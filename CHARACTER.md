@@ -27,11 +27,13 @@ Pose names are free; the script's `pose` / `pose_cycle` use them. Built-in scrip
 The default's generator (`characters/default/make.py`) is a working template.
 
 ### Arm rigs (SVG)
-Instead of swapping whole pose groups, an SVG character can carry real arms: `"arms": [{"id": "armL", "origin": "x y"
-(elbow), "hands": ["point", "palm", ...], "poses": {"rest": {"rot": 96, "hand": "palm"}, "up": {"rot": 268, "hand":
-"point"}, "wave": {"rot": 258, "hand": "palm", "wave": true}}}]`. Each `#armL` group is drawn pointing along +x from the
-elbow and holds one `#armL-<hand>` group per hand shape. On every beat the arm winds up, swings to the pose angle with a
-small overshoot (the shortest way round) and swaps the hand shape mid-swing. `characters/dev/` is the reference.
+An SVG character can carry real two-bone arms instead of whole pose groups: `"arms": [{"id": "armL", "shoulder": [x, y],
+"upper": 118, "hands": ["point", "palm", ...], "poses": {"rest": {"u": 100, "f": -6, "hand": "palm"}, "up": {"u": 146,
+"f": 118, "hand": "point"}, "wave": {..., "wave": true}}}]`. `#armL` rotates at the shoulder by `u`; every `.fore` group
+inside it bends at the elbow (`translate(upper, 0)`) by `f`; one `#armL-<hand>` group per hand shape. On each beat the
+arm winds up, swings with a small overshoot and swaps the hand mid-swing (transforms are applied by a timeline hook, so
+nested rotations stay exact). `"brows": {"sel": "#brows", "raise": -9, "end": "#browL"}` lifts the brows on accented
+words and shrugs, and raises one brow with the final smirk. `characters/dev/` is the reference.
 
 ### Secondary motion (both options)
 Optional keys in `character.json`, all tied to the timeline:

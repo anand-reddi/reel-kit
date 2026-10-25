@@ -165,35 +165,48 @@ class Film:
         elif c["type"] == "svg":
             ho, wo = c.get("head_origin", "600 480"), c.get("wave_origin", "800 560")
             arms = c.get("arms")
-            if arms:   # real arm rigs: rotate at the elbow (anticipation -> swing with overshoot), hand shape swaps mid-swing
+            if arms:   # two-bone arms: upper arm rotates at the shoulder (u), forearm bends at the elbow (f); hands swap mid-swing
                 state = {}
+                A("const ARMS = {};")
                 for a in arms:
-                    rest = a["poses"]["rest"]; state[a["id"]] = [rest["rot"], rest.get("hand")]
-                    A(f'tl.set("#{a["id"]}", {{ rotation: {rest["rot"]}, svgOrigin: "{a["origin"]}" }}, 0);')
-                    for h in a["hands"]: A(f'tl.set("#{a["id"]}-{h}", {{ opacity: {1 if h == rest.get("hand") else 0} }}, 0);')
+                    r0 = a["poses"]["rest"]; state[a["id"]] = [r0["u"], r0["f"], r0.get("hand")]
+                    A(f'ARMS.{a["id"]} = {{ u: {r0["u"]}, f: {r0["f"]}, sx: {a["shoulder"][0]}, sy: {a["shoulder"][1]}, U: {a["upper"]} }};')
+                    for h in a["hands"]: A(f'tl.set("#{a["id"]}-{h}", {{ opacity: {1 if h == r0.get("hand") else 0} }}, 0);')
+                A('window.__hooks.push(() => { for (const id in ARMS) { const a = ARMS[id], el = document.getElementById(id); if (!el) continue; '
+                  'el.setAttribute("transform", `rotate(${a.u} ${a.sx} ${a.sy})`); '
+                  'el.querySelectorAll(".fore").forEach((g) => g.setAttribute("transform", `rotate(${a.f} ${a.U} 0)`)); } });')
             for k, (t, name) in enumerate(beats):
                 if arms:
                     for a in arms:
-                        p = a["poses"].get(name, a["poses"]["rest"]); cur, curh = state[a["id"]]
-                        tgt = min((p["rot"] + 360 * n for n in (-1, 0, 1)), key=lambda v: abs(v - cur))
-                        d = tgt - cur
-                        if abs(d) > 1:
-                            if abs(d) > 20: A(f'tl.to("#{a["id"]}", {{ rotation: {round(cur - (8 if d > 0 else -8), 2)}, duration: 0.08, ease: "power1.in", svgOrigin: "{a["origin"]}" }}, {r3(t)});')
-                            A(f'tl.to("#{a["id"]}", {{ rotation: {round(tgt, 2)}, duration: 0.42, ease: "back.out(1.4)", svgOrigin: "{a["origin"]}" }}, {r3(t + 0.08)});')
-                        h = p.get("hand", curh)
-                        if h != curh:
-                            sw = t + 0.08 + (0.14 if abs(d) > 1 else 0)
-                            if curh: A(f'tl.set("#{a["id"]}-{curh}", {{ opacity: 0 }}, {r3(sw)});')
+                        p = a["poses"].get(name, a["poses"]["rest"]); cu, cf, ch = state[a["id"]]
+                        tu, tf = p["u"], p["f"]; du, df = tu - cu, tf - cf
+                        if abs(du) + abs(df) > 1:
+                            if abs(du) + abs(df) > 25:
+                                A(f'tl.to(ARMS.{a["id"]}, {{ u: {round(cu - 4 * (1 if du > 0 else -1), 2)}, f: {round(cf - 8 * (1 if df > 0 else -1), 2)}, duration: 0.08, ease: "power1.in" }}, {r3(t)});')
+                            A(f'tl.to(ARMS.{a["id"]}, {{ u: {tu}, f: {tf}, duration: 0.46, ease: "back.out(1.3)" }}, {r3(t + 0.08)});')
+                        h = p.get("hand", ch)
+                        if h != ch:
+                            sw = t + 0.2
+                            if ch: A(f'tl.set("#{a["id"]}-{ch}", {{ opacity: 0 }}, {r3(sw)});')
                             A(f'tl.set("#{a["id"]}-{h}", {{ opacity: 1 }}, {r3(sw)});')
                         if p.get("wave"):
-                            A(f'tl.to("#{a["id"]}", {{ rotation: {round(tgt + 9, 2)}, duration: 0.16, yoyo: true, repeat: 5, ease: "sine.inOut", svgOrigin: "{a["origin"]}" }}, {r3(t + 0.55)});')
-                        state[a["id"]] = [tgt, h]
+                            A(f'tl.to(ARMS.{a["id"]}, {{ f: {tf + (14 if a["id"].endswith("L") else -14)}, duration: 0.17, yoyo: true, repeat: 5, ease: "sine.inOut" }}, {r3(t + 0.56)});')
+                        state[a["id"]] = [tu, tf, h]
                 else:
                     A(f'tl.set("#pose-{name}", {{ opacity: 1 }}, {r3(t)});')
                     if k + 1 < len(beats) and beats[k + 1][1] != name: A(f'tl.set("#pose-{name}", {{ opacity: 0 }}, {r3(beats[k + 1][0])});')
                 if k: A(f'tl.fromTo("#pres-body", {{ scaleY: 0.965, y: 16 }}, {{ scaleY: 1, y: 0, duration: 0.35, ease: "back.out(3)", svgOrigin: "600 1000" }}, {r3(t)});')
                 A(f'tl.to("#head", {{ rotation: {[-4, 3, -3, 4, -6, 3][k % 6]}, duration: 0.3, ease: "power2.out", svgOrigin: "{ho}" }}, {r3(t)});')
                 if name == "wave" and not arms: A(f'tl.to("#pose-wave", {{ rotation: 6, svgOrigin: "{wo}", duration: 0.18, yoyo: true, repeat: 5, ease: "sine.inOut" }}, {r3(t + 0.1)});')
+            br = c.get("brows")
+            if br:
+                ups = sorted({round(w["t"], 2) for ln in s.tm["lines"] for w in ln["words"] if w.get("accent")} | {round(t, 2) for t, n in beats if n in ("shrug", "palms")})
+                last = -9
+                for t in ups:
+                    if t - last < 0.7: continue
+                    A(f'tl.to("{br["sel"]}", {{ y: {br.get("raise", -9)}, duration: 0.12, ease: "power2.out" }}, {r3(t - 0.06)}); tl.to("{br["sel"]}", {{ y: 0, duration: 0.3, ease: "power2.inOut" }}, {r3(t + 0.42)});')
+                    last = t
+                if br.get("end"): A(f'tl.to("{br["end"]}", {{ y: {br.get("raise", -9)}, rotation: -4, duration: 0.2, ease: "power2.out" }}, {r3(s.tm["lines"][-1]["end"] + 0.05)});')
             # lip flap while each line plays, a smile at the end, blinks every ~3 s
             A('tl.set("#m-smile", { opacity: 0 }, 0); tl.set("#m-closed", { opacity: 1 }, 0);')
             cur = "closed"
@@ -342,7 +355,7 @@ class Film:
             shutil.copy(os.path.join(KIT, "assets", "vendor", "hairline.js"), os.path.join(s.out, "assets", "hairline.js"))
             head_extra = "<script>" + open(os.path.join(KIT, "core", "clock.js")).read() + "</script>"
             mod = '<script type="module">import * as H from "./assets/hairline.js"; window.__hairline = H;</script>'
-            upd = ", onUpdate() { window.__advance(tl.time() * 1000); }"
+            upd = "window.__advance(tl.time() * 1000);"
         js = "\n".join(s.js)
         html = f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"/><title>{esc(s.sc.get("title", "reel"))}</title><style>{css}</style>{head_extra}<script src="gsap.min.js"></script>{mod}</head>
@@ -357,7 +370,8 @@ class Film:
 </div>
 <script>
 const fmt = (v, d) => Number(v).toLocaleString("en-US", {{ minimumFractionDigits: d, maximumFractionDigits: d }});
-const tl = gsap.timeline({{ paused: true{upd} }});
+window.__hooks = window.__hooks || [];
+const tl = gsap.timeline({{ paused: true, onUpdate() {{ {upd} window.__hooks.forEach((f) => f()); }} }});
 {js}
 window.__timelines = window.__timelines || {{}};
 window.__timelines["reel"] = tl;
