@@ -63,6 +63,11 @@ class Film:
         if ch in (None, "none", False): return None
         d = ch if os.path.isdir(str(ch)) else (os.path.join(s.sdir, ch) if os.path.isdir(os.path.join(s.sdir, str(ch))) else os.path.join(KIT, "characters", ch))
         cfg = json.load(open(os.path.join(d, "character.json"))); cfg["dir"] = d
+        if cfg["type"] == "rig":
+            for part in cfg["parts"]:
+                if part.get("src"): shutil.copy(os.path.join(d, part["src"]), os.path.join(s.out, "assets", part["src"]))
+            if cfg.get("avatar"): shutil.copy(os.path.join(d, cfg["avatar"]), os.path.join(s.out, "assets", cfg["avatar"]))
+            return cfg
         if cfg["type"] == "svg":
             svg = open(os.path.join(d, cfg["file"])).read()
             shutil.copy(os.path.join(d, cfg["file"]), os.path.join(s.out, "assets", "character.svg")); cfg["svg"] = svg
@@ -74,6 +79,7 @@ class Film:
     def char_avatar(s):
         c = s.char
         if not c: return ""
+        if c["type"] == "rig": return "assets/" + c["avatar"] if c.get("avatar") else ""
         if c["type"] == "svg": return f'assets/character.svg#svgView(viewBox({c.get("avatar_view", "395 70 410 410").replace(" ", ",")}))'
         return "assets/" + c.get("avatar", list(c["poses"].values())[0])
 
@@ -144,7 +150,9 @@ class Film:
                 ln = lines_of[i][min(k * max(1, len(lines_of[i]) // len(per_line)), len(lines_of[i]) - 1)]
                 t = 0.0 if not beats else ln["start"] - 0.1
                 beats.append((t, name if name in names else names[0]))
-        if c["type"] == "svg":
+        if c["type"] == "rig":
+            body = s.rig_presenter(c, beats, dur)
+        elif c["type"] == "svg":
             ho, wo = c.get("head_origin", "600 480"), c.get("wave_origin", "800 560")
             for k, (t, name) in enumerate(beats):
                 A(f'tl.set("#pose-{name}", {{ opacity: 1 }}, {r3(t)});')
@@ -208,6 +216,55 @@ class Film:
         s.rigs(c, dur)
         A(f'tl.fromTo("#pres", {{ y: 260 }}, {{ y: 0, duration: 0.5, ease: "back.out(1.4)" }}, 0);')
         return body
+
+    def rig_presenter(s, c, beats, dur):
+        """A cut-out rig: nested full-canvas parts with pivots (character.json "parts"), a pose library ("poses": part ->
+        {rotation, x, y, scale} in canvas px), lip sync from mouth layers, blinks, nods on accented words, end face."""
+        A = s.js.append; cw, ch = c["canvas"]
+        kids = {}
+        for part in c["parts"]: kids.setdefault(part.get("parent"), []).append(part)
+        def build(pid):
+            out = ""
+            for part in kids.get(pid, []):
+                ox, oy = part.get("origin", [cw / 2, ch / 2])
+                img = f'<img src="assets/{part["src"]}" style="position:absolute;inset:0;width:100%;height:100%"/>' if part.get("src") else ""
+                out += (f'<div id="{part["id"]}" style="position:absolute;inset:0;transform-origin:{ox / cw * 100:.2f}% {oy / ch * 100:.2f}%'
+                        f'{";opacity:0" if part.get("hidden") else ""}">{img}{build(part["id"])}</div>')
+            return out
+        # poses: anticipation -> action (overshoot) -> hold, per the pose library
+        poses = c.get("poses", {}); moved = sorted({p for v in poses.values() for p in v})
+        def vals(pose, part):
+            v = poses.get(pose, {}).get(part, {})
+            return {"rotation": v.get("rotation", 0), "xPercent": round(v.get("x", 0) / cw * 100, 3), "yPercent": round(v.get("y", 0) / ch * 100, 3), "scale": v.get("scale", 1)}
+        for k, (t, name) in enumerate(beats):
+            for part in moved:
+                v = vals(name, part)
+                if k and abs(v["rotation"]) > 0.5:
+                    A(f'tl.to("#{part}", {{ rotation: {round(-v["rotation"] * 0.3, 2)}, duration: 0.09, ease: "power1.in" }}, {r3(t)});')
+                A(f'tl.to("#{part}", {{ rotation: {v["rotation"]}, xPercent: {v["xPercent"]}, yPercent: {v["yPercent"]}, scale: {v["scale"]}, duration: 0.45, ease: "back.out(1.8)" }}, {r3(t + (0.09 if k else 0))});')
+        # lip sync
+        talk = c.get("talk", []); seq = c.get("talk_order") or list(range(len(talk))) + [len(talk)]
+        for ln in s.tm["lines"]:
+            t, k, cur = ln["start"], 0, None
+            while t < ln["end"] - 0.06:
+                which = seq[k % len(seq)]
+                if which != cur:
+                    for i, m in enumerate(talk): A(f'tl.set("#{m}", {{ opacity: {1 if which == i else 0} }}, {r3(t)});')
+                    cur = which
+                t += 0.085 + (0.035 if k % 3 == 2 else 0); k += 1
+            for m in talk: A(f'tl.set("#{m}", {{ opacity: 0 }}, {r3(ln["end"])});')
+        if c.get("end"): A(f'tl.set("#{c["end"]}", {{ opacity: 1 }}, {r3(s.tm["lines"][-1]["end"] + 0.05)});')
+        if c.get("blink"):
+            bt = 1.6
+            while bt < dur - 0.3:
+                A(f'tl.set("#{c["blink"]}", {{ opacity: 1 }}, {r3(bt)}); tl.set("#{c["blink"]}", {{ opacity: 0 }}, {r3(bt + 0.11)});'); bt += 2.9 + (0.6 if int(bt) % 2 else 0)
+        nod = c.get("talk_nod")
+        if nod:   # a small nod on every line start and every accented word
+            hits = [ln["start"] for ln in s.tm["lines"]] + [w["t"] for ln in s.tm["lines"] for w in ln["words"] if w.get("accent")]
+            for t in sorted(set(round(h, 2) for h in hits)):
+                A(f'tl.fromTo("#{nod["sel"].lstrip("#")}", {{ rotation: 0, yPercent: 0 }}, {{ rotation: {nod.get("rot", 1.2)}, yPercent: {round(nod.get("y", 3) / ch * 100, 3)}, duration: 0.14, ease: "power1.out", yoyo: true, repeat: 1, immediateRender: false }}, {r3(t)});')
+        return (f'<div id="pres" style="position:absolute;left:{c.get("x", 114)}px;top:{c.get("y", 1165)}px;width:{c.get("width", 853)}px;'
+                f'height:{c.get("height", 853)}px">{build(None)}</div>')
 
     def rigs(s, c, dur):
         """Optional secondary motion from character.json (all seekable tweens):

@@ -46,6 +46,18 @@ Extra PNG keys: `"layers": [{"id", "src", "z", "hidden"}]` (z < 0 = behind the b
 `"talk_order"` (sequence of talk-frame indexes; index len(talk) = mouth closed), `"end"` (face after the last line),
 `"canvas": [w, h]` (so rig origins can be given in canvas pixels).
 
+## Option C: cut-out rig from an illustration (best fidelity: the art is never redrawn)
+
+`characters/presenter/` (the @techinsixty presenter + kitten) is the reference. `build.py` cuts the master image into
+full-canvas layers (body, head, kitten body/head/ear, tail), gives every pixel to exactly one part, in-paints what each
+moving part hides (neck under the jaw, shirt under the kitten, fur under the ear and tail base) so motion never tears,
+and paints only what the art lacks (open mouths, closed eyes, kitten blink). `rig/character.json`:
+`"type": "rig"`, `"canvas"`, placement, `"parts"` (id, parent, src, origin in canvas px, hidden), a pose library
+`"poses": {name: {part: {rotation, x, y, scale}}}` (played as anticipation -> overshoot -> hold on each beat),
+`"talk"` + `"talk_order"`, `"blink"`, `"end"`, `"talk_nod"` (nods on line starts and accented words), plus the
+secondary-motion keys above. Keep pose angles small (2-4 degrees on the head) and put idle loops on their own wrapper
+part so they never fight the pose tweens. Check every new rig at its extreme angles before rendering.
+
 ## Making one from a photo
 Ask Claude: "make my character from this photo" — it draws Option A in the same flat style, keeping the ids above, and checks
 it with `python3 reel.py make styles/paper/examples/one-prompt.json --stills`.
