@@ -1,0 +1,23 @@
+@font-face { font-family: "Inter"; src: url("assets/inter-500.woff2"); font-weight: 500; }
+@font-face { font-family: "Inter"; src: url("assets/inter-600.woff2"); font-weight: 600; }
+@font-face { font-family: "Inter"; src: url("assets/inter-700.woff2"); font-weight: 700; }
+@font-face { font-family: "IBM Plex Mono"; src: url("assets/plex-500.woff2"); font-weight: 500; }
+html, body { margin: 0; background: #e6e2db; }
+#root { position: relative; width: 1080px; height: 1920px; overflow: hidden; background: #e6e2db; font-family: "Inter", sans-serif; }
+.clip { position: absolute; inset: 0; }
+#gl { position: absolute; inset: 0; width: 1080px; height: 1920px; }
+#ov, #leaders { position: absolute; inset: 0; pointer-events: none; }
+#leaders { width: 1080px; height: 1920px; }
+.sbar { position: absolute; left: 70px; right: 70px; top: 268px; height: 20px; }
+.sline { position: absolute; left: 0; right: 0; top: 9px; height: 2px; background: #8d8981; opacity: .7; }
+.sdot { position: absolute; top: 3px; width: 14px; height: 14px; border-radius: 7px; border: 2px solid #8d8981; background: #efece6; box-sizing: border-box; transform: translateX(-50%); }
+.slabel { position: absolute; top: -46px; font-size: 27px; font-weight: 600; color: #141518; white-space: nowrap; }
+.tag { position: absolute; left: 70px; top: 318px; font-size: 22px; font-weight: 500; color: #3c3d40; background: rgba(250,249,246,.85); border: 1.5px solid #cfcac1; border-radius: 30px; padding: 6px 16px; }
+.title { position: absolute; left: 70px; right: 70px; top: 400px; opacity: 0; }
+.title b { display: block; font-size: 92px; font-weight: 700; letter-spacing: -3px; color: #141518; line-height: 1.02; }
+.title span { display: block; font-size: 30px; font-weight: 500; color: #3c3d40; margin-top: 10px; }
+.label { position: absolute; left: 0; top: 0; background: #faf9f6; border: 2px solid var(--lc, #141518); border-radius: 12px; padding: 8px 16px; opacity: 0; transform-origin: 0 50%; white-space: nowrap; box-shadow: 0 6px 18px rgba(0,0,0,.08); }
+.label b { display: block; font-size: 33px; font-weight: 700; color: var(--lc, #141518); }
+.label span { display: block; font-family: "IBM Plex Mono", monospace; font-size: 23px; color: #6a6760; margin-top: 2px; }
+.cap { position: absolute; left: 50%; top: 1500px; transform: translateX(-50%); width: max-content; max-width: 900px; background: #17181b; border-radius: 22px; padding: 18px 30px; font-size: 54px; font-weight: 700; letter-spacing: -1px; color: #8e8f94; text-align: center; opacity: 0; line-height: 1.15; box-shadow: 0 10px 30px rgba(0,0,0,.18); }
+.cap i { font-style: normal; }

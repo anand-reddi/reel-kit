@@ -1,0 +1,27 @@
+{
+  "style": "studio3d",
+  "title": "OIS",
+  "duration": 10,
+  "scene": "ois.scene.js",
+  "voice": { "name": "am_michael", "speed": 1.08 },
+  "music": { "style": "beat", "bpm": 84, "key": "major" },
+  "levels": { "music": -33, "sfx": -23 },
+  "tag": "Simplified · not to scale",
+  "states": [
+    { "label": "Still", "at": "start", "color": "#141518" },
+    { "label": "Shaking", "at": "word:shakes", "color": "#d93a2b" },
+    { "label": "Sensed", "at": "word:gyroscope", "color": "#e0731f" },
+    { "label": "Corrected", "at": "word:magnets", "color": "#2457e6" },
+    { "label": "Sharp", "at": "line:3:end+0.2", "color": "#1f9d6b" }
+  ],
+  "titles": [ { "text": "Optical image stabilization", "sub": "The lens moves, so the picture doesn't.", "at": "line:3:end+0.35" } ],
+  "sfx": [
+    { "at": "line:0+0.3", "id": "pro_riser/air_gate", "gain": -16 },
+    { "at": "word:springs", "id": "pro_pop/boop", "gain": -10 },
+    { "at": "word:shakes", "id": "pro_whoosh_big/gritty", "gain": -16 },
+    { "at": "word:gyroscope", "id": "pro_pop/tink", "gain": -10 },
+    { "at": "word:magnets", "id": "pro_pop_in/deep", "gain": -8 },
+    { "at": "line:3:end+0.2", "id": "pro_notify/ding_2045", "gain": -12 }
+  ],
+  "scenes": [ { "lines": [ "Your camera lens hangs on springs.", "When your hand shakes,", "a gyroscope feels it,", "and magnets push the lens the other way." ] } ]
+}

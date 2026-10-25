@@ -30,7 +30,9 @@ cd ~/reel-kit && python3 reel.py styles
 
 Styles: `paper` — off-white dotted paper, black/white UI cards with a red accent, live hairline line figures,
 word-synced captions, presenter
-(see `styles/paper/STYLE.md`). `python3 reel.py styles` lists what the repo has now.
+(see `styles/paper/STYLE.md`).
+`studio3d` — one continuous camera through a matte 3D studio (three.js), state bar, callout labels, titles, caption
+pill; each video brings its own scene module (see `styles/studio3d/STYLE.md`). `python3 reel.py styles` lists what the repo has now.
 
 ## 2. Adding a new style from a reference video
 When the user shares a reference video and wants "videos like this":
