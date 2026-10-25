@@ -1,0 +1,13 @@
+{
+  "type": "svg",
+  "file": "character.svg",
+  "x": -60, "y": 1150, "width": 1200,
+  "head_origin": "600 500",
+  "wave_origin": "318 812",
+  "avatar_view": "380 120 440 440",
+  "poses": ["up", "palms", "card", "thumb", "shrug", "wave"],
+  "idle": [ { "sel": "#tail", "rot": 10, "period": 1.8, "origin": "942 575" } ],
+  "twitch": [ { "sel": "#cat-ear", "rot": 12, "every": 2.6, "offset": 0.9, "origin": "922 430" } ],
+  "blink2": [ { "open": "#cat-eyes-open", "shut": "#cat-eyes-shut", "every": 3.3, "offset": 1.3 } ],
+  "react": { "sel": "#cat", "y": -26, "rot": -5, "origin": "872 600" }
+}
