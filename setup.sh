@@ -24,6 +24,6 @@ if ! command -v earshot >/dev/null && [ ! -x "$HOME/earshot/.venv/bin/earshot" ]
 fi
 command -v ffmpeg >/dev/null || echo "WARN: ffmpeg missing (apt-get install -y ffmpeg)" >&2
 command -v npx >/dev/null || echo "WARN: node/npx missing (HyperFrames renders through npx)" >&2
-ls /opt/pw-browsers/chromium_headless_shell-*/chrome-headless-shell-*/chrome-headless-shell "$HOME"/.cache/ms-playwright/chromium_headless_shell-*/chrome-headless-shell-*/chrome-headless-shell >/dev/null 2>&1 \
-  || [ -n "${HYPERFRAMES_BROWSER_PATH:-}" ] || echo "NOTE: no local headless Chrome found; HyperFrames will try to download one (or set HYPERFRAMES_BROWSER_PATH)" >&2
+found=""; for c in /opt/pw-browsers/chromium_headless_shell-*/chrome-headless-shell-*/chrome-headless-shell "$HOME"/.cache/ms-playwright/chromium_headless_shell-*/chrome-headless-shell-*/chrome-headless-shell; do [ -x "$c" ] && found="$c"; done
+[ -n "$found" ] || [ -n "${HYPERFRAMES_BROWSER_PATH:-}" ] || echo "NOTE: no local headless Chrome found; HyperFrames will try to download one (or set HYPERFRAMES_BROWSER_PATH)" >&2
 echo "$DEST"
