@@ -75,4 +75,3 @@ html, body { margin: 0; background: {paper}; }
 .imcap { position: absolute; left: 150px; top: -46px; font-size: 26px; color: {mid}; }
 .figwrap { position: absolute; top: 0; --hairline-plate: {paper}; --hairline-hi: {ink}; --hairline-edge: #55524c; --hairline-mid: #a8a39a; --hairline-lo: #d6d1c8; --hairline-stroke: 2.6; }
 .figcap { font-size: 26px; color: {mid}; height: 34px; } .figread { position: absolute; right: 0; top: 0; font-size: 28px; color: {accent}; }
-#pres { filter: drop-shadow(0 0 22px {glow}); }

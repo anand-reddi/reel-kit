@@ -8,10 +8,10 @@ THEMES = {
     "light": dict(paper="#efece6", ink="#141414", accent="#e5372d", grey="#c9c4ba", mid="#8a857c", card="#1b1b1d",
                   surface="#ffffff", edge="#141414", shadow="#141414", soft="#14141428", vig="#14141418", rays="#14141410",
                   ed="#d7d3cb", ed2="#c4bfb6", ed3="#8f8a81", blend="multiply", glow="transparent"),
-    # night navy built from the presenter: shirt navy, label red, kitten amber
-    "dark":  dict(paper="#0d111d", ink="#eef0f6", accent="#e5372d", grey="#343c54", mid="#8891ab", card="#060910",
-                  surface="#161d30", edge="#2a3350", shadow="#03050a", soft="#00000066", vig="#00000070", rays="#ffffff08",
-                  ed="#2a3248", ed2="#222a3e", ed3="#46506c", blend="normal", amber="#f3b33d", glow="#6f86c84d"),
+    # neutral black (no blue tint); the presenter's red label carries the accent
+    "dark":  dict(paper="#0b0b0b", ink="#f2f1ee", accent="#e5372d", grey="#3a3a3a", mid="#8e8d89", card="#000000",
+                  surface="#171717", edge="#2b2b2b", shadow="#000000", soft="#00000080", vig="#00000080", rays="#ffffff07",
+                  ed="#2a2a2a", ed2="#202020", ed3="#4a4a4a", blend="normal", glow="transparent"),
 }
 THEME = THEMES["light"]
 W, H = 1080, 1920
