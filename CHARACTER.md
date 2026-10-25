@@ -1,6 +1,6 @@
 # Plugging in a presenter character
 
-A character is a folder with a `character.json`. Point a script at it with `"character": "characters/goku"` (relative to the
+A character is a folder with a `character.json`. Point a script at it with `"character": "characters/<name>"` (relative to the
 script or the kit) or `"character": "none"` for no presenter (cards then sit lower). `characters/default/` is the
 placeholder.
 
