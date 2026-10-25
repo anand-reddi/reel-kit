@@ -1,0 +1,28 @@
+{
+  "title": "One prompt",
+  "duration": 10,
+  "brand": { "handle": "@techinsixty", "bio": "dev tools · AI · security\nexplained in 60 seconds" },
+  "voice": { "name": "am_michael", "speed": 1.18 },
+  "music": { "style": "beat", "bpm": 100, "key": "minor" },
+  "character": "default",
+  "scenes": [
+    { "label": "one prompt", "counter": { "name": "PROMPTS", "value": "0", "steps": ["1"] }, "pose": "up",
+      "lines": ["This reel was made from one *prompt.*"],
+      "card": { "type": "prompt", "text": "make a 10s reel about this reel", "tag": "1 prompt" } },
+    { "label": "the stack", "counter": { "name": "LAYERS", "steps": ["1/4", "2/4", "3/4", "4/4"] }, "pose": ["palms", "card"],
+      "lines": ["The script,", "the voice,", "the *captions,*", "every motion,"],
+      "card": { "type": "checklist", "title": "the stack", "stamp": { "text": "ALL CODE", "x": 640, "y": -40, "rot": -9 },
+                "items": [{ "label": "script", "icon": "doc" }, { "label": "voice", "icon": "wave" }, { "label": "captions", "icon": "cc" }, { "label": "motion", "icon": "play" }] } },
+    { "label": "all code", "counter": { "name": "LINES", "from": 0, "to": 312, "count_for": 0.9 }, "pose": "thumb",
+      "lines": ["all written in *code.*"],
+      "card": { "type": "code", "file": "reel.html", "lines": ["// one file, one timeline", "const tl = gsap.timeline();", "tl.to(\"#caption\", { y: 0 })", "  .to(\"#card\", { scale: 1 })", "  .from(\"#voice\", { t: 0.2 });", "render(\"reel.mp4\");"] } },
+    { "label": "all code", "counter": { "name": "EDITORS", "value": "0" }, "pose": "shrug",
+      "lines": ["No editor.", "No timeline."],
+      "card": { "type": "code", "file": "reel.html", "type_at": "start", "line_step": 0.02,
+                "lines": ["// one file, one timeline", "const tl = gsap.timeline();", "tl.to(\"#caption\", { y: 0 })", "  .to(\"#card\", { scale: 1 })"],
+                "reject": { "at": "line:0-0.1", "stamp": "NOPE", "stamp_word_at": "word:editor+0.08", "stamp_at": "word:timeline" } } },
+    { "label": "follow", "counter": { "name": "RUNTIME", "from": 8, "to": 10, "count_for": 1.6 }, "pose": "wave",
+      "lines": ["Follow for the full *system.*"],
+      "card": { "type": "profile", "tap_at": "word:follow+0.12", "stamp": { "text": "THE SYSTEM →", "at": "word:system+0.1", "x": 330, "y": -130, "rot": -7 } } }
+  ]
+}

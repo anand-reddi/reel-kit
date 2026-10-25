@@ -1,0 +1,18 @@
+{
+  "title": "Card tour",
+  "brand": { "handle": "@techinsixty", "bio": "dev tools · AI · security\nexplained in 60 seconds" },
+  "voice": { "name": "am_michael", "speed": 1.18 },
+  "music": { "style": "beat", "bpm": 96, "key": "major" },
+  "scenes": [
+    { "label": "the kit", "counter": { "name": "CARDS", "from": 0, "to": 7, "count_for": 1.0 },
+      "lines": ["This kit ships *seven* card types."],
+      "card": { "type": "stat", "title": "reel-kit", "value": 7, "label": "card types, ready to use", "tag": "v1" } },
+    { "label": "graphs", "counter": { "name": "REACH", "value": "early" },
+      "lines": ["Growth curves,", "with a *marker.*"],
+      "card": { "type": "graph", "marker": 0.18, "marker_at": "word:marker", "marker_label": "you are here" } },
+    { "label": "screens", "counter": { "name": "SHOTS", "value": "1" },
+      "lines": ["Drop in any *screenshot,*", "and circle what matters."],
+      "card": { "type": "image", "src": "sample-shot.png", "caption": "// your screenshot", "height": 500,
+                "highlight": { "x": 18, "y": 30, "w": 64, "h": 40, "at": "word:circle" }, "stamp": { "text": "LOOK", "at": "line:1:end-0.2", "x": 620, "y": -60 } } }
+  ]
+}
