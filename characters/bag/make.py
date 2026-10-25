@@ -1,16 +1,17 @@
-"""The @techinsixty bag head: an original anonymous dev with a paper-bag head (marker X eyes, zigzag grin, creases,
-torn bottom edge) in a dark grey-green sweatshirt. Flat outlines, two-bone arm rig, marker brows, lip sync.
+"""The @techinsixty bag head: an original anonymous dev wearing a crumpled paper bag (marker X eyes, crooked zigzag
+grin, torn bottom edge sitting on the collar) and an oversized dark sweatshirt. Two-bone arm rig, lip sync.
 Run: python3 make.py -> character.svg + character.json"""
 import math, os
 
 OUT = "#121212"
-SKIN, SKIN_SH, SKIN_HI = "#f1d0ac", "#dcb48e", "#f8e0c4"
+SKIN, SKIN_SH, SKIN_HI = "#f5dccb", "#e2bba6", "#fbeadf"
 HAIR, HAIR_HI = "#161616", "#2e2e33"
-JK, JK_SH, JK_HI, STITCH = "#3d4440", "#2c3230", "#535b56", "#2c3230"     # sweatshirt
-BAG, BAG_SH, BAG_HI, BAG_DK = "#c9a578", "#b08d62", "#dcbd92", "#9c7a51"
-MARK = "#1c1a17"
+JK, JK_SH, JK_HI, STITCH = "#383e3a", "#2a2f2c", "#5c625d", "#2a2f2c"     # sweatshirt
+JK_LT = "#4a504c"
+BAG, BAG_SH, BAG_HI, BAG_DK = "#c6a374", "#ad8a5c", "#d5b78a", "#94744b"
+MARK, CREASE, LIP = "#1b1915", "#3b2d1d", "#e9aaa0"
 RED = "#e5372d"
-W = 6
+W = 5
 
 def rng(seed):
     s = seed
@@ -87,9 +88,9 @@ def kitten(kx=800, ky=484):
 </g>'''
 
 # ------------------------------------------------------------------ layout (svg coords)
-HEAD = (600, 320)
-SHL, SHR = (478, 610), (722, 610)
-U, F = 96, 112
+HEAD = (600, 336)
+SHL, SHR = (424, 640), (776, 640)
+U, F = 112, 118
 HS = 1.2                                     # hand scale
 
 def smooth(pts, closed=True, k=0.8):
@@ -101,89 +102,112 @@ def smooth(pts, closed=True, k=0.8):
         d += f"C{c1[0]:.1f},{c1[1]:.1f} {c2[0]:.1f},{c2[1]:.1f} {p2[0]:.1f},{p2[1]:.1f} "
     return d + ("Z" if closed else "")
 
-# ------------------------------------------------------------------ head: paper bag (local coords, centre 0,0)
-def bag_shape():
-    # slightly flared bag, torn zigzag bottom
-    n = 14; teeth = []
-    for i in range(n + 1):
-        x = 172 - i * 344 / n
-        teeth.append((x, 158 + (16 if i % 2 else 0) + (i % 3) * 2))
-    return P([(-150, -250), (150, -262), (172, 150)] + teeth[1:-1] + [(-172, 156)])
+# ------------------------------------------------------------------ head: crumpled paper bag (local coords, centre 0,0)
+# The bag sits low: its torn bottom edge stops just above the collar, so only a sliver of chin and neck shows.
+def bag_pts():
+    top = [(-170, -198), (-120, -186), (-50, -190), (16, -192), (30, -168), (46, -196), (110, -200), (170, -206)]
+    right = [(174, -150), (178, -40), (182, 70), (186, 168)]
+    n, teeth = 17, []
+    for i in range(1, n):
+        x = 186 - i * 370 / n
+        teeth.append((x, 168 + (15 if i % 2 else 0) + (5 if i % 4 == 1 else 0) - (3 if i % 5 == 2 else 0)))
+    left = [(-184, 166), (-178, 40), (-174, -80), (-178, -150)]
+    return top + right + teeth + left
 
-def zig(y0, amp, curve=0.0, x0=-104, x1=110, n=8):
-    pts = []
+def zig(amp, rise, drop=0, hook=16, n=10):
+    # crooked marker zigzag: rises toward the right end and hooks up into a smirk
+    x0, x1, pts = -118, 116, []
     for i in range(n + 1):
-        t = i / n; x = x0 + (x1 - x0) * t
-        pts.append(f"{x:.0f},{y0 + (amp if i % 2 else -amp) - curve * (1 - (2 * t - 1) ** 2):.0f}")
-    return "M" + " L".join(pts)
+        t = i / n; x = x0 + (x1 - x0) * t; yb = 100 + drop - rise * t ** 2.2
+        pts.append((x, yb + (amp if i % 2 else -amp)))
+    ex, ey = pts[-1]; pts.append((ex + 10, ey - hook * 0.55)); pts.append((ex + 16, ey - hook))
+    return "M" + " L".join(f"{x:.0f},{y:.0f}" for x, y in pts)
+
+def brush(p1, p2, w1, w2):
+    (x1, y1), (x2, y2) = p1, p2; dx, dy = x2 - x1, y2 - y1; L = math.hypot(dx, dy); nx, ny = -dy / L, dx / L
+    q = [(x1 + nx * w1 / 2, y1 + ny * w1 / 2), (x2 + nx * w2 / 2, y2 + ny * w2 / 2), (x2 - nx * w2 / 2, y2 - ny * w2 / 2), (x1 - nx * w1 / 2, y1 - ny * w1 / 2)]
+    return f'<path d="{P(q)}" fill="{MARK}" stroke="{MARK}" stroke-width="3" stroke-linejoin="round"/>'
+
+def X(cx, cy, w=86, h=100):
+    return (brush((cx - w / 2, cy - h / 2), (cx + w / 2, cy + h / 2), 22, 18) +
+            brush((cx + w / 2 - 4, cy - h / 2 + 2), (cx - w / 2 + 2, cy + h / 2), 21, 19))
 
 def head():
-    chin = (f'<path d="M-70,140 Q-62,214 0,222 Q62,214 70,140 Z" fill="{SKIN}" stroke="{OUT}" stroke-width="{W - 1}"/>'
-            f'<path d="M-68,150 Q0,196 68,150 L70,140 L-70,140 Z" fill="{SKIN_SH}"/>'
-            f'<path d="M-22,194 Q0,203 22,194" stroke="#c07a72" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.7"/>')
-    rim = (f'<path d="M-150,-250 L150,-262 L156,-196 L-154,-186 Z" fill="{BAG_HI}" stroke="{OUT}" stroke-width="{W - 1}" stroke-linejoin="round"/>'
-           f'<path d="M-6,-255 L14,-214 L30,-257" fill="{BAG_SH}" stroke="{OUT}" stroke-width="3" stroke-linejoin="round"/>')
-    shade = (f'<path d="M100,-194 L156,-196 L172,150 L120,162 Z" fill="{BAG_SH}" opacity="0.75"/>'
-             f'<path d="M-154,-186 L-120,-188 L-132,156 L-172,156 Z" fill="{BAG_HI}" opacity="0.5"/>'
-             f'<path d="M-40,-160 L-10,-110 L120,-150 M-150,10 L-90,40 L-118,150 M70,20 L152,96 M40,-190 L54,-140 M-20,110 L10,170" '
-             f'stroke="{BAG_DK}" stroke-width="3" fill="none" opacity="0.75" stroke-linejoin="round"/>'
-             f'<path d="M-60,-150 L-14,-100 M110,30 L80,120" stroke="{BAG_HI}" stroke-width="4" fill="none" opacity="0.8"/>')
-    def X(cx, cy, s=38):
-        return (f'<path d="M{cx - s},{cy - s} L{cx + s * 0.9},{cy + s * 1.05} M{cx + s * 0.95},{cy - s * 0.95} L{cx - s * 0.9},{cy + s}" '
-                f'stroke="{MARK}" stroke-width="17" stroke-linecap="round"/>')
-    eyes = (f'<g id="eyes-open">{X(-66, -40)}{X(70, -44)}</g>'
-            f'<g id="eyes-shut" opacity="0"><path d="M-108,-38 L-26,-40 M30,-42 L112,-44" stroke="{MARK}" stroke-width="15" stroke-linecap="round"/></g>')
-    brows = (f'<g id="brows"><g id="browL"><path d="M-106,-110 L-30,-102" stroke="{MARK}" stroke-width="11" stroke-linecap="round"/></g>'
-             f'<g id="browR"><path d="M32,-106 L108,-116" stroke="{MARK}" stroke-width="11" stroke-linecap="round"/></g></g>')
-    y = 70
+    outline = P(bag_pts())
+    chin = (f'<path d="M-74,130 L74,130 L70,176 Q0,236 -70,176 Z" fill="{SKIN}" stroke="{OUT}" stroke-width="{W - 1}" stroke-linejoin="round"/>'
+            f'<path d="M-70,130 L70,130 L68,176 Q0,206 -68,176 Z" fill="{LIP}"/>'
+            f'<path d="M-30,186 Q0,196 30,186" stroke="{SKIN_SH}" stroke-width="4" fill="none" stroke-linecap="round"/>')
+    facets = "".join(f'<path d="{P(p)}" fill="{c}" opacity="{o}"/>' for p, c, o in (
+        ([(-200, -230), (200, -230), (200, -170), (60, -160), (-80, -150), (-200, -146)], BAG_HI, 0.9),        # folded rim
+        ([(-200, -146), (-80, -150), (-36, -70), (-200, 10)], BAG_HI, 0.45),                                    # left light patch
+        ([(126, -168), (200, -170), (200, 210), (150, 210), (118, 60)], BAG_SH, 0.9),                          # right side in shade
+        ([(52, 110), (200, 30), (200, 210), (30, 210)], BAG_DK, 0.55),                                          # lower right
+        ([(-24, 20), (44, -18), (96, 56), (20, 104)], BAG_SH, 0.45),                                           # centre crease
+        ([(-200, 80), (-110, 112), (-70, 210), (-200, 210)], BAG_SH, 0.6),                                     # lower left
+        ([(-120, -60), (-60, -80), (-80, 20)], BAG_HI, 0.35),
+    ))
+    creases = (f'<path d="M-184,-40 L-132,-56 L-96,-92 M-60,-150 L-18,-104 L60,-124 M118,40 L110,128 M-142,96 L-122,160 '
+               f'M66,-60 L150,-112 M-20,140 L2,176 M30,-168 L22,-140" stroke="{CREASE}" stroke-width="2.6" fill="none" stroke-linejoin="round" stroke-linecap="round"/>'
+               f'<path d="M-150,-170 L120,-180" stroke="{BAG_DK}" stroke-width="3" fill="none" opacity="0.7"/>'
+               f'<path d="M-110,-128 L-40,-118 M-150,-100 L-120,-96" stroke="#e6cc9f" stroke-width="7" fill="none" stroke-linecap="round" opacity="0.8"/>')
+    flap = f'<path d="M16,-192 L30,-168 L46,-196 Z" fill="{BAG_DK}" stroke="{OUT}" stroke-width="2.5" stroke-linejoin="round"/>'
+    E1, E2 = (-64, -6), (70, -10)
+    squash = lambda c: f'transform="translate({c[0]} {c[1]}) scale(1 0.28) translate({-c[0]} {-c[1]})"'
+    eyes = (f'<g id="xeyes"><g id="eyes-open">{X(*E1)}{X(*E2)}</g>'
+            f'<g id="eyes-shut" opacity="0"><g {squash(E1)}>{X(*E1)}</g><g {squash(E2)}>{X(*E2)}</g></g></g>')
     m = {
-        "closed": f'<path d="{zig(y, 12)}" stroke="{MARK}" stroke-width="11" fill="none" stroke-linejoin="round" stroke-linecap="round"/>',
-        "o": (f'<path d="{zig(y - 12, 9, 0, -84, 90, 6)} L90,{y + 16} Q0,{y + 46} -84,{y + 16} Z" fill="{MARK}" stroke="{MARK}" stroke-width="10" stroke-linejoin="round"/>'
-              f'<path d="M-40,{y + 20} Q0,{y + 34} 40,{y + 20}" stroke="#7a2b2b" stroke-width="10" fill="none" stroke-linecap="round"/>'),
-        "smile": f'<path d="{zig(y, 12, 22)}" stroke="{MARK}" stroke-width="11" fill="none" stroke-linejoin="round" stroke-linecap="round"/>',
+        "closed": f'<path d="{zig(11, 18, hook=14)}" stroke="{MARK}" stroke-width="11" fill="none" stroke-linejoin="miter" stroke-miterlimit="6" stroke-linecap="round"/>',
+        "o": f'<path d="{zig(20, 20, drop=6, hook=18)}" stroke="{MARK}" stroke-width="12" fill="none" stroke-linejoin="miter" stroke-miterlimit="6" stroke-linecap="round"/>',
+        "smile": f'<path d="{zig(13, 26, hook=20)}" stroke="{MARK}" stroke-width="11" fill="none" stroke-linejoin="miter" stroke-miterlimit="6" stroke-linecap="round"/>',
     }
     mouths = "".join(f'<g id="m-{k}" class="mth" opacity="{1 if k == "smile" else 0}">{v}</g>' for k, v in m.items())
     return f'''
   {chin}
-  <path d="{bag_shape()}" fill="{BAG}" stroke="{OUT}" stroke-width="{W}" stroke-linejoin="round"/>
-  {shade}
-  {rim}
+  <clipPath id="bagclip"><path d="{outline}"/></clipPath>
+  <path d="{outline}" fill="{BAG}"/>
+  <g clip-path="url(#bagclip)">{facets}{creases}</g>
+  {flap}
+  <path d="{outline}" fill="none" stroke="{OUT}" stroke-width="{W}" stroke-linejoin="round"/>
   {eyes}
-  {mouths}
-  {brows}'''
+  {mouths}'''
 
-# ------------------------------------------------------------------ two-bone arm: full sweatshirt sleeves, cuffs, bare hands
+# ------------------------------------------------------------------ two-bone arm: oversized sweatshirt sleeves, cuffs, bare hands
 def tube(x0, x1, w0, w1): return f"M{x0},{-w0} L{x1},{-w1} L{x1},{w1} L{x0},{w0} Z"
 
 def arm(side, rest_u, rest_f):
     flip = side == "R"; sx, sy = SHL if side == "L" else SHR
-    up_t, fo_t = tube(-10, U + 4, 44, 36), tube(0, F - 8, 36, 30)
-    cuff = tube(F - 28, F - 4, 33, 31)
+    up_t, fo_t = tube(0, U + 4, 40, 37), tube(0, F - 6, 38, 32)
+    cuff = tube(F - 30, F - 4, 35, 33)
     ink = lambda d, w=2 * W: f'<path d="{d}" fill="{OUT}" stroke="{OUT}" stroke-width="{w}" stroke-linejoin="round"/>'
     hands = {"L": {"point": 0, "palm": -8, "thumb": -25}, "R": {"palm": 8, "point": 0}}[side]
     hg = "".join(f'<g id="arm{side}-{k}" opacity="0"><g transform="translate({F} 0) rotate({90 + hr})">{hand(k, flip)}</g></g>' for k, hr in hands.items())
     fore = f'transform="rotate({rest_f} {U} 0)"'
     return (f'<g id="arm{side}" transform="rotate({rest_u} {sx} {sy})"><g transform="translate({sx} {sy})">'
             f'{ink(up_t)}<g class="fore" {fore}><g transform="translate({U} 0)">{ink(fo_t)}<circle r="{38 + W}" fill="{OUT}"/></g></g>'
-            f'<path d="{up_t}" fill="{JK}"/><circle r="44" fill="{JK}"/>'
-            f'<path d="M6,-30 L{U * 0.8:.0f},-26" stroke="{JK_HI}" stroke-width="8" stroke-linecap="round"/>'
+            f'<path d="{up_t}" fill="{JK}"/><circle r="48" fill="{JK}"/>'
+            f'<path d="M14,-28 L{U * 0.8:.0f},-26" stroke="{JK_HI}" stroke-width="7" stroke-linecap="round"/>'
             f'<g class="fore" {fore}><g transform="translate({U} 0)">{hg}<path d="{fo_t}" fill="{JK}"/><circle r="38" fill="{JK}"/>'
             f'<path d="{cuff}" fill="{JK_SH}" stroke="{OUT}" stroke-width="4" stroke-linejoin="round"/>'
-            f'<path d="M8,16 L{F - 36},14" stroke="{JK_SH}" stroke-width="7" stroke-linecap="round"/></g></g>'
+            f'<path d="M10,16 L{F - 38},14" stroke="{JK_SH}" stroke-width="7" stroke-linecap="round"/></g></g>'
             f'</g></g>')
 
-# ------------------------------------------------------------------ torso: loose sweatshirt with a crew neck
+# ------------------------------------------------------------------ torso: oversized sweatshirt, drooping shoulders, high crew collar
 def body():
-    sw = "M528,530 C484,540 452,570 446,612 L432,1010 L768,1010 L754,612 C748,570 716,540 672,530 Z"
+    sw = "M522,534 Q600,522 678,534 C750,542 822,572 836,652 L846,1010 L354,1010 L364,652 C378,572 450,542 522,534 Z"
     return f'''
-  <path d="M568,470 L566,552 Q600,566 634,552 L632,470 Z" fill="{SKIN}" stroke="{OUT}" stroke-width="{W}"/>
-  <path d="M568,488 Q600,520 632,488 L632,470 L568,470 Z" fill="{SKIN_SH}" opacity="0.8"/>
-  <path d="{sw}" fill="{JK}" stroke="{OUT}" stroke-width="{W}" stroke-linejoin="round"/>
-  <path d="M640,1010 L768,700 L768,1010 Z" fill="{JK_SH}" opacity="0.6"/>
-  <path d="M548,536 Q600,586 652,536" fill="{SKIN}" stroke="{OUT}" stroke-width="{W}"/>
-  <path d="M538,532 Q600,604 662,532" stroke="{JK_SH}" stroke-width="12" fill="none"/>
-  <path d="M538,532 Q600,604 662,532" stroke="{OUT}" stroke-width="3" fill="none"/>
-  <path d="M520,700 L560,640 M680,760 L640,860" stroke="{OUT}" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.6"/>'''
+  <clipPath id="swclip"><path d="{sw}"/></clipPath>
+  <path d="{sw}" fill="{JK}"/>
+  <g clip-path="url(#swclip)">
+    <path d="M400,1010 L840,640 L840,1010 Z" fill="{JK_LT}"/>
+    <path d="M560,1010 L840,770 L840,1010 Z" fill="{JK_HI}" opacity="0.7"/>
+      </g>
+  <path d="{sw}" fill="none" stroke="{OUT}" stroke-width="{W}" stroke-linejoin="round"/>
+  <path d="M540,470 L540,580 Q600,604 660,580 L660,470 Z" fill="{SKIN}" stroke="{OUT}" stroke-width="{W}"/>
+  <path d="M540,470 L660,470 L660,540 Q600,560 540,540 Z" fill="{SKIN_SH}" opacity="0.7"/>
+  <path d="M520,548 Q600,628 680,548" stroke="{JK_SH}" stroke-width="24" fill="none" stroke-linecap="round"/>
+  <path d="M520,536 Q600,616 680,536" stroke="{OUT}" stroke-width="3.5" fill="none"/>
+  <path d="M514,560 Q600,644 686,560" stroke="{OUT}" stroke-width="3.5" fill="none"/>
+  <path d="M536,600 C520,640 506,690 500,760 M700,606 C716,660 724,700 726,760 M650,700 L612,790" stroke="{OUT}" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.75"/>'''
 
 # ------------------------------------------------------------------ poses
 POSES_L = {
@@ -211,10 +235,10 @@ open(os.path.join(here, "character.svg"), "w").write(svg())
 import json
 json.dump({
     "type": "svg", "file": "character.svg", "x": -60, "y": 1130, "width": 1200,
-    "head_origin": f"{HEAD[0]} {HEAD[1] + 150}", "avatar_view": "360 60 480 480",
+    "head_origin": "600 540", "avatar_view": "370 110 460 460",
     "poses": list(POSES_L),
     "arms": [{"id": "armL", "shoulder": list(SHL), "upper": U, "hands": ["point", "palm", "thumb"], "poses": POSES_L},
              {"id": "armR", "shoulder": list(SHR), "upper": U, "hands": ["palm", "point"], "poses": POSES_R}],
-    "brows": {"sel": "#brows", "raise": -10, "end": "#browL"},
+    "brows": {"sel": "#xeyes", "raise": -8},
 }, open(os.path.join(here, "character.json"), "w"), indent=1)
 print("wrote character.svg + character.json")
