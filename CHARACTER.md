@@ -26,6 +26,14 @@ Pose names are free; the script's `pose` / `pose_cycle` use them. Built-in scrip
 `card` (point at the card), `thumb` (at chest), `shrug`, `wave`. `avatar_view` is the crop used for the profile-card avatar.
 The default's generator (`characters/default/make.py`) is a working template.
 
+### Secondary motion (both options)
+Optional keys in `character.json`, all tied to the timeline:
+`"idle": [{"sel": "#tail", "rot": 12, "period": 1.7, "origin": "930 600"}]` continuous sway;
+`"twitch": [{"sel": "#cat-ear", "rot": 14, "every": 2.6, "offset": 0.9, "origin": "896 410"}]` a quick flick every few seconds;
+`"blink2": [{"open": "#cat-eyes-open", "shut": "#cat-eyes-shut", "every": 3.3}]` a second set of eyes (a pet);
+`"react": {"sel": "#cat", "y": -34, "rot": -6, "origin": "880 610"}` a hop whenever a stamp lands.
+`characters/goku-toon/` (the channel presenter as a vector puppet, drawn by `make.py`) uses all four.
+
 ## Option B: PNG poses (fastest from an existing avatar app or drawing)
 
 ```json

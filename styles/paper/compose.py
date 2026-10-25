@@ -37,7 +37,7 @@ class Ctx:
         s.A(f'tl.to("#stage", {{ keyframes: [{{ x: {amt}, y: {-amt / 2} }}, {{ x: {-amt}, y: {amt / 2} }}, {{ x: {amt / 2}, y: 0 }}, {{ x: 0, y: 0 }}], duration: 0.2, ease: "none" }}, {r3(t)});')
     def stamp(s, text, t, o=None):
         o = o or {}; sid = f"{s.p}-st{len(s.f.stamps)}"; rot = o.get("rot", -8)
-        s.f.stamps.append(sid)
+        s.f.stamps.append(sid); s.f.stamp_times.append(t)
         s.f.extra[s.p] = s.f.extra.get(s.p, "") + f'<div id="{sid}" class="stamp{" big" if o.get("big") else ""}" style="left:{o.get("x", 300)}px;top:{o.get("y", -120)}px">{esc(text)}</div>'
         s.A(f'tl.fromTo("#{sid}", {{ opacity: 0, scale: 2.6, rotation: {rot - 10} }}, {{ opacity: 1, scale: 1, rotation: {rot}, duration: 0.16, ease: "power4.in" }}, {r3(t - 0.16)});')
         s.shake(t); s.sfx(t, "pro_impact/short", -7 if o.get("big") else -9)
@@ -51,7 +51,7 @@ class Film:
     def __init__(s, script, timing, work, script_dir):
         s.sc, s.tm, s.work, s.sdir = script, timing, work, script_dir
         s.th = {**THEME, **script.get("theme", {})}; s.brand = script.get("brand", {})
-        s.js, s.cues, s.stamps, s.extra, s.counters, s.uses_figures = [], [], [], {}, 0, False
+        s.js, s.cues, s.stamps, s.extra, s.counters, s.uses_figures, s.stamp_times = [], [], [], {}, 0, False, []
         s.out = os.path.join(work, "film"); os.makedirs(os.path.join(s.out, "assets"), exist_ok=True)
         s.char = s.load_character(script.get("character", "default"))
         s.avatar = s.asset(s.brand["avatar"]) if s.brand.get("avatar") else s.char_avatar()
@@ -198,8 +198,35 @@ class Film:
                     A(f'tl.set("#blink", {{ opacity: 1 }}, {r3(bt)}); tl.set("#blink", {{ opacity: 0 }}, {r3(bt + 0.1)});'); bt += 2.9
             body = (f'<div id="pres" style="position:absolute;left:{c.get("x", 140)}px;top:{c.get("y", 1180)}px;width:{c.get("width", 800)}px;height:{c.get("height", 740)}px">'
                     f'<div id="presin" style="position:absolute;inset:0;transform-origin:50% 100%">{imgs}</div></div>')
+        s.rigs(c, dur)
         A(f'tl.fromTo("#pres", {{ y: 260 }}, {{ y: 0, duration: 0.5, ease: "back.out(1.4)" }}, 0);')
         return body
+
+    def rigs(s, c, dur):
+        """Optional secondary motion from character.json (all seekable tweens):
+        idle:   [{sel, rot, period, origin, y}]   continuous sway (a tail, an antenna)
+        twitch: [{sel, rot, every, offset, origin}]  a quick flick every few seconds (an ear)
+        blink2: [{open, shut, every, offset}]     a second pair of eyes that blinks on its own clock (a pet)
+        react:  {sel, y, rot, origin}             a hop whenever a stamp lands"""
+        A = s.js.append
+        for it in c.get("idle", []):
+            half = it.get("period", 1.6) / 2; n = int(dur / half) + 1; o = f', svgOrigin: "{it["origin"]}"' if it.get("origin") else ""
+            if it.get("rot"): A(f'tl.fromTo("{it["sel"]}", {{ rotation: {-it["rot"]} }}, {{ rotation: {it["rot"]}, duration: {r3(half)}, yoyo: true, repeat: {n}, ease: "sine.inOut"{o} }}, 0);')
+            if it.get("y"): A(f'tl.fromTo("{it["sel"]}", {{ y: 0 }}, {{ y: {it["y"]}, duration: {r3(half)}, yoyo: true, repeat: {n}, ease: "sine.inOut" }}, 0);')
+        for it in c.get("twitch", []):
+            t = it.get("offset", 1.0); o = f', svgOrigin: "{it["origin"]}"' if it.get("origin") else ""
+            while t < dur - 0.3:
+                A(f'tl.to("{it["sel"]}", {{ rotation: {it.get("rot", 12)}, duration: 0.07, yoyo: true, repeat: 3, ease: "sine.inOut"{o} }}, {r3(t)});'); t += it.get("every", 3.0)
+        for it in c.get("blink2", []):
+            t = it.get("offset", 1.2)
+            while t < dur - 0.3:
+                A(f'tl.set("{it["open"]}", {{ opacity: 0 }}, {r3(t)}); tl.set("{it["shut"]}", {{ opacity: 1 }}, {r3(t)}); tl.set("{it["open"]}", {{ opacity: 1 }}, {r3(t + 0.12)}); tl.set("{it["shut"]}", {{ opacity: 0 }}, {r3(t + 0.12)});')
+                t += it.get("every", 3.4)
+        rc = c.get("react")
+        if rc:
+            o = f', svgOrigin: "{rc["origin"]}"' if rc.get("origin") else ""
+            for t in s.stamp_times:
+                A(f'tl.to("{rc["sel"]}", {{ y: {rc.get("y", -30)}, rotation: {rc.get("rot", 0)}, duration: 0.14, ease: "power2.out", yoyo: true, repeat: 1{o} }}, {r3(t - 0.02)});')
 
     def write(s, hdr, caps, cards, pres, dur):
         th = s.th; css = open(os.path.join(HERE, "style.css")).read()
