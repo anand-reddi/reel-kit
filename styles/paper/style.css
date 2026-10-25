@@ -8,7 +8,7 @@ html, body { margin: 0; background: {paper}; }
 .clip { position: absolute; inset: 0; }
 #stage { position: absolute; inset: 0; }
 #paperdots { position: absolute; inset: -60px; background-image: radial-gradient({ink}22 1.3px, transparent 1.6px); background-size: 9px 9px; opacity: .55; }
-#vig { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 40%, transparent 55%, {ink}18 100%); }
+#vig { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 40%, transparent 55%, {vig} 100%); }
 .mono { font-family: "IBM Plex Mono", monospace; font-weight: 500; }
 .hdr { position: absolute; left: 110px; right: 110px; top: 118px; display: flex; justify-content: space-between; font-size: 27px; letter-spacing: 2px; color: {mid}; opacity: 0; }
 .redt { color: {accent}; font-weight: 500; }
@@ -18,17 +18,17 @@ html, body { margin: 0; background: {paper}; }
 .card-wrap { position: absolute; left: 0; right: 0; height: 700px; }
 .card-wrap { opacity: 0; }
 .tagline { position: absolute; left: 150px; top: 0; font-size: 26px; color: {mid}; }
-.pbar { position: absolute; left: 130px; width: 820px; top: 60px; height: 132px; border-radius: 30px; background: {card}; box-shadow: 14px 16px 0 {ink}22; display: flex; align-items: center; padding: 0 26px; box-sizing: border-box; }
+.pbar { position: absolute; left: 130px; width: 820px; top: 60px; height: 132px; border-radius: 30px; background: {card}; box-shadow: 14px 16px 0 {soft}; display: flex; align-items: center; padding: 0 26px; box-sizing: border-box; }
 .caret-in { color: {accent}; font-size: 54px; margin-right: 18px; font-weight: 700; }
 .ptxt { flex: 1; color: #f4f1ea; font-size: 38px; font-family: "IBM Plex Mono", monospace; white-space: nowrap; }
 .ch { opacity: 0; }
 .caret { display: inline-block; width: 4px; height: 42px; background: {accent}; vertical-align: middle; margin-left: 4px; }
 .send { width: 84px; height: 84px; border-radius: 42px; background: #3a3a3f; display: flex; align-items: center; justify-content: center; }
-.ptag { position: absolute; left: 160px; top: 230px; background: {accent}; color: #fff; font-size: 46px; padding: 12px 30px; border-radius: 18px; opacity: 0; box-shadow: 8px 10px 0 {ink}25; }
+.ptag { position: absolute; left: 160px; top: 230px; background: {accent}; color: #fff; font-size: 46px; padding: 12px 30px; border-radius: 18px; opacity: 0; box-shadow: 8px 10px 0 {soft}; }
 .spark { position: absolute; left: 880px; top: 125px; }
 .spark i { position: absolute; width: 70px; height: 7px; background: {accent}; border-radius: 4px; transform-origin: 0 50%; opacity: 0; }
 .spark i:nth-child(1) { rotate: -60deg; } .spark i:nth-child(2) { rotate: -25deg; } .spark i:nth-child(3) { rotate: 10deg; } .spark i:nth-child(4) { rotate: 45deg; } .spark i:nth-child(5) { rotate: 80deg; }
-.sheet { position: absolute; left: 150px; width: 780px; top: 0; background: #fff; border: 5px solid {ink}; border-radius: 30px; padding: 26px 34px 14px; box-sizing: border-box; box-shadow: 16px 18px 0 {ink}; }
+.sheet { position: absolute; left: 150px; width: 780px; top: 0; background: {surface}; border: 5px solid {edge}; border-radius: 30px; padding: 26px 34px 14px; box-sizing: border-box; box-shadow: 16px 18px 0 {shadow}; }
 .sheet-h { display: flex; justify-content: space-between; font-size: 26px; color: {mid}; margin-bottom: 10px; }
 .row { display: flex; align-items: center; height: 116px; border-top: 3px dashed {grey}; opacity: 0; }
 .ico { width: 76px; height: 76px; border-radius: 18px; background: {paper}; display: flex; align-items: center; justify-content: center; margin-right: 24px; }
@@ -36,23 +36,23 @@ html, body { margin: 0; background: {paper}; }
 .rbar { flex: 1; height: 14px; background: {paper}; border-radius: 7px; margin-right: 26px; overflow: hidden; }
 .rfill { width: 100%; height: 100%; background: {ink}; transform-origin: 0 50%; transform: scaleX(0); }
 .chk { width: 58px; height: 58px; border-radius: 29px; background: {grey}; display: flex; align-items: center; justify-content: center; transform: scale(0); }
-.stamp { position: absolute; color: {accent}; border: 9px solid {accent}; border-radius: 16px; font-weight: 700; font-size: 66px; padding: 4px 26px; letter-spacing: 3px; opacity: 0; background: {paper}cc; mix-blend-mode: multiply; }
+.stamp { position: absolute; color: {accent}; border: 9px solid {accent}; border-radius: 16px; font-weight: 700; font-size: 66px; padding: 4px 26px; letter-spacing: 3px; opacity: 0; background: {paper}cc; mix-blend-mode: {blend}; }
 .stamp.big { font-size: 150px; border-width: 14px; padding: 0 40px; }
-.code { position: absolute; left: 120px; width: 840px; top: 0; background: {card}; border-radius: 28px; padding: 26px 30px 30px; box-sizing: border-box; box-shadow: 16px 18px 0 {ink}30; font-family: "IBM Plex Mono", monospace; font-size: 31px; color: #e9e6df; }
+.code { position: absolute; left: 120px; width: 840px; top: 0; background: {card}; border-radius: 28px; padding: 26px 30px 30px; box-sizing: border-box; box-shadow: 16px 18px 0 {soft}; font-family: "IBM Plex Mono", monospace; font-size: 31px; color: #e9e6df; }
 .dots3 { display: flex; gap: 12px; align-items: center; margin-bottom: 18px; } .dots3 i { width: 18px; height: 18px; border-radius: 9px; background: #4a4a50; } .dots3 i:first-child { background: {accent}; }
 .dots3 span { margin-left: 16px; font-size: 24px; color: #8d8a84; }
 .cl { line-height: 1.75; white-space: pre; opacity: 0; } .cl em { display: inline-block; width: 46px; color: #5c5a56; font-style: normal; }
 .cl .c { color: #77746e; font-style: normal; } .cl .k { color: {accent}; font-weight: 500; } .cl .f { color: #fff; font-weight: 500; } .cl s { text-decoration: none; color: #f0b9b3; } .cl u { text-decoration: none; color: #f6d27a; }
-.editor { position: absolute; left: 170px; width: 760px; top: 250px; height: 380px; background: #d7d3cb; border: 5px solid {ink}; border-radius: 22px; box-shadow: 14px 16px 0 {ink}; opacity: 0; overflow: hidden; }
-.ed-h { background: {ink}; color: #bdb8ae; font-size: 22px; padding: 12px 20px; }
-.trk { position: relative; height: 62px; margin: 12px 18px; background: #c4bfb6; border-radius: 8px; }
-.tclip { position: absolute; top: 8px; bottom: 8px; background: #8f8a81; border-radius: 6px; }
+.editor { position: absolute; left: 170px; width: 760px; top: 250px; height: 380px; background: {ed}; border: 5px solid {edge}; border-radius: 22px; box-shadow: 14px 16px 0 {shadow}; opacity: 0; overflow: hidden; }
+.ed-h { background: {card}; color: #bdb8ae; font-size: 22px; padding: 12px 20px; }
+.trk { position: relative; height: 62px; margin: 12px 18px; background: {ed2}; border-radius: 8px; }
+.tclip { position: absolute; top: 8px; bottom: 8px; background: {ed3}; border-radius: 6px; }
 .playhead { position: absolute; left: 46%; top: 50px; bottom: 0; width: 5px; background: {accent}; }
 .xline { position: absolute; left: -40px; right: -40px; top: 50%; height: 16px; background: {accent}; transform-origin: 0 50%; transform: rotate(28deg) scaleX(0); }
 .xline.x2 { transform: rotate(-28deg) scaleX(0); }
 .rays { position: absolute; left: 540px; top: 260px; width: 0; height: 0; opacity: 0; }
-.rays i { position: absolute; left: -45px; bottom: 0; width: 0; height: 0; border-left: 45px solid transparent; border-right: 45px solid transparent; border-bottom: 1000px solid {ink}10; transform-origin: 50% 100%; }
-.prof { position: absolute; left: 140px; width: 800px; top: 0; background: {card}; border-radius: 34px; padding: 30px 36px 36px; box-sizing: border-box; box-shadow: 16px 18px 0 {ink}35; color: #f4f1ea; }
+.rays i { position: absolute; left: -45px; bottom: 0; width: 0; height: 0; border-left: 45px solid transparent; border-right: 45px solid transparent; border-bottom: 1000px solid {rays}; transform-origin: 50% 100%; }
+.prof { position: absolute; left: 140px; width: 800px; top: 0; background: {card}; border-radius: 34px; padding: 30px 36px 36px; box-sizing: border-box; box-shadow: 16px 18px 0 {soft}; color: #f4f1ea; }
 .ph { display: flex; justify-content: space-between; font-size: 30px; color: #bdb8ae; margin-bottom: 26px; }
 .prow { display: flex; align-items: center; gap: 30px; }
 .pav { width: 150px; height: 150px; border-radius: 75px; overflow: hidden; border: 5px solid #f4f1ea; flex: none; }
@@ -69,9 +69,10 @@ html, body { margin: 0; background: {paper}; }
 .sl { font-size: 40px; font-weight: 700; margin-top: 6px; } .bars { display: flex; align-items: flex-end; gap: 14px; height: 130px; margin-top: 26px; }
 .bars i { flex: 1; background: {ink}; border-radius: 6px 6px 0 0; transform-origin: 50% 100%; } .bars i:last-child { background: {accent}; }
 .graph { padding: 20px; } .gl { font-family: "IBM Plex Mono", monospace; font-size: 24px; fill: {mid}; } .gm { font-family: "IBM Plex Mono", monospace; font-size: 20px; fill: #fff; }
-.imframe { position: absolute; left: 120px; right: 120px; top: 0; background: #fff; border: 5px solid {ink}; border-radius: 28px; box-shadow: 16px 18px 0 {ink}; overflow: hidden; }
+.imframe { position: absolute; left: 120px; right: 120px; top: 0; background: {surface}; border: 5px solid {edge}; border-radius: 28px; box-shadow: 16px 18px 0 {shadow}; overflow: hidden; }
 .imin { position: absolute; inset: 0; } .imin img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
 .hlbox { position: absolute; border: 8px solid {accent}; border-radius: 16px; box-shadow: 0 0 0 9999px rgba(20,20,20,.28); }
 .imcap { position: absolute; left: 150px; top: -46px; font-size: 26px; color: {mid}; }
 .figwrap { position: absolute; top: 0; --hairline-plate: {paper}; --hairline-hi: {ink}; --hairline-edge: #55524c; --hairline-mid: #a8a39a; --hairline-lo: #d6d1c8; --hairline-stroke: 2.6; }
 .figcap { font-size: 26px; color: {mid}; height: 34px; } .figread { position: absolute; right: 0; top: 0; font-size: 28px; color: {accent}; }
+#pres { filter: drop-shadow(0 0 22px {glow}); }

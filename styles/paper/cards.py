@@ -103,7 +103,7 @@ def profile(p, c, x):
     x.A(f'tl.to("#{p}-tap", {{ scale: 0.86, duration: 0.07, yoyo: true, repeat: 1 }}, {x.r(tap)});')
     x.A(f'tl.to("#{p}-btn", {{ scale: 0.92, duration: 0.07, yoyo: true, repeat: 1 }}, {x.r(tap)});')
     x.A(f'tl.set("#{p}-fa", {{ display: "none" }}, {x.r(tap + 0.07)});'); x.A(f'tl.set("#{p}-fb", {{ display: "inline" }}, {x.r(tap + 0.07)});')
-    x.A(f'tl.set("#{p}-btn", {{ backgroundColor: "#2b2b2f" }}, {x.r(tap + 0.07)});')
+    x.A(f'tl.set("#{p}-btn", {{ backgroundColor: "{x.th["edge"]}" }}, {x.r(tap + 0.07)});')
     x.A(f'tl.fromTo("#{p}-ring", {{ opacity: 1, scale: 0.2 }}, {{ opacity: 0, scale: 1.6, duration: 0.5, ease: "power2.out", immediateRender: false }}, {x.r(tap + 0.05)});')
     x.A(f'tl.fromTo("#{p}-hearts b", {{ opacity: 0, y: 0 }}, {{ opacity: 1, y: -90, duration: 0.5, ease: "power2.out", stagger: 0.04 }}, {x.r(tap + 0.1)});')
     x.A(f'tl.to("#{p}-hearts b", {{ opacity: 0, duration: 0.3, stagger: 0.04 }}, {x.r(tap + 0.6)});')
@@ -146,8 +146,8 @@ def graph(p, c, x):
     x.sfx(t0, "swipe/glide", -16); x.sfx(mk, "pro_pop/tink", -10)
     path = "M120,520 " + " ".join(f"L{120 + i / 40 * 600:.0f},{520 - (i / 40) ** 2.4 * 440:.0f}" for i in range(1, 41))
     return f'''<div class="sheet graph"><svg viewBox="40 40 720 560" width="100%" height="470">
-    <g stroke="#e3dfd7" stroke-width="2">{"".join(f'<path d="M{120 + i * 75},80 V520"/>' for i in range(9))}{"".join(f'<path d="M120,{80 + i * 55} H720"/>' for i in range(9))}</g>
-    <path d="M120,60 V520 H740" stroke="#141414" stroke-width="5" fill="none"/><path d="M110,72 L120,56 L130,72 M728,510 L744,520 L728,530" stroke="#141414" stroke-width="5" fill="none"/>
+    <g stroke="{x.th["grey"]}" stroke-width="2" opacity="0.6">{"".join(f'<path d="M{120 + i * 75},80 V520"/>' for i in range(9))}{"".join(f'<path d="M120,{80 + i * 55} H720"/>' for i in range(9))}</g>
+    <path d="M120,60 V520 H740" stroke="{x.th["ink"]}" stroke-width="5" fill="none"/><path d="M110,72 L120,56 L130,72 M728,510 L744,520 L728,530" stroke="{x.th["ink"]}" stroke-width="5" fill="none"/>
     <text x="96" y="300" transform="rotate(-90 96 300)" class="gl">{esc(c.get("y_label", "reach"))}</text><text x="700" y="560" class="gl">{esc(c.get("x_label", "time"))}</text>
     <path id="{p}-curve" d="{path}" stroke="{x.th["mid"]}" stroke-width="5" stroke-dasharray="1" pathLength="1" fill="none"/>
     <path id="{p}-vl" d="M{mx:.0f},100 V520" stroke="{x.th["accent"]}" stroke-width="4" stroke-dasharray="12 10"/>

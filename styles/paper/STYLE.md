@@ -19,7 +19,7 @@ Keep each line under ~8 words: one line = one caption beat.
   "music": { "style": "beat", "bpm": 100, "key": "minor" },   // key: minor | major | dark ; style "none" = no music
   "levels": { "music": -31, "sfx": -24 },             // optional loudness of the beds (LUFS)
   "character": "default",                              // a folder (see CHARACTER.md) or "none"
-  "theme": { "accent": "#e5372d" },                    // optional: paper, ink, accent, grey, mid, card
+  "theme": "dark",                                     // "light" (default) | "dark" | { "base": "dark", "accent": "#..." }
   "scenes": [
     { "label": "one prompt",                           // header: "// 01 · one prompt"
       "counter": { "name": "PROMPTS", "value": "0", "steps": ["1"] },

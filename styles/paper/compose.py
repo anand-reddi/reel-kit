@@ -4,7 +4,16 @@ from .cards import CARDS, esc
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 KIT = os.path.dirname(os.path.dirname(HERE))
-THEME = dict(paper="#efece6", ink="#141414", accent="#e5372d", grey="#c9c4ba", mid="#8a857c", card="#1b1b1d")
+THEMES = {
+    "light": dict(paper="#efece6", ink="#141414", accent="#e5372d", grey="#c9c4ba", mid="#8a857c", card="#1b1b1d",
+                  surface="#ffffff", edge="#141414", shadow="#141414", soft="#14141428", vig="#14141418", rays="#14141410",
+                  ed="#d7d3cb", ed2="#c4bfb6", ed3="#8f8a81", blend="multiply", glow="transparent"),
+    # night navy built from the presenter: shirt navy, label red, kitten amber
+    "dark":  dict(paper="#0d111d", ink="#eef0f6", accent="#e5372d", grey="#343c54", mid="#8891ab", card="#060910",
+                  surface="#161d30", edge="#2a3350", shadow="#03050a", soft="#00000066", vig="#00000070", rays="#ffffff08",
+                  ed="#2a3248", ed2="#222a3e", ed3="#46506c", blend="normal", amber="#f3b33d", glow="#6f86c84d"),
+}
+THEME = THEMES["light"]
 W, H = 1080, 1920
 r3 = lambda v: round(float(v), 3)
 
@@ -50,7 +59,8 @@ class Ctx:
 class Film:
     def __init__(s, script, timing, work, script_dir):
         s.sc, s.tm, s.work, s.sdir = script, timing, work, script_dir
-        s.th = {**THEME, **script.get("theme", {})}; s.brand = script.get("brand", {})
+        th = script.get("theme", {}); th = {"base": th} if isinstance(th, str) else th
+        s.th = {**THEMES[th.get("base", "light")], **{k: v for k, v in th.items() if k != "base"}}; s.brand = script.get("brand", {})
         s.js, s.cues, s.stamps, s.extra, s.counters, s.uses_figures, s.stamp_times = [], [], [], {}, 0, False, []
         s.out = os.path.join(work, "film"); os.makedirs(os.path.join(s.out, "assets"), exist_ok=True)
         s.char = s.load_character(script.get("character", "default"))
