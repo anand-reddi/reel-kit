@@ -1,0 +1,111 @@
+{
+ "type": "svg",
+ "file": "character.svg",
+ "x": -60,
+ "y": 1150,
+ "width": 1200,
+ "head_origin": "600 522",
+ "avatar_view": "400 90 400 400",
+ "poses": [
+  "rest",
+  "up",
+  "card",
+  "palms",
+  "shrug",
+  "thumb",
+  "wave"
+ ],
+ "arms": [
+  {
+   "id": "armL",
+   "shoulder": [
+    440,
+    612
+   ],
+   "upper": 118,
+   "hands": [
+    "point",
+    "palm",
+    "thumb"
+   ],
+   "poses": {
+    "rest": {
+     "u": 100,
+     "f": -6,
+     "hand": "palm"
+    },
+    "up": {
+     "u": 146,
+     "f": 118,
+     "hand": "point"
+    },
+    "card": {
+     "u": 152,
+     "f": 92,
+     "hand": "point"
+    },
+    "palms": {
+     "u": 132,
+     "f": 98,
+     "hand": "palm"
+    },
+    "shrug": {
+     "u": 124,
+     "f": 84,
+     "hand": "palm"
+    },
+    "thumb": {
+     "u": 124,
+     "f": 158,
+     "hand": "thumb"
+    },
+    "wave": {
+     "u": 150,
+     "f": 110,
+     "hand": "palm",
+     "wave": true
+    }
+   }
+  },
+  {
+   "id": "armR",
+   "shoulder": [
+    760,
+    612
+   ],
+   "upper": 118,
+   "hands": [
+    "palm",
+    "point"
+   ],
+   "poses": {
+    "rest": {
+     "u": 80,
+     "f": 6,
+     "hand": "palm"
+    },
+    "palms": {
+     "u": 48,
+     "f": -98,
+     "hand": "palm"
+    },
+    "shrug": {
+     "u": 56,
+     "f": -84,
+     "hand": "palm"
+    },
+    "up": {
+     "u": 34,
+     "f": -118,
+     "hand": "point"
+    }
+   }
+  }
+ ],
+ "brows": {
+  "sel": "#brows",
+  "raise": -10,
+  "end": "#browL"
+ },
+ "talk_nod": true
+}
