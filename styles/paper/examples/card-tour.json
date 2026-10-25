@@ -1,4 +1,5 @@
 {
+  "style": "paper",
   "title": "Card tour",
   "brand": { "handle": "@techinsixty", "bio": "dev tools · AI · security\nexplained in 60 seconds" },
   "voice": { "name": "am_michael", "speed": 1.18 },

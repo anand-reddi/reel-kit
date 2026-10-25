@@ -2,7 +2,8 @@
 import json, os, re, shutil
 from .cards import CARDS, esc
 
-KIT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+HERE = os.path.dirname(os.path.abspath(__file__))
+KIT = os.path.dirname(os.path.dirname(HERE))
 THEME = dict(paper="#efece6", ink="#141414", accent="#e5372d", grey="#c9c4ba", mid="#8a857c", card="#1b1b1d")
 W, H = 1080, 1920
 r3 = lambda v: round(float(v), 3)
@@ -178,7 +179,7 @@ class Film:
         return body
 
     def write(s, hdr, caps, cards, pres, dur):
-        th = s.th; css = open(os.path.join(KIT, "kit", "reel.css")).read()
+        th = s.th; css = open(os.path.join(HERE, "style.css")).read()
         for k, v in th.items(): css = css.replace("{" + k + "}", v)
         for f in os.listdir(os.path.join(KIT, "assets", "fonts")): shutil.copy(os.path.join(KIT, "assets", "fonts", f), os.path.join(s.out, "assets", f))
         shutil.copy(os.path.join(KIT, "assets", "gsap.min.js"), os.path.join(s.out, "gsap.min.js"))

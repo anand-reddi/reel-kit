@@ -37,4 +37,4 @@ there is no mouth movement (use Option A for that).
 
 ## Making one from a photo
 Ask Claude: "make my character from this photo" — it draws Option A in the same flat style, keeping the ids above, and checks
-it with `python3 reel.py make examples/one-prompt.json --stills`.
+it with `python3 reel.py make styles/paper/examples/one-prompt.json --stills`.
