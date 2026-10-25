@@ -59,34 +59,23 @@ def smooth(pts, closed=True, k=0.5):
     return d + ("Z" if closed else "")
 
 def hair_back():
-    # voluminous wavy mop: overlapping elongated clumps swept around the head (not round curls, not spikes)
-    r = rng(5); cl = []
-    for i in range(17):
-        t = math.radians(-200 + 220 * i / 16 + (r() - 0.5) * 6)
-        R = 150 + r() * 18
-        cx, cy = R * math.cos(t), -118 + R * 0.92 * math.sin(t)
-        cl.append((cx, cy, 70 + r() * 22, 40 + r() * 14, math.degrees(t) + 90 + (20 if math.cos(t) > 0 else -20)))
-    cl += [(-170, -10, 46, 70, -12), (170, -10, 46, 70, 12), (-150, 40, 34, 52, -20), (150, 40, 34, 52, 20), (0, -130, 170, 130, 0)]
-    o = "".join(f'<ellipse cx="{x:.1f}" cy="{y:.1f}" rx="{a + W:.1f}" ry="{b + W:.1f}" transform="rotate({ang:.1f} {x:.1f} {y:.1f})" fill="{OUT}"/>' for x, y, a, b, ang in cl)
-    f = "".join(f'<ellipse cx="{x:.1f}" cy="{y:.1f}" rx="{a:.1f}" ry="{b:.1f}" transform="rotate({ang:.1f} {x:.1f} {y:.1f})" fill="{HAIR}"/>' for x, y, a, b, ang in cl)
-    hi = "".join(f'<path d="M{x - 26 * math.cos(math.radians(ang)):.1f},{y - 26 * math.sin(math.radians(ang)):.1f} q{20 * math.sin(math.radians(ang)):.1f},{-20 * math.cos(math.radians(ang)):.1f} {52 * math.cos(math.radians(ang)):.1f},{52 * math.sin(math.radians(ang)):.1f}" stroke="{HAIR_HI}" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.75"/>'
-                 for x, y, a, b, ang in cl[:17:2])
-    return o + f + hi
+    # short, neat hair hugging the skull, a little volume on top, short sideburns
+    pts = [(-142, 10), (-148, -60), (-140, -128), (-108, -186), (-52, -216), (10, -224), (72, -214), (122, -184),
+           (148, -130), (152, -60), (144, 10), (132, 12), (132, -40), (0, -60), (-132, -40), (-132, 12)]
+    d = smooth(pts, True, 0.8)
+    hi = "".join(f'<path d="M{x},{y} q{dx},-14 {dx * 2.4},-2" stroke="{HAIR_HI}" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.8"/>'
+                 for x, y, dx in ((-90, -186, 14), (-20, -208, 16), (52, -200, 16)))
+    return f'<path d="{d}" fill="{HAIR}" stroke="{OUT}" stroke-width="{W}" stroke-linejoin="round"/>' + hi
 
 def hair_front():
-    # big wavy locks falling over the forehead (like the art), each sweeping outward with a curled tip
-    cap = f'<path d="M-196,-130 Q-170,-206 0,-222 Q170,-206 196,-130 L196,-150 L-196,-150 Z" fill="{HAIR}"/>'
-    locks = [((-200, -120), (-118, -172), (-176, -62), -1), ((-150, -164), (-46, -190), (-112, -84), -1),
-             ((-80, -188), (24, -194), (-40, -76), -1), ((-10, -194), (96, -184), (40, -82), 1),
-             ((62, -188), (160, -160), (110, -78), 1), ((124, -170), (200, -118), (178, -58), 1)]
-    out = cap
-    for (x0, y0), (x1, y1), (tx, ty), d in locks:
-        path = (f"M{x0},{y0} C{x0 + d * 4},{y0 + 50} {tx + d * 22},{ty - 40} {tx},{ty} "
-                f"C{tx - d * 4},{ty - 10} {tx - d * 16},{ty - 16} {tx - d * 30},{ty - 22} "
-                f"C{(tx + x1) / 2},{(ty + y1) / 2 + 10} {x1 - d * 2},{y1 + 40} {x1},{y1} Z")
-        out += f'<path d="{path}" fill="{HAIR}" stroke="{OUT}" stroke-width="4.5" stroke-linejoin="round"/>'
-        mx = (x0 + x1) / 2
-        out += f'<path d="M{mx:.0f},{min(y0, y1) + 14} C{mx + d * 4:.0f},{(y0 + ty) / 2:.0f} {tx + d * 10},{ty - 50} {tx + d * 6},{ty - 22}" stroke="{HAIR_HI}" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.7"/>'
+    # side-swept fringe (parting on his right), lower edge with a few soft wave tips; clipped to the head shape
+    edge = [(-150, -96), (-118, -112), (-96, -96), (-66, -118), (-36, -104), (-4, -126), (30, -112), (64, -136),
+            (98, -128), (128, -146), (152, -130)]
+    pts = [(-160, -150)] + edge + [(160, -170), (110, -222), (10, -236), (-90, -222)]
+    d = smooth(pts, True, 0.7)
+    out = f'<path d="{d}" fill="{HAIR}" stroke="{OUT}" stroke-width="4.5" stroke-linejoin="round"/>'
+    out += "".join(f'<path d="M{x},{y} q{18},14 {30},34" stroke="{HAIR_HI}" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.75"/>'
+                   for x, y in ((-120, -176), (-60, -190), (6, -196), (70, -186)))
     return out
 
 # ------------------------------------------------------------------ face
@@ -121,11 +110,9 @@ def head():
     stub = rng(9); dots = "".join(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="1.6" fill="{HAIR}" opacity="0.28"/>'
                                      for x, y in ((math.sin(t) * 112 * (0.86 + 0.14 * stub()), 60 + (1 - math.cos(t)) * 66 + stub() * 14)
                                                   for t in (math.radians(-78 + i * 4) for i in range(40))) if abs(x) > 40 or y > 130)
-    band = (f'<g transform="translate(6 40) rotate(-12)"><rect x="-44" y="-12" width="88" height="24" rx="11" fill="{BAND}" stroke="{OUT}" stroke-width="3"/>'
-            f'<rect x="-13" y="-8" width="26" height="16" rx="3" fill="{BAND_PAD}" stroke="#9b7652" stroke-width="1.5"/>'
-            + "".join(f'<circle cx="{x}" cy="{y}" r="1.6" fill="#9b7652"/>' for x in (-34, -26, 26, 34) for y in (-4, 4)) + "</g>")
+    band = ''
     return f'''
-  <path d="M-40,120 L-44,215 L44,215 L40,120 Z" fill="{SKIN_SH}" stroke="{OUT}" stroke-width="{W}"/>
+  <path d="M-34,120 L-38,215 L38,215 L34,120 Z" fill="{SKIN_SH}" stroke="{OUT}" stroke-width="{W}"/>
   {hair_back()}
   <g><ellipse cx="-131" cy="10" rx="20" ry="30" fill="{SKIN}" stroke="{OUT}" stroke-width="{W}"/><ellipse cx="131" cy="10" rx="20" ry="30" fill="{SKIN}" stroke="{OUT}" stroke-width="{W}"/>
      <circle cx="-138" cy="34" r="6" fill="none" stroke="#c9ccd4" stroke-width="3"/><circle cx="138" cy="34" r="6" fill="none" stroke="#c9ccd4" stroke-width="3"/></g>
@@ -143,41 +130,59 @@ def head():
   {hair_front()}'''
 
 # ------------------------------------------------------------------ arms and hands (forearms leave the sleeve hem at the elbow)
+def caps(x1, y1, x2, y2, w):
+    return f'<path d="M{x1:.1f},{y1:.1f} L{x2:.1f},{y2:.1f}" stroke-width="{w}" stroke-linecap="round"/>'
+
 def hand(kind, flip=False):
-    o = f'stroke="{OUT}" stroke-width="4" stroke-linejoin="round"'
-    f = lambda x, y, w, h, rot=0: f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{w / 2}" fill="{SKIN}" {o} transform="rotate({rot} {x + w / 2} {y + h})"/>'
-    palm = f'<path d="M-30,-6 Q-34,-40 -20,-46 L22,-46 Q34,-40 30,-6 Q26,26 0,30 Q-26,26 -30,-6 Z" fill="{SKIN}" {o}/>'
-    if kind == "point":
-        g = f(-8, -112, 18, 70) + palm + f"<path d='M-24,-40 q4,-10 14,-6 M-24,-24 q6,-8 16,-4 M-22,-8 q8,-8 18,-2' stroke='{SKIN_SH}' stroke-width='4' fill='none'/>" + f(16, -52, 16, 42, 35)
-    elif kind == "palm":
-        g = "".join(f(-30 + i * 15, -96 + abs(i - 1.5) * 9, 15, 60) for i in range(4)) + palm + f(22, -46, 16, 42, 48)
+    """Cartoon hand in wrist space (wrist at 0,0, fingers toward -y). Shapes are drawn twice: outlined, then filled
+    without outline on top, so all parts merge into one clean silhouette."""
+    fw = 15                                   # finger thickness
+    palm = '<path d="M-27,-4 Q-31,-34 -24,-56 L24,-56 Q31,-34 27,-4 Q20,10 0,12 Q-20,10 -27,-4 Z"/>'
+    fingers = []
+    if kind in ("palm", "wave"):
+        for i, (x, ln, ang) in enumerate(((-18, 42, -9), (-6, 52, -3), (7, 50, 3), (19, 40, 10))):
+            a = math.radians(ang - 90); fingers.append(caps(x, -50, x + ln * math.cos(a), -50 + ln * math.sin(a), fw))
+        fingers.append(caps(-24, -22, -46, -46, fw + 1))             # thumb out to the side
+    elif kind == "point":
+        fingers.append(caps(-14, -50, -14, -104, fw))                # index up
+        for x in (-1, 11, 21): fingers.append(caps(x, -52, x, -60, fw))   # curled knuckles
+        fingers.append(caps(-20, -24, 2, -36, fw + 1))               # thumb folded across
     elif kind == "thumb":
-        g = f(-8, -96, 18, 58, -8) + palm + f"<path d='M-24,-30 h40 M-24,-14 h40 M-22,2 h36' stroke='{SKIN_SH}' stroke-width='4'/>"
-    else:
-        g = palm
-    return f'<g transform="scale({-1.38 if flip else 1.38} 1.38)">{g}</g>'
+        fingers.append(caps(-22, -30, -30, -82, fw + 2))             # thumb up
+        for y in (-48, -34, -20): fingers.append(caps(-14, y, 22, y, fw))  # curled fingers to the side
+    shapes = "".join(fingers)
+    outline = f'<g fill="none" stroke="{OUT}">{shapes.replace("stroke-width=", "data-w=")}</g>'
+    # outlined pass: thicker strokes in ink, then skin strokes on top
+    ink = "".join(f.replace(f'stroke-width="{w}"', f'stroke-width="{w + 2 * 4}"') for f, w in [(f, int(f.split('stroke-width="')[1].split('"')[0])) for f in fingers])
+    g = (f'<g stroke="{OUT}" fill="none">{ink}</g>'
+         f'<g fill="{SKIN}" stroke="{OUT}" stroke-width="4" stroke-linejoin="round">{palm}</g>'
+         f'<g stroke="{SKIN}" fill="none">{shapes}</g>'
+         f'<g fill="{SKIN}" stroke="none">{palm.replace("Z\"/>", "Z\" transform=\"scale(0.86) translate(0 -3)\"/>")}</g>')
+    if kind in ("palm", "wave"):
+        g += f'<path d="M-14,-24 q14,8 26,-2" stroke="{SKIN_SH}" stroke-width="3" fill="none" stroke-linecap="round"/>'
+    return f'<g transform="scale({-1.25 if flip else 1.25} 1.25)">{g}</g>'
 
 def forearm(elbow, angle, kind, length=150, flip=False, hrot=0):
     ex, ey = elbow; a = math.radians(angle); hx, hy = ex + length * math.cos(a), ey + length * math.sin(a)
-    rot = angle + 90 + hrot
     nx, ny = -math.sin(a), math.cos(a)
     q = lambda w0, w1: f"M{ex + nx * w0:.1f},{ey + ny * w0:.1f} L{hx + nx * w1:.1f},{hy + ny * w1:.1f} L{hx - nx * w1:.1f},{hy - ny * w1:.1f} L{ex - nx * w0:.1f},{ey - ny * w0:.1f} Z"
-    return (f'<path d="{q(34 + W, 24 + W)}" fill="{OUT}" stroke="{OUT}" stroke-width="{W}" stroke-linejoin="round"/><circle cx="{ex}" cy="{ey}" r="{34 + W}" fill="{OUT}"/>'
-            f'<path d="{q(34, 24)}" fill="{SKIN}"/><circle cx="{ex}" cy="{ey}" r="34" fill="{SKIN}"/>'
-            f'<path d="M{ex + 14 * math.cos(a + 1.57):.1f},{ey + 14 * math.sin(a + 1.57):.1f} L{hx + 14 * math.cos(a + 1.57):.1f},{hy + 14 * math.sin(a + 1.57):.1f}" stroke="{SKIN_SH}" stroke-width="14" stroke-linecap="round" opacity="0.7"/>'
-            f'<g transform="translate({hx:.1f} {hy:.1f}) rotate({rot:.1f})">{hand(kind, flip)}</g>')
+    rot = angle + 90 + hrot
+    return (f'<path d="{q(29, 20)}" fill="{SKIN}" stroke="{OUT}" stroke-width="{W}" stroke-linejoin="round"/>'
+            f'<path d="M{ex + nx * 12:.1f},{ey + ny * 12:.1f} L{hx + nx * 9:.1f},{hy + ny * 9:.1f}" stroke="{SKIN_SH}" stroke-width="9" stroke-linecap="round" opacity="0.6"/>'
+            f'<g transform="translate({hx:.1f} {hy:.1f}) rotate({rot:.1f})">{hand(kind, flip)}</g>'
+            f'<path d="M{ex + nx * 31:.1f},{ey + ny * 31:.1f} L{ex - nx * 31:.1f},{ey - ny * 31:.1f}" stroke="{TEE}" stroke-width="10"/>')
 
-EL, ER = (318, 812), (882, 812)      # elbows at the sleeve hems
+EL, ER = (398, 800), (802, 800)      # elbows at the sleeve hems
 POSES = {
-    "up":    [forearm(EL, -95, "point", 170)],
-    "card":  [forearm(EL, -122, "point", 170, hrot=-10)],
-    "palms": [forearm(EL, -150, "palm", 150, hrot=-20), forearm(ER, -30, "palm", 150, True, 20)],
-    "thumb": [forearm(EL, -40, "thumb", 150, hrot=-50)],
-    "shrug": [forearm(EL, -165, "palm", 140, hrot=-40), forearm(ER, -15, "palm", 140, True, 40)],
-    "wave":  [forearm(EL, -105, "palm", 170, hrot=5)],
+    "up":    [forearm(EL, -92, "point", 150)],
+    "card":  [forearm(EL, -118, "point", 150, hrot=-8)],
+    "palms": [forearm(EL, -148, "palm", 135, hrot=-10), forearm(ER, -32, "palm", 135, True, 10)],
+    "thumb": [forearm(EL, -55, "thumb", 135, hrot=-35)],
+    "shrug": [forearm(EL, -160, "palm", 130, hrot=-25), forearm(ER, -20, "palm", 130, True, 25)],
+    "wave":  [forearm(EL, -100, "palm", 150, hrot=6)],
 }
-HANG = {"L": f'<path d="M{EL[0] - 34},{EL[1]} L{EL[0] - 28},1010 L{EL[0] + 20},1010 L{EL[0] + 34},{EL[1]} Z" fill="{SKIN}" stroke="{OUT}" stroke-width="{W}"/>',
-        "R": f'<path d="M{ER[0] + 34},{ER[1]} L{ER[0] + 28},1010 L{ER[0] - 20},1010 L{ER[0] - 34},{ER[1]} Z" fill="{SKIN}" stroke="{OUT}" stroke-width="{W}"/>'}
+HANG = {"L": f'<path d="M{EL[0] - 29},{EL[1]} L{EL[0] - 24},1010 L{EL[0] + 18},1010 L{EL[0] + 29},{EL[1]} Z" fill="{SKIN}" stroke="{OUT}" stroke-width="{W}"/><path d="M{EL[0] - 31},{EL[1]} L{EL[0] + 31},{EL[1]}" stroke="{TEE}" stroke-width="10"/>',
+        "R": f'<path d="M{ER[0] + 29},{ER[1]} L{ER[0] + 24},1010 L{ER[0] - 18},1010 L{ER[0] - 29},{ER[1]} Z" fill="{SKIN}" stroke="{OUT}" stroke-width="{W}"/><path d="M{ER[0] + 31},{ER[1]} L{ER[0] - 31},{ER[1]}" stroke="{TEE}" stroke-width="10"/>'}
 def pose_group(name, parts):
     uses_l = name in ("up", "card", "palms", "thumb", "shrug", "wave"); uses_r = name in ("palms", "shrug")
     hang = ("" if uses_l else HANG["L"]) + ("" if uses_r else HANG["R"])
@@ -185,22 +190,20 @@ def pose_group(name, parts):
 
 # ------------------------------------------------------------------ body: oversized drop-shoulder tee
 def body():
-    tee = "M300,590 C360,560 450,548 520,546 L680,546 C750,548 840,560 900,590 C960,620 975,700 960,812 L840,830 L838,1010 L362,1010 L360,830 L240,812 C225,700 240,620 300,590 Z"
+    tee = "M370,600 C420,570 480,556 530,554 L670,554 C720,556 780,570 830,600 C872,628 880,700 870,792 L780,808 L776,1010 L424,1010 L420,808 L330,792 C320,700 328,628 370,600 Z"
     return f'''
   <path d="{tee}" fill="{TEE}" stroke="{OUT}" stroke-width="{W}" stroke-linejoin="round"/>
-  <path d="M840,830 L838,1010 L760,1010 C790,900 800,760 860,640 C900,700 950,760 960,812 Z" fill="{TEE_SH}" opacity="0.9"/>
-  <path d="M240,812 L360,830 M840,830 L960,812" stroke="{OUT}" stroke-width="{W}"/>
-  <path d="M250,790 L360,808 M850,808 L955,790" stroke="{TEE_HI}" stroke-width="5" opacity="0.8"/>
-  <path d="M360,830 C352,760 352,700 368,640 M840,830 C848,760 848,700 832,640" stroke="{TEE_SH}" stroke-width="6" fill="none"/>
-  <path d="M470,700 L560,780 L520,690 M650,740 L700,820" stroke="{TEE_SH}" stroke-width="7" fill="none" stroke-linecap="round"/>
-  <path d="M512,548 Q600,630 688,548" fill="{SKIN_SH}" stroke="{OUT}" stroke-width="{W}"/>
-  <path d="M500,546 Q600,650 700,546" stroke="{TEE_SH}" stroke-width="16" fill="none"/>
-  <path d="M500,546 Q600,650 700,546" stroke="{OUT}" stroke-width="{W}" fill="none"/>
-  <path d="M556,600 l-6,26 M644,600 l6,26" stroke="{SKIN_SH}" stroke-width="3" opacity="0.8"/>
-  <g transform="translate(712 650)"><rect x="-17" y="0" width="34" height="96" fill="none" stroke="#ece8e0" stroke-width="3"/>
-    <text x="0" y="28" text-anchor="middle" font-size="24" font-weight="700" fill="{RED}" font-family="sans-serif">オ</text>
-    <text x="0" y="58" text-anchor="middle" font-size="24" font-weight="700" fill="{RED}" font-family="sans-serif">タ</text>
-    <text x="0" y="88" text-anchor="middle" font-size="24" font-weight="700" fill="{RED}" font-family="sans-serif">ク</text></g>'''
+  <path d="M780,808 L776,1010 L712,1010 C736,900 744,770 790,650 C832,700 862,750 870,792 Z" fill="{TEE_SH}" opacity="0.9"/>
+  <path d="M330,792 L420,808 M780,808 L870,792" stroke="{OUT}" stroke-width="{W}"/>
+  <path d="M420,808 C414,750 414,700 428,650 M780,808 C786,750 786,700 772,650" stroke="{TEE_SH}" stroke-width="6" fill="none"/>
+  <path d="M500,720 L560,790 M650,760 L690,830" stroke="{TEE_SH}" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <path d="M528,556 Q600,628 672,556" fill="{SKIN_SH}" stroke="{OUT}" stroke-width="{W}"/>
+  <path d="M516,554 Q600,644 684,554" stroke="{TEE_SH}" stroke-width="14" fill="none"/>
+  <path d="M516,554 Q600,644 684,554" stroke="{OUT}" stroke-width="{W}" fill="none"/>
+  <g transform="translate(690 660)"><rect x="-15" y="0" width="30" height="86" fill="none" stroke="#ece8e0" stroke-width="3"/>
+    <text x="0" y="25" text-anchor="middle" font-size="21" font-weight="700" fill="{RED}" font-family="sans-serif">オ</text>
+    <text x="0" y="52" text-anchor="middle" font-size="21" font-weight="700" fill="{RED}" font-family="sans-serif">タ</text>
+    <text x="0" y="79" text-anchor="middle" font-size="21" font-weight="700" fill="{RED}" font-family="sans-serif">ク</text></g>'''
 
 # ------------------------------------------------------------------ kitten on his left shoulder (viewer right)
 def fur(cx, cy, rx, ry, n, jag, seed):
@@ -211,7 +214,7 @@ def fur(cx, cy, rx, ry, n, jag, seed):
     return P(pts)
 
 def kitten():
-    kx, ky = 872, 470
+    kx, ky = 838, 474
     eye = lambda x, y, r: (f'<ellipse cx="{x}" cy="{y}" rx="{r}" ry="{r * 1.08}" fill="{AMBER}" stroke="{OUT}" stroke-width="3"/>'
                            f'<ellipse cx="{x + 1}" cy="{y + 2}" rx="{r * 0.55}" ry="{r * 0.78}" fill="#120f0a"/>'
                            f'<circle cx="{x + r * 0.35}" cy="{y - r * 0.4}" r="{r * 0.32}" fill="#fff"/><circle cx="{x - r * 0.3}" cy="{y + r * 0.45}" r="{r * 0.14}" fill="#fff"/>')
