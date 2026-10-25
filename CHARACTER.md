@@ -26,6 +26,13 @@ Pose names are free; the script's `pose` / `pose_cycle` use them. Built-in scrip
 `card` (point at the card), `thumb` (at chest), `shrug`, `wave`. `avatar_view` is the crop used for the profile-card avatar.
 The default's generator (`characters/default/make.py`) is a working template.
 
+### Arm rigs (SVG)
+Instead of swapping whole pose groups, an SVG character can carry real arms: `"arms": [{"id": "armL", "origin": "x y"
+(elbow), "hands": ["point", "palm", ...], "poses": {"rest": {"rot": 96, "hand": "palm"}, "up": {"rot": 268, "hand":
+"point"}, "wave": {"rot": 258, "hand": "palm", "wave": true}}}]`. Each `#armL` group is drawn pointing along +x from the
+elbow and holds one `#armL-<hand>` group per hand shape. On every beat the arm winds up, swings to the pose angle with a
+small overshoot (the shortest way round) and swaps the hand shape mid-swing. `characters/dev/` is the reference.
+
 ### Secondary motion (both options)
 Optional keys in `character.json`, all tied to the timeline:
 `"idle": [{"sel": "#tail", "rot": 12, "period": 1.7, "origin": "930 600"}]` continuous sway;

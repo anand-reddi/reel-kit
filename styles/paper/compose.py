@@ -164,12 +164,36 @@ class Film:
             body = s.rig_presenter(c, beats, dur)
         elif c["type"] == "svg":
             ho, wo = c.get("head_origin", "600 480"), c.get("wave_origin", "800 560")
+            arms = c.get("arms")
+            if arms:   # real arm rigs: rotate at the elbow (anticipation -> swing with overshoot), hand shape swaps mid-swing
+                state = {}
+                for a in arms:
+                    rest = a["poses"]["rest"]; state[a["id"]] = [rest["rot"], rest.get("hand")]
+                    A(f'tl.set("#{a["id"]}", {{ rotation: {rest["rot"]}, svgOrigin: "{a["origin"]}" }}, 0);')
+                    for h in a["hands"]: A(f'tl.set("#{a["id"]}-{h}", {{ opacity: {1 if h == rest.get("hand") else 0} }}, 0);')
             for k, (t, name) in enumerate(beats):
-                A(f'tl.set("#pose-{name}", {{ opacity: 1 }}, {r3(t)});')
-                if k + 1 < len(beats) and beats[k + 1][1] != name: A(f'tl.set("#pose-{name}", {{ opacity: 0 }}, {r3(beats[k + 1][0])});')
+                if arms:
+                    for a in arms:
+                        p = a["poses"].get(name, a["poses"]["rest"]); cur, curh = state[a["id"]]
+                        tgt = min((p["rot"] + 360 * n for n in (-1, 0, 1)), key=lambda v: abs(v - cur))
+                        d = tgt - cur
+                        if abs(d) > 1:
+                            if abs(d) > 20: A(f'tl.to("#{a["id"]}", {{ rotation: {round(cur - (8 if d > 0 else -8), 2)}, duration: 0.08, ease: "power1.in", svgOrigin: "{a["origin"]}" }}, {r3(t)});')
+                            A(f'tl.to("#{a["id"]}", {{ rotation: {round(tgt, 2)}, duration: 0.42, ease: "back.out(1.4)", svgOrigin: "{a["origin"]}" }}, {r3(t + 0.08)});')
+                        h = p.get("hand", curh)
+                        if h != curh:
+                            sw = t + 0.08 + (0.14 if abs(d) > 1 else 0)
+                            if curh: A(f'tl.set("#{a["id"]}-{curh}", {{ opacity: 0 }}, {r3(sw)});')
+                            A(f'tl.set("#{a["id"]}-{h}", {{ opacity: 1 }}, {r3(sw)});')
+                        if p.get("wave"):
+                            A(f'tl.to("#{a["id"]}", {{ rotation: {round(tgt + 9, 2)}, duration: 0.16, yoyo: true, repeat: 5, ease: "sine.inOut", svgOrigin: "{a["origin"]}" }}, {r3(t + 0.55)});')
+                        state[a["id"]] = [tgt, h]
+                else:
+                    A(f'tl.set("#pose-{name}", {{ opacity: 1 }}, {r3(t)});')
+                    if k + 1 < len(beats) and beats[k + 1][1] != name: A(f'tl.set("#pose-{name}", {{ opacity: 0 }}, {r3(beats[k + 1][0])});')
                 if k: A(f'tl.fromTo("#pres-body", {{ scaleY: 0.965, y: 16 }}, {{ scaleY: 1, y: 0, duration: 0.35, ease: "back.out(3)", svgOrigin: "600 1000" }}, {r3(t)});')
                 A(f'tl.to("#head", {{ rotation: {[-4, 3, -3, 4, -6, 3][k % 6]}, duration: 0.3, ease: "power2.out", svgOrigin: "{ho}" }}, {r3(t)});')
-                if name == "wave": A(f'tl.to("#pose-wave", {{ rotation: 6, svgOrigin: "{wo}", duration: 0.18, yoyo: true, repeat: 5, ease: "sine.inOut" }}, {r3(t + 0.1)});')
+                if name == "wave" and not arms: A(f'tl.to("#pose-wave", {{ rotation: 6, svgOrigin: "{wo}", duration: 0.18, yoyo: true, repeat: 5, ease: "sine.inOut" }}, {r3(t + 0.1)});')
             # lip flap while each line plays, a smile at the end, blinks every ~3 s
             A('tl.set("#m-smile", { opacity: 0 }, 0); tl.set("#m-closed", { opacity: 1 }, 0);')
             cur = "closed"
