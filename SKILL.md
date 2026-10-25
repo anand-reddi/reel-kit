@@ -1,6 +1,6 @@
 ---
 name: reel-kit
-description: Make short videos and reels from a script in the user's saved styles (paper explainer, more to come): voice, synced captions, animation, presenter, music, SFX.
+description: Make short videos and reels from a script in the user's saved styles (paper explainer, 3D studio explainer): voice, synced captions, animation, music, SFX.
 ---
 
 # reel-kit
@@ -44,7 +44,7 @@ When the user shares a reference video and wants "videos like this":
 3. Build `styles/<name>/` with the same interface as `styles/paper/`: `__init__.py` exposing
    `build(script, timing, work, script_dir) -> cues`, `CARDS` (its building blocks) and `SIZE`; its own CSS/assets;
    `STYLE.md` (look, script format, blocks, timing grammar); `examples/` with the 10 s test script. Reuse
-   `core/voice.py` and `core/sound.py` as they are; put new shared helpers in `core/`, never copy them into a style.
+   `core/voice.py`, `core/sound.py` and `core/clock.js` as they are; put new shared helpers in `core/`, never copy them into a style.
    Fonts go in `assets/fonts/` (vendored from npm `@fontsource/*`, jsDelivr is blocked in the browser).
 4. Draw only original characters and artwork; never copy the reference creator's avatar, logo or branding.
 5. Render the example, check the frames, send it. After the user approves, add the style to the list in section 1,
