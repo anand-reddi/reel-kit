@@ -13,6 +13,7 @@ its own `STYLE.md`; a reel is one JSON script with `"style": "<name>"`.
 ## 0. Setup (once per session)
 ```bash
 [ -f ~/reel-kit/reel.py ] || git clone -q --depth 1 -b techinsixty https://github.com/anand-reddi/reel-kit ~/reel-kit
+git -C ~/reel-kit pull -q || true   # pick up styles added since the last clone
 bash ~/reel-kit/setup.sh          # deps, Kokoro voice model (cached), earshot SFX; idempotent
 cd ~/reel-kit && python3 reel.py styles
 ```
@@ -27,7 +28,8 @@ cd ~/reel-kit && python3 reel.py styles
    ```
 4. Look at `out/my-reel-frames.png` before sending. Send the MP4 with a one-line summary.
 
-Styles: `paper` (see `styles/paper/STYLE.md`). `python3 reel.py styles` lists what the repo has now.
+Styles: `paper` — off-white dotted paper, black/white UI cards with a red accent, word-synced captions, presenter
+(see `styles/paper/STYLE.md`). `python3 reel.py styles` lists what the repo has now.
 
 ## 2. Adding a new style from a reference video
 When the user shares a reference video and wants "videos like this":
@@ -53,4 +55,5 @@ When the user shares a reference video and wants "videos like this":
 - Fonts and GSAP are vendored: renders need no network. Rendering needs Node (npx hyperframes), ffmpeg and a headless
   Chrome (auto-detected from Playwright's folders, or `HYPERFRAMES_BROWSER_PATH`).
 - Write "AI", "SBI", "API" plainly (no spaces); use the script's `voice.say` map only for words Kokoro gets wrong.
+- The voice must fit the duration: the kit stops and says so if it overruns (cut words or raise `voice.speed`, max ~1.25).
 - Build files go to `build/<name>/` next to the script; `film/index.html` is a normal HyperFrames composition.
