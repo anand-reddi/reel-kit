@@ -32,8 +32,11 @@ The default's generator (`characters/default/make.py`) is a working template.
 { "type": "png", "x": 140, "y": 1180, "width": 800, "height": 740, "avatar": "head.png",
   "poses": { "up": "up.png", "palms": "palms.png", "card": "card.png", "shrug": "shrug.png", "wave": "wave.png" } }
 ```
-Transparent PNGs, same canvas size, bottom-aligned (waist up). The kit swaps them per beat, bounces, and bobs while talking;
-there is no mouth movement (use Option A for that).
+Transparent PNGs, same canvas size, bottom-aligned (waist up). The kit swaps them per beat, bounces and tilts (`tilt`,
+degrees). Optional overlays on the same canvas: `"talk": ["talk.png", "talk2.png"]` (open-mouth frames, flapped while
+the voice speaks) and `"blink": "blink.png"` (closed eyes, every ~3 s). Without `talk` it bobs while talking instead.
+`characters/goku/` is a worked example: an illustration cut out of a flat background, with mouth and blink overlays
+painted onto it (Pillow), and `avatar.png` for the profile card.
 
 ## Making one from a photo
 Ask Claude: "make my character from this photo" — it draws Option A in the same flat style, keeping the ids above, and checks

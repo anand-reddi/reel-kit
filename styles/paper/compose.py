@@ -67,7 +67,9 @@ class Film:
             svg = open(os.path.join(d, cfg["file"])).read()
             shutil.copy(os.path.join(d, cfg["file"]), os.path.join(s.out, "assets", "character.svg")); cfg["svg"] = svg
         else:
-            for name, f in cfg["poses"].items(): shutil.copy(os.path.join(d, f), os.path.join(s.out, "assets", f))
+            talk = cfg.get("talk", []); talk = [talk] if isinstance(talk, str) else talk
+            files = set(cfg["poses"].values()) | set(talk) | {cfg[k] for k in ("blink", "avatar") if cfg.get(k)}
+            for f in files: shutil.copy(os.path.join(d, f), os.path.join(s.out, "assets", f))
         return cfg
     def char_avatar(s):
         c = s.char
@@ -167,15 +169,35 @@ class Film:
                 b += 3.0
             body = re.sub(r"<\?xml[^>]*>", "", c["svg"])
             body = re.sub(r"<svg\b", f'<svg id="pres" style="position:absolute;left:{c.get("x", -60)}px;top:{c.get("y", 1130)}px;width:{c.get("width", 1200)}px;height:auto"', body, count=1)
-        else:   # PNG poses: swap images, bounce on each change (no lip sync)
-            imgs = "".join(f'<img id="pose-{n}" class="pose" src="assets/{f}" style="position:absolute;left:0;bottom:0;width:100%;opacity:0"/>' for n, f in c["poses"].items())
+        else:   # PNG poses: swap per beat, bounce + tilt on each change; optional talk/blink overlays (same canvas)
+            box = "position:absolute;left:0;top:0;width:100%;height:100%;object-fit:contain;object-position:bottom"
+            imgs = "".join(f'<img id="pose-{n}" class="pose" src="assets/{f}" style="{box};opacity:0"/>' for n, f in c["poses"].items())
+            talk = c.get("talk", []); talk = [talk] if isinstance(talk, str) else talk
+            imgs += "".join(f'<img id="talk{i}" src="assets/{f}" style="{box};opacity:0"/>' for i, f in enumerate(talk))
+            if c.get("blink"): imgs += f'<img id="blink" src="assets/{c["blink"]}" style="{box};opacity:0"/>'
+            tilt = c.get("tilt", 2.0)
             for k, (t, name) in enumerate(beats):
                 A(f'tl.set("#pose-{name}", {{ opacity: 1 }}, {r3(t)});')
                 if k + 1 < len(beats) and beats[k + 1][1] != name: A(f'tl.set("#pose-{name}", {{ opacity: 0 }}, {r3(beats[k + 1][0])});')
-                if k: A(f'tl.fromTo("#pres", {{ scaleY: 0.97, y: 14 }}, {{ scaleY: 1, y: 0, duration: 0.35, ease: "back.out(3)" }}, {r3(t)});')
-            for ln in s.tm["lines"]:   # a small talking bob instead of a mouth
-                A(f'tl.to("#pres", {{ y: -6, duration: 0.12, yoyo: true, repeat: {max(1, int((ln["end"] - ln["start"]) / 0.24) * 2 - 1)}, ease: "sine.inOut" }}, {r3(ln["start"])});')
-            body = f'<div id="pres" style="position:absolute;left:{c.get("x", 140)}px;top:{c.get("y", 1180)}px;width:{c.get("width", 800)}px;height:{c.get("height", 740)}px;transform-origin:50% 100%">{imgs}</div>'
+                if k: A(f'tl.fromTo("#presin", {{ scaleY: 0.97, y: 14 }}, {{ scaleY: 1, y: 0, duration: 0.35, ease: "back.out(3)" }}, {r3(t)});')
+                A(f'tl.to("#presin", {{ rotation: {[0, tilt, -tilt * 0.7, tilt * 0.6, -tilt, tilt * 0.4][k % 6]}, duration: 0.45, ease: "power2.out" }}, {r3(t)});')
+            if talk:   # lip flap, alternating openings, closed between lines
+                for ln in s.tm["lines"]:
+                    t, k = ln["start"], 0
+                    while t < ln["end"] - 0.06:
+                        which = k % (len(talk) + 1)
+                        for i in range(len(talk)): A(f'tl.set("#talk{i}", {{ opacity: {1 if which == i else 0} }}, {r3(t)});')
+                        t += 0.09 + (0.03 if k % 3 == 2 else 0); k += 1
+                    for i in range(len(talk)): A(f'tl.set("#talk{i}", {{ opacity: 0 }}, {r3(ln["end"])});')
+            else:
+                for ln in s.tm["lines"]:
+                    A(f'tl.to("#presin", {{ y: -6, duration: 0.12, yoyo: true, repeat: {max(1, int((ln["end"] - ln["start"]) / 0.24) * 2 - 1)}, ease: "sine.inOut" }}, {r3(ln["start"])});')
+            if c.get("blink"):
+                bt = 1.7
+                while bt < dur - 0.3:
+                    A(f'tl.set("#blink", {{ opacity: 1 }}, {r3(bt)}); tl.set("#blink", {{ opacity: 0 }}, {r3(bt + 0.1)});'); bt += 2.9
+            body = (f'<div id="pres" style="position:absolute;left:{c.get("x", 140)}px;top:{c.get("y", 1180)}px;width:{c.get("width", 800)}px;height:{c.get("height", 740)}px">'
+                    f'<div id="presin" style="position:absolute;inset:0;transform-origin:50% 100%">{imgs}</div></div>')
         A(f'tl.fromTo("#pres", {{ y: 260 }}, {{ y: 0, duration: 0.5, ease: "back.out(1.4)" }}, 0);')
         return body
 
