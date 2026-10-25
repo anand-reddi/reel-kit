@@ -1,9 +1,0 @@
-{
-  "type": "png",
-  "x": 150, "y": 1150, "width": 800, "height": 800,
-  "poses": { "idle": "cut.png" },
-  "talk": ["talk.png", "talk2.png"],
-  "blink": "blink.png",
-  "avatar": "avatar.png",
-  "tilt": 2.0
-}

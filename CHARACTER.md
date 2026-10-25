@@ -32,7 +32,6 @@ Optional keys in `character.json`, all tied to the timeline:
 `"twitch": [{"sel": "#cat-ear", "rot": 14, "every": 2.6, "offset": 0.9, "origin": "896 410"}]` a quick flick every few seconds;
 `"blink2": [{"open": "#cat-eyes-open", "shut": "#cat-eyes-shut", "every": 3.3}]` a second set of eyes (a pet);
 `"react": {"sel": "#cat", "y": -34, "rot": -6, "origin": "880 610"}` a hop whenever a stamp lands.
-`characters/goku-toon/` (the channel presenter as a vector puppet, drawn by `make.py`) uses all four.
 
 ## Option B: PNG poses (fastest from an existing avatar app or drawing)
 
@@ -43,16 +42,9 @@ Optional keys in `character.json`, all tied to the timeline:
 Transparent PNGs, same canvas size, bottom-aligned (waist up). The kit swaps them per beat, bounces and tilts (`tilt`,
 degrees). Optional overlays on the same canvas: `"talk": ["talk.png", "talk2.png"]` (open-mouth frames, flapped while
 the voice speaks) and `"blink": "blink.png"` (closed eyes, every ~3 s). Without `talk` it bobs while talking instead.
-`characters/goku/` is a worked example: an illustration cut out of a flat background, with mouth and blink overlays
-painted onto it (Pillow), and `avatar.png` for the profile card.
-
-### Cut-out rigs from an illustration (PNG, best fidelity)
-`characters/goku-cut/` animates the user's own art without redrawing it: `build.py` cuts the master image (white
-background) into full-canvas layers and fits parts from a ChatGPT parts sheet onto it: mouth shapes (`talk`, cycled by
-`talk_order`; index len(talk) = closed), a blink, an end expression (`end`), gesture poses made from his real forearm
-rotated at the elbow plus sheet hands, and the kitten's tail/ear as `layers` (`z` < 0 = behind, `hidden` = starts
-invisible) driven by `idle`/`twitch`/`blink2`. PNG origins are canvas pixels (`"canvas": [w, h]`). Use the folder
-`goku-cut/rig` as the character.
+Extra PNG keys: `"layers": [{"id", "src", "z", "hidden"}]` (z < 0 = behind the body; `hidden` starts invisible),
+`"talk_order"` (sequence of talk-frame indexes; index len(talk) = mouth closed), `"end"` (face after the last line),
+`"canvas": [w, h]` (so rig origins can be given in canvas pixels).
 
 ## Making one from a photo
 Ask Claude: "make my character from this photo" — it draws Option A in the same flat style, keeping the ids above, and checks
