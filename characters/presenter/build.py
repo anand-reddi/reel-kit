@@ -57,6 +57,12 @@ TAIL = inT & ~inK & ~shirt_strong
 HEADR = (poly(HEAD_POLY) > 0.5) & ~inK & ~inT
 SOLID = ALPHA > 0.5
 KITv, TAILv = KIT & SOLID, TAIL & SOLID
+# the seam where the kitten touches his hair: light anti-alias pixels there would show as a sliver once either part moves
+XX0 = np.mgrid[0:H, 0:W][1]
+SEAM = nd.binary_dilation(KIT, iterations=7) & nd.binary_dilation(HEADR & SOLID, iterations=7) & (YY < 470) & (XX0 < 800)
+LIGHT = (SRC.astype(int).min(2) > 95)
+ALPHA = np.where(SEAM & LIGHT, 0.0, ALPHA); A3 = ALPHA[..., None]
+SOLID = ALPHA > 0.5; KITv = KIT & SOLID
 
 # ---------------------------------------------------------------- body (shirt, neck, arms in pockets)
 body_alpha = ALPHA * ~HEADR * ~KIT * ~TAIL
@@ -72,8 +78,9 @@ save(layer(body_rgb, body_alpha), "body")
 # ---------------------------------------------------------------- head (hair + face), with hair continued under the kitten
 head_alpha = ALPHA * HEADR
 head_rgb = RGB.copy()
-hair_under = KITv & nd.binary_dilation(HEADR & SOLID, iterations=18) & (YY < 440)
-head_rgb = inpaint(head_rgb, hair_under, 8); head_alpha = np.maximum(head_alpha, hair_under * 1.0)
+hair_under = KIT & nd.binary_dilation(HEADR & SOLID, iterations=24) & (YY < 450) & (XX0 < 800)
+HAIR_C = np.median(RGB[HEADR & SOLID & (RGB.max(2) < 60)].reshape(-1, 3), 0).astype(np.uint8)
+head_rgb[hair_under] = HAIR_C; head_alpha = np.maximum(head_alpha, nd.gaussian_filter(hair_under * 1.0, 1.0) * hair_under)
 
 # skin field: a smooth fill computed only from skin pixels (never pulls in hair, brows or lashes)
 f = SRC.astype(int)
