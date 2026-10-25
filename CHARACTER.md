@@ -46,6 +46,14 @@ the voice speaks) and `"blink": "blink.png"` (closed eyes, every ~3 s). Without 
 `characters/goku/` is a worked example: an illustration cut out of a flat background, with mouth and blink overlays
 painted onto it (Pillow), and `avatar.png` for the profile card.
 
+### Cut-out rigs from an illustration (PNG, best fidelity)
+`characters/goku-cut/` animates the user's own art without redrawing it: `build.py` cuts the master image (white
+background) into full-canvas layers and fits parts from a ChatGPT parts sheet onto it: mouth shapes (`talk`, cycled by
+`talk_order`; index len(talk) = closed), a blink, an end expression (`end`), gesture poses made from his real forearm
+rotated at the elbow plus sheet hands, and the kitten's tail/ear as `layers` (`z` < 0 = behind, `hidden` = starts
+invisible) driven by `idle`/`twitch`/`blink2`. PNG origins are canvas pixels (`"canvas": [w, h]`). Use the folder
+`goku-cut/rig` as the character.
+
 ## Making one from a photo
 Ask Claude: "make my character from this photo" — it draws Option A in the same flat style, keeping the ids above, and checks
 it with `python3 reel.py make styles/paper/examples/one-prompt.json --stills`.

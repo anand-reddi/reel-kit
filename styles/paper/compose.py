@@ -68,7 +68,7 @@ class Film:
             shutil.copy(os.path.join(d, cfg["file"]), os.path.join(s.out, "assets", "character.svg")); cfg["svg"] = svg
         else:
             talk = cfg.get("talk", []); talk = [talk] if isinstance(talk, str) else talk
-            files = set(cfg["poses"].values()) | set(talk) | {cfg[k] for k in ("blink", "avatar") if cfg.get(k)}
+            files = set(cfg["poses"].values()) | set(talk) | {cfg[k] for k in ("blink", "avatar", "end") if cfg.get(k)} | {L["src"] for L in cfg.get("layers", [])}
             for f in files: shutil.copy(os.path.join(d, f), os.path.join(s.out, "assets", f))
         return cfg
     def char_avatar(s):
@@ -171,10 +171,14 @@ class Film:
             body = re.sub(r"<svg\b", f'<svg id="pres" style="position:absolute;left:{c.get("x", -60)}px;top:{c.get("y", 1130)}px;width:{c.get("width", 1200)}px;height:auto"', body, count=1)
         else:   # PNG poses: swap per beat, bounce + tilt on each change; optional talk/blink overlays (same canvas)
             box = "position:absolute;left:0;top:0;width:100%;height:100%;object-fit:contain;object-position:bottom"
-            imgs = "".join(f'<img id="pose-{n}" class="pose" src="assets/{f}" style="{box};opacity:0"/>' for n, f in c["poses"].items())
+            layer = lambda L: f'<img id="{L["id"]}" src="assets/{L["src"]}" style="{box}{";opacity:0" if L.get("hidden") else ""}"/>'
+            imgs = "".join(layer(L) for L in c.get("layers", []) if L.get("z", 1) < 0)
+            imgs += "".join(f'<img id="pose-{n}" class="pose" src="assets/{f}" style="{box};opacity:0"/>' for n, f in c["poses"].items())
             talk = c.get("talk", []); talk = [talk] if isinstance(talk, str) else talk
             imgs += "".join(f'<img id="talk{i}" src="assets/{f}" style="{box};opacity:0"/>' for i, f in enumerate(talk))
             if c.get("blink"): imgs += f'<img id="blink" src="assets/{c["blink"]}" style="{box};opacity:0"/>'
+            if c.get("end"): imgs += f'<img id="endface" src="assets/{c["end"]}" style="{box};opacity:0"/>'
+            imgs += "".join(layer(L) for L in c.get("layers", []) if L.get("z", 1) >= 0)
             tilt = c.get("tilt", 2.0)
             for k, (t, name) in enumerate(beats):
                 A(f'tl.set("#pose-{name}", {{ opacity: 1 }}, {r3(t)});')
@@ -185,13 +189,16 @@ class Film:
                 for ln in s.tm["lines"]:
                     t, k = ln["start"], 0
                     while t < ln["end"] - 0.06:
-                        which = k % (len(talk) + 1)
+                        seq = c.get("talk_order") or list(range(len(talk))) + [len(talk)]
+                        which = seq[k % len(seq)]
                         for i in range(len(talk)): A(f'tl.set("#talk{i}", {{ opacity: {1 if which == i else 0} }}, {r3(t)});')
                         t += 0.09 + (0.03 if k % 3 == 2 else 0); k += 1
                     for i in range(len(talk)): A(f'tl.set("#talk{i}", {{ opacity: 0 }}, {r3(ln["end"])});')
             else:
                 for ln in s.tm["lines"]:
                     A(f'tl.to("#presin", {{ y: -6, duration: 0.12, yoyo: true, repeat: {max(1, int((ln["end"] - ln["start"]) / 0.24) * 2 - 1)}, ease: "sine.inOut" }}, {r3(ln["start"])});')
+            if c.get("end"):
+                A(f'tl.set("#endface", {{ opacity: 1 }}, {r3(s.tm["lines"][-1]["end"] + 0.05)});')
             if c.get("blink"):
                 bt = 1.7
                 while bt < dur - 0.3:
@@ -209,22 +216,28 @@ class Film:
         blink2: [{open, shut, every, offset}]     a second pair of eyes that blinks on its own clock (a pet)
         react:  {sel, y, rot, origin}             a hop whenever a stamp lands"""
         A = s.js.append
+        cw, ch = c.get("canvas", [1, 1])
+        def origin(o):
+            if not o: return ""
+            if c["type"] == "svg": return f', svgOrigin: "{o}"'
+            x, y = (float(v) for v in o.split()); return f', transformOrigin: "{x / cw * 100:.2f}% {y / ch * 100:.2f}%"'
         for it in c.get("idle", []):
-            half = it.get("period", 1.6) / 2; n = int(dur / half) + 1; o = f', svgOrigin: "{it["origin"]}"' if it.get("origin") else ""
+            half = it.get("period", 1.6) / 2; n = int(dur / half) + 1; o = origin(it.get("origin"))
             if it.get("rot"): A(f'tl.fromTo("{it["sel"]}", {{ rotation: {-it["rot"]} }}, {{ rotation: {it["rot"]}, duration: {r3(half)}, yoyo: true, repeat: {n}, ease: "sine.inOut"{o} }}, 0);')
             if it.get("y"): A(f'tl.fromTo("{it["sel"]}", {{ y: 0 }}, {{ y: {it["y"]}, duration: {r3(half)}, yoyo: true, repeat: {n}, ease: "sine.inOut" }}, 0);')
         for it in c.get("twitch", []):
-            t = it.get("offset", 1.0); o = f', svgOrigin: "{it["origin"]}"' if it.get("origin") else ""
+            t = it.get("offset", 1.0); o = origin(it.get("origin"))
             while t < dur - 0.3:
                 A(f'tl.to("{it["sel"]}", {{ rotation: {it.get("rot", 12)}, duration: 0.07, yoyo: true, repeat: 3, ease: "sine.inOut"{o} }}, {r3(t)});'); t += it.get("every", 3.0)
         for it in c.get("blink2", []):
             t = it.get("offset", 1.2)
             while t < dur - 0.3:
-                A(f'tl.set("{it["open"]}", {{ opacity: 0 }}, {r3(t)}); tl.set("{it["shut"]}", {{ opacity: 1 }}, {r3(t)}); tl.set("{it["open"]}", {{ opacity: 1 }}, {r3(t + 0.12)}); tl.set("{it["shut"]}", {{ opacity: 0 }}, {r3(t + 0.12)});')
+                if it.get("open"): A(f'tl.set("{it["open"]}", {{ opacity: 0 }}, {r3(t)}); tl.set("{it["open"]}", {{ opacity: 1 }}, {r3(t + 0.12)});')
+                A(f'tl.set("{it["shut"]}", {{ opacity: 1 }}, {r3(t)}); tl.set("{it["shut"]}", {{ opacity: 0 }}, {r3(t + 0.12)});')
                 t += it.get("every", 3.4)
         rc = c.get("react")
         if rc:
-            o = f', svgOrigin: "{rc["origin"]}"' if rc.get("origin") else ""
+            o = origin(rc.get("origin"))
             for t in s.stamp_times:
                 A(f'tl.to("{rc["sel"]}", {{ y: {rc.get("y", -30)}, rotation: {rc.get("rot", 0)}, duration: 0.14, ease: "power2.out", yoyo: true, repeat: 1{o} }}, {r3(t - 0.02)});')
 
