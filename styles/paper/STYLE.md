@@ -42,8 +42,9 @@ Write "AI", "SBI", "API" plainly (no spaces); add `voice.say` only for words Kok
 | `graph` | growth / "you are here" | `marker` (0–1), `marker_at`, `marker_label`, `x_label`, `y_label` |
 | `image` | a real screenshot, with a highlight box | `src` (next to the script), `caption`, `height`, `fit` cover/contain, `highlight: {x,y,w,h,at}` (%) |
 | `profile` | the follow CTA (uses `brand`) | `tap_at`, `button`, `done` |
+| `figure` | a live isometric line drawing (hairline, 33 objects) that reacts on cue | `name`, `path: [{at, x, y}]` (pointer 0–1 in the figure box; no path = it plays its own tour), `intensity` (0–1), `caption`, `readout` (red live readout, default on), `leave`, `mount_at`, `width`, `colors` |
 
-Any card takes `"stamp": "TEXT"` or `{"text","at","x","y","rot"}` — a red rubber stamp with a shake and impact sound,
+Any card also takes `"sfx": [{"at", "id", "gain"}]` for extra sound hits, and `"stamp": "TEXT"` or `{"text","at","x","y","rot"}` — a red rubber stamp with a shake and impact sound,
 and `"top"` (px) to move it. Times (`at` keys) accept: seconds after scene start, `start`, `end`, `line:N`,
 `line:N:end`, `word:follow` — each with an optional `+0.1` / `-0.2`. Lines split across 2–4 caption lines per scene
 read best; a checklist with as many items as lines ticks exactly on each line.
@@ -62,3 +63,16 @@ New card: add a function to `styles/paper/cards.py` (`fn(p, cfg, ctx) -> html`, 
 `ctx.at(...)`, sound with `ctx.sfx(t, earshot_id, gain_db)`), register it in `CARDS`, style it in `styles/paper/style.css`.
 Sound ids come from `earshot sfx list`. Presenter: see `CHARACTER.md`.
 
+
+## Figures (the `figure` card)
+Live drawings from [hairline](https://github.com/lucasmarkes/hairline) (MIT, vendored in `assets/vendor/`), recoloured
+to the paper palette. They run on a virtual clock tied to the timeline (`core/clock.js`), so renders are frame-exact.
+Names: riffle terrain exploded phosphor slow turntable keyboard elevator phone laptop terminal cabinet branches vault
+lockers padlock patch dish router loupe sieve rail plug query drawer basket plot hub relay settle format rebuild stack.
+What the pointer does per figure (from hairline's docs): height picks a floor/layer/drawer/frame (`elevator`, `exploded`,
+`phone`, `drawer`, `stack`, `sieve`, `cabinet`, `terminal` scrolls, `laptop` lid); nearness opens `padlock`, lifts
+`terrain` and `keyboard`; circling the dial turns `vault` (readout "dial NN"); a `path` that ends on a word lands the
+reaction on that word. Without a path the figure plays its own tour (slow to start: give it 3 s or more).
+Recipes: vault dial = 9 points on a circle centred (0.42, 0.5), radius 0.22, 0.22 s apart; padlock opens = from
+(0.1, 0.95) to (0.55, 0.22) ending on the word; terminal scroll = y 0.25 → 0.8 across the scene.
+Example: `examples/figures.json`.

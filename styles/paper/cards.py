@@ -168,4 +168,26 @@ def image(p, c, x):
     cap = f'<div class="imcap mono">{esc(c["caption"])}</div>' if c.get("caption") else ""
     return f'''<div class="imframe" style="height:{c.get("height", 520)}px"><div class="imin"><img id="{p}-img" src="{esc(src)}" style="object-fit:{c.get("fit", "cover")}"/>{box}</div></div>{cap}'''
 
-CARDS = dict(prompt=prompt, checklist=checklist, code=code, profile=profile, stat=stat, graph=graph, image=image)
+# ------------------------------------------------------------------ hairline figure (live isometric line drawing)
+FIGURES = ["riffle", "terrain", "exploded", "phosphor", "slow", "turntable", "keyboard", "elevator", "phone", "laptop", "terminal",
+           "cabinet", "branches", "vault", "lockers", "padlock", "patch", "dish", "router", "loupe", "sieve", "rail", "plug", "query",
+           "drawer", "basket", "plot", "hub", "relay", "settle", "format", "rebuild", "stack"]
+def figure(p, c, x):
+    name = c.get("name", "terminal")
+    if name not in FIGURES: raise SystemExit(f"figure '{name}' unknown; have: {', '.join(FIGURES)}")
+    x.f.uses_figures = True
+    start = x.at(c.get("mount_at", "start"))
+    path = [[round(x.at(k.get("at", "start")), 3), k.get("x", 0.5), k.get("y", 0.5)] for k in c.get("path", [])]
+    opts = {"intensity": c.get("intensity", 0.8)}
+    if not path: opts["play"] = True
+    import json as _j
+    x.A(f'window.__figs.push({{ el: document.getElementById("{p}-fig"), name: "{name}", start: {x.r(start)}, opts: {_j.dumps(opts)}, path: {_j.dumps(path)}, leave: {"true" if c.get("leave", True) else "false"} }});')
+    for k in path[1:]: x.sfx(k[0], c.get("move_sfx", "pro_hover_tick/soft"), -17)
+    w = c.get("width", 700)
+    cap = f'<div class="figcap mono">{esc(c.get("caption", ""))}</div>'
+    read = '<div class="figread mono"></div>' if c.get("readout", True) else ""
+    col = c.get("colors", {})
+    style = "".join(f"--hairline-{k}:{v};" for k, v in col.items())
+    return f'<div class="figwrap" style="width:{w}px;margin-left:{(1080 - w) // 2}px;{style}">{cap}<div id="{p}-fig" class="fig"></div>{read}</div>'
+
+CARDS = dict(prompt=prompt, checklist=checklist, code=code, profile=profile, stat=stat, graph=graph, image=image, figure=figure)

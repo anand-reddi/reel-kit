@@ -28,7 +28,8 @@ cd ~/reel-kit && python3 reel.py styles
    ```
 4. Look at `out/my-reel-frames.png` before sending. Send the MP4 with a one-line summary.
 
-Styles: `paper` — off-white dotted paper, black/white UI cards with a red accent, word-synced captions, presenter
+Styles: `paper` — off-white dotted paper, black/white UI cards with a red accent, live hairline line figures,
+word-synced captions, presenter
 (see `styles/paper/STYLE.md`). `python3 reel.py styles` lists what the repo has now.
 
 ## 2. Adding a new style from a reference video

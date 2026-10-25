@@ -1,0 +1,163 @@
+{
+  "style": "paper",
+  "title": "Figures",
+  "brand": {
+    "handle": "@techinsixty",
+    "bio": "dev tools · AI · security\nexplained in 60 seconds"
+  },
+  "voice": {
+    "name": "am_michael",
+    "speed": 1.15
+  },
+  "music": {
+    "style": "beat",
+    "bpm": 92,
+    "key": "dark"
+  },
+  "scenes": [
+    {
+      "label": "the vault",
+      "counter": {
+        "name": "SECRETS",
+        "value": "1,024"
+      },
+      "pose": "card",
+      "lines": [
+        "Your secrets sit in a *vault.*"
+      ],
+      "card": {
+        "type": "figure",
+        "name": "vault",
+        "caption": "// vault.sys",
+        "path": [
+          {
+            "at": "start+0.15",
+            "x": 0.42,
+            "y": 0.28
+          },
+          {
+            "at": "start+0.37",
+            "x": 0.576,
+            "y": 0.344
+          },
+          {
+            "at": "start+0.59",
+            "x": 0.64,
+            "y": 0.5
+          },
+          {
+            "at": "start+0.81",
+            "x": 0.576,
+            "y": 0.656
+          },
+          {
+            "at": "start+1.03",
+            "x": 0.42,
+            "y": 0.72
+          },
+          {
+            "at": "start+1.25",
+            "x": 0.264,
+            "y": 0.656
+          },
+          {
+            "at": "start+1.47",
+            "x": 0.2,
+            "y": 0.5
+          },
+          {
+            "at": "start+1.69",
+            "x": 0.264,
+            "y": 0.344
+          },
+          {
+            "at": "start+1.91",
+            "x": 0.42,
+            "y": 0.28
+          }
+        ],
+        "intensity": 1
+      }
+    },
+    {
+      "label": "one weak key",
+      "counter": {
+        "name": "KEYS",
+        "steps": [
+          "1 weak",
+          "1 weak"
+        ]
+      },
+      "pose": [
+        "palms",
+        "shrug"
+      ],
+      "lines": [
+        "One weak key,",
+        "and the lock *opens.*"
+      ],
+      "card": {
+        "type": "figure",
+        "name": "padlock",
+        "caption": "// auth",
+        "path": [
+          {
+            "at": "line:1-0.1",
+            "x": 0.1,
+            "y": 0.95
+          },
+          {
+            "at": "word:opens",
+            "x": 0.55,
+            "y": 0.22
+          }
+        ],
+        "leave": false,
+        "stamp": {
+          "text": "BREACHED",
+          "at": "word:opens+0.25",
+          "x": 560,
+          "y": 330
+        },
+        "sfx": [
+          {
+            "at": "word:opens",
+            "id": "pro_click/glass",
+            "gain": -8
+          }
+        ],
+        "intensity": 1
+      }
+    },
+    {
+      "label": "logs",
+      "counter": {
+        "name": "LINES",
+        "from": 0,
+        "to": 4812,
+        "count_for": 1.4
+      },
+      "pose": "up",
+      "lines": [
+        "So check your logs *today.*"
+      ],
+      "card": {
+        "type": "figure",
+        "name": "terminal",
+        "caption": "// tail -f auth.log",
+        "path": [
+          {
+            "at": "start",
+            "x": 0.5,
+            "y": 0.25
+          },
+          {
+            "at": "end-0.3",
+            "x": 0.5,
+            "y": 0.8
+          }
+        ]
+      }
+    }
+  ]
+}

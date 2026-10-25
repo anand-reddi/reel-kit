@@ -73,3 +73,5 @@ html, body { margin: 0; background: {paper}; }
 .imin { position: absolute; inset: 0; } .imin img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
 .hlbox { position: absolute; border: 8px solid {accent}; border-radius: 16px; box-shadow: 0 0 0 9999px rgba(20,20,20,.28); }
 .imcap { position: absolute; left: 150px; top: -46px; font-size: 26px; color: {mid}; }
+.figwrap { position: absolute; top: 0; --hairline-plate: {paper}; --hairline-hi: {ink}; --hairline-edge: #55524c; --hairline-mid: #a8a39a; --hairline-lo: #d6d1c8; --hairline-stroke: 2.6; }
+.figcap { font-size: 26px; color: {mid}; height: 34px; } .figread { position: absolute; right: 0; top: 0; font-size: 28px; color: {accent}; }

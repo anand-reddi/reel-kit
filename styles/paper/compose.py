@@ -51,7 +51,7 @@ class Film:
     def __init__(s, script, timing, work, script_dir):
         s.sc, s.tm, s.work, s.sdir = script, timing, work, script_dir
         s.th = {**THEME, **script.get("theme", {})}; s.brand = script.get("brand", {})
-        s.js, s.cues, s.stamps, s.extra, s.counters = [], [], [], {}, 0
+        s.js, s.cues, s.stamps, s.extra, s.counters, s.uses_figures = [], [], [], {}, 0, False
         s.out = os.path.join(work, "film"); os.makedirs(os.path.join(s.out, "assets"), exist_ok=True)
         s.char = s.load_character(script.get("character", "default"))
         s.avatar = s.asset(s.brand["avatar"]) if s.brand.get("avatar") else s.char_avatar()
@@ -111,10 +111,11 @@ class Film:
             if card:
                 fn = CARDS.get(card["type"]) or (_ for _ in ()).throw(SystemExit(f"unknown card type {card['type']}; have {list(CARDS)}"))
                 inner = fn(p, card, ctx)
+                for fx in card.get("sfx", []): ctx.sfx(ctx.at(fx.get("at", "start")), fx["id"], fx.get("gain", -10))
                 if card.get("stamp"):
                     stp = card["stamp"]; stp = {"text": stp} if isinstance(stp, str) else stp
                     ctx.stamp(stp["text"], ctx.at(stp.get("at", "end-0.45")), stp)
-                top = card.get("top", 600 if s.char else 720)
+                top = card.get("top", (510 if card["type"] == "figure" else 600) if s.char else 720)
                 cards += f'<div id="{p}" class="card-wrap" style="top:{top}px">{inner}@@EXTRA_{p}@@</div>'
                 rot = [-4, 4, -3, 3][i % 4]
                 A(f'tl.fromTo("#{p}", {{ opacity: 0, y: 80, rotation: {rot}, scale: 0.88 }}, {{ opacity: 1, y: 0, rotation: 0, scale: 1, duration: 0.45, ease: "back.out(1.6)" }}, {r3(st + (0.05 if i == 0 else 0))});')
@@ -183,9 +184,15 @@ class Film:
         for k, v in th.items(): css = css.replace("{" + k + "}", v)
         for f in os.listdir(os.path.join(KIT, "assets", "fonts")): shutil.copy(os.path.join(KIT, "assets", "fonts", f), os.path.join(s.out, "assets", f))
         shutil.copy(os.path.join(KIT, "assets", "gsap.min.js"), os.path.join(s.out, "gsap.min.js"))
+        head_extra, mod, upd = "", "", ""
+        if s.uses_figures:
+            shutil.copy(os.path.join(KIT, "assets", "vendor", "hairline.js"), os.path.join(s.out, "assets", "hairline.js"))
+            head_extra = "<script>" + open(os.path.join(KIT, "core", "clock.js")).read() + "</script>"
+            mod = '<script type="module">import * as H from "./assets/hairline.js"; window.__hairline = H;</script>'
+            upd = ", onUpdate() { window.__advance(tl.time() * 1000); }"
         js = "\n".join(s.js)
         html = f'''<!doctype html>
-<html lang="en"><head><meta charset="utf-8"/><title>{esc(s.sc.get("title", "reel"))}</title><style>{css}</style><script src="gsap.min.js"></script></head>
+<html lang="en"><head><meta charset="utf-8"/><title>{esc(s.sc.get("title", "reel"))}</title><style>{css}</style>{head_extra}<script src="gsap.min.js"></script>{mod}</head>
 <body>
 <div id="root" data-composition-id="reel" data-start="0" data-duration="{dur}" data-width="{W}" data-height="{H}" data-fps="{s.sc.get("fps", 30)}">
  <div id="stagewrap" class="clip" data-start="0" data-duration="{dur}" data-track-index="1">
@@ -197,7 +204,7 @@ class Film:
 </div>
 <script>
 const fmt = (v, d) => Number(v).toLocaleString("en-US", {{ minimumFractionDigits: d, maximumFractionDigits: d }});
-const tl = gsap.timeline({{ paused: true }});
+const tl = gsap.timeline({{ paused: true{upd} }});
 {js}
 window.__timelines = window.__timelines || {{}};
 window.__timelines["reel"] = tl;
