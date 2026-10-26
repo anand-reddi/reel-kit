@@ -190,4 +190,75 @@ def figure(p, c, x):
     style = "".join(f"--hairline-{k}:{v};" for k, v in col.items())
     return f'<div class="figwrap" style="width:{w}px;margin-left:{(1080 - w) // 2}px;{style}">{cap}<div id="{p}-fig" class="fig"></div>{read}</div>'
 
-CARDS = dict(prompt=prompt, checklist=checklist, code=code, profile=profile, stat=stat, graph=graph, image=image, figure=figure)
+
+# ------------------------------------------------------------------ social post (a real post you are quoting), [[phrase]] gets highlighted
+def _marks(text, p, x, at):
+    out, k = "", 0
+    for i, part in enumerate(re.split(r"\[\[(.*?)\]\]", text)):
+        if i % 2:
+            out += f'<mark id="{p}-mk{k}">{esc(part)}</mark>'
+            x.A(f'tl.to("#{p}-mk{k}", {{ backgroundSize: "100% 100%", duration: 0.35, ease: "power2.out" }}, {x.r(at + k * 0.25)});')
+            x.sfx(at + k * 0.25, "pro_hover_tick/soft", -14); k += 1
+        else: out += esc(part)
+    return out
+def post(p, c, x):
+    body = _marks(c.get("text", ""), p, x, x.at(c.get("highlight_at", "line:1")))
+    img = f'<div class="post-img"><img src="{esc(x.asset(c["image"]))}"/></div>' if c.get("image") else ""
+    foot = "".join(f"<span>{esc(f)}</span>" if i else f"<span><b>{esc(f)}</b></span>" for i, f in enumerate(c.get("footer", [])))
+    x.A(f'tl.to("#{p} .post", {{ y: -14, duration: {x.r(x.end - x.start)}, ease: "sine.inOut" }}, {x.r(x.start)});')
+    who = f'<div class="post-u">{esc(c.get("handle", ""))}{" · " + esc(c["date"]) if c.get("date") else ""}</div>'
+    return (f'<div class="post"><div class="post-h"><div class="post-av">{esc(c.get("name", "?")[:1])}</div><div><div class="post-n">{esc(c.get("name", ""))}</div>'
+            f'{who}</div></div><div class="post-t">{body}</div>{img}<div class="post-f">{foot}</div></div>')
+
+# ------------------------------------------------------------------ terminal: typed lines, a progress list that strikes items off, a done overlay
+def _tline(s):
+    s = esc(s)
+    if s.startswith("$ "): return f'<span class="pr">$</span> {s[2:]}'
+    if s.startswith("✓ "): return f'<span class="ok">✓</span> {s[2:]}'
+    if s.startswith("# "): return f'<span class="dim">{s}</span>'
+    return s
+def terminal(p, c, x):
+    lines = c.get("lines", []); t0 = x.at(c.get("type_at", "start+0.15")); step = c.get("line_step", 0.32)
+    body = "".join(f'<div class="tl" id="{p}-l{i}">{_tline(l)}</div>' for i, l in enumerate(lines))
+    for i in range(len(lines)):
+        x.A(f'tl.fromTo("#{p}-l{i}", {{ opacity: 0, clipPath: "inset(0 100% 0 0)" }}, {{ opacity: 1, clipPath: "inset(0 0% 0 0)", duration: 0.22, ease: "none" }}, {x.r(t0 + i * step)});')
+        x.sfx(t0 + i * step, "pro_typing_run/tick", -17)
+    pr = c.get("progress")
+    if pr:
+        ta = x.at(pr.get("at", "line:1")); items = pr.get("items", []); total = pr.get("total", len(items)); dur = pr.get("for", 2.0)
+        ev = dur / max(1, len(items))
+        body += f'<div id="{p}-pg" class="tprog"><span>{esc(pr.get("label", "Working"))}</span><b id="{p}-pn">0/{total}</b></div>'
+        x.A(f'tl.to("#{p}-pg", {{ opacity: 1, duration: 0.15 }}, {x.r(ta)});')
+        x.f.counters += 1; k = x.f.counters
+        x.A(f'const cnt{k} = {{ v: 0 }}; tl.to(cnt{k}, {{ v: {total}, duration: {x.r(dur)}, ease: "none", onUpdate: () => {{ document.querySelector("#{p}-pn").textContent = Math.round(cnt{k}.v) + "/{total}"; }} }}, {x.r(ta)});')
+        for i, it in enumerate(items):
+            ti = ta + i * ev
+            body += f'<div class="tpk" id="{p}-k{i}"><i>✕</i><s id="{p}-s{i}">{esc(it)}</s></div>'
+            x.A(f'tl.fromTo("#{p}-k{i}", {{ opacity: 0, x: -20 }}, {{ opacity: 1, x: 0, duration: 0.12 }}, {x.r(ti)});')
+            x.A(f'tl.fromTo("#{p}-s{i}", {{ "--k": 0, color: "#e9e6df" }}, {{ "--k": 1, color: "#8d8a84", duration: 0.18 }}, {x.r(ti + 0.12)});')
+            x.sfx(ti + 0.12, "pro_hover_tick/glass", -15)
+        if pr.get("badge"):
+            body += f'<div id="{p}-bd" class="tbadge">✓ {esc(pr["badge"])}</div>'
+            x.A(f'tl.fromTo("#{p}-bd", {{ opacity: 0, scale: 0.5 }}, {{ opacity: 1, scale: 1, duration: 0.3, ease: "back.out(3)" }}, {x.r(ta + dur + 0.05)});')
+            x.sfx(ta + dur + 0.08, "pro_pop_in/round", -9)
+    dn = c.get("done")
+    if dn:
+        td = x.at(dn.get("at", "line:1"))
+        body += (f'<div id="{p}-dn" class="tdone"><div class="ck"><svg viewBox="0 0 40 40" width="100" height="100"><path d="M9,21 L17,29 L32,12" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'
+                 f'<div>{esc(dn.get("text", "Done"))}</div></div>')
+        x.A(f'tl.fromTo("#{p}-dn", {{ opacity: 0, scale: 0.6 }}, {{ opacity: 1, scale: 1, duration: 0.35, ease: "back.out(2.6)" }}, {x.r(td)});')
+        x.A(f'tl.to("#{p} .tl, #{p} .tpk", {{ opacity: 0.25, duration: 0.25 }}, {x.r(td)});')
+        x.sfx(td + 0.05, "pro_pop_in/round", -8)
+    return f'<div class="term"><div class="dots3"><i></i><i></i><i></i><span class="mono">{esc(c.get("title", "terminal"))}</span></div>{body}</div>'
+
+# ------------------------------------------------------------------ repository card: name, description ([[phrase]] highlighted), topics, a stats row
+def repo(p, c, x):
+    desc = _marks(c.get("description", ""), p, x, x.at(c.get("highlight_at", "line:1")))
+    topics = "".join(f"<span>{esc(tp)}</span>" for tp in c.get("topics", []))
+    stats = "".join(f"<span>{esc(s)}</span>" if i else f"<span><b>{esc(s)}</b></span>" for i, s in enumerate(c.get("stats", [])))
+    icon = '<svg viewBox="0 0 24 24" width="40" height="40"><path d="M5,3 h12 a2,2 0 0 1 2,2 v14 h-12 a2,2 0 0 0 -2,2 z M5,19 a2,2 0 0 1 2,-2 h12" stroke="currentColor" stroke-width="2" fill="none"/></svg>'
+    x.A(f'tl.fromTo("#{p} .repo-s span", {{ opacity: 0, y: 14 }}, {{ opacity: 1, y: 0, duration: 0.25, stagger: 0.12 }}, {x.r(x.at(c.get("stats_at", "line:1")))});')
+    return (f'<div class="repo"><div class="repo-n">{icon}<span>{esc(c.get("owner", ""))} / <b>{esc(c.get("name", ""))}</b></span><span class="pub">Public</span></div>'
+            f'<div class="repo-d">{desc}</div><div class="repo-t">{topics}</div><div class="repo-s">{stats}</div></div>')
+
+CARDS = dict(prompt=prompt, checklist=checklist, code=code, profile=profile, stat=stat, graph=graph, image=image, figure=figure, post=post, terminal=terminal, repo=repo)

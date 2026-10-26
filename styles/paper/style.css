@@ -88,3 +88,32 @@ html, body { margin: 0; background: {paper}; }
 .hdr.chips .hlab { font-weight: 800; font-size: 28px; text-transform: uppercase; letter-spacing: 3px; }
 .hdr.chips .hcnt { border: 2px solid {mid}; border-radius: 999px; padding: 8px 20px; font-weight: 700; font-size: 24px; letter-spacing: 2px; text-transform: uppercase; color: {mid}; }
 .hdr.chips .hcnt b { color: {accent}; margin-left: 6px; }
+
+/* short captions (one phrase at a time, centred), headline, new cards */
+.cap.short { left: 60px; right: 60px; text-align: center; font-size: 86px; line-height: 1.05; z-index: 12; }
+.cap.short .w { transform-origin: 50% 80%; } .cap.short .acc { font-size: 100px; }
+.headline { position: absolute; left: 60px; right: 60px; top: 190px; text-align: center; z-index: 6; }
+.headline .h1 { font-size: 74px; font-weight: 800; letter-spacing: -2px; line-height: 1.05; opacity: 0; }
+.headline .h2 { margin-top: 14px; } .headline .h2 span { display: inline-block; background: {accent}; color: #fff; padding: 4px 30px 12px; border-radius: 14px;
+  font-family: "Instrument Serif", serif; font-style: italic; font-size: 84px; box-shadow: 10px 12px 0 {soft}; opacity: 0; }
+.post { position: absolute; left: 120px; width: 840px; top: 0; background: {surface}; border: 5px solid {edge}; border-radius: 30px; padding: 30px 36px 26px; box-sizing: border-box; box-shadow: 16px 18px 0 {shadow}; }
+.post-h { display: flex; align-items: center; gap: 20px; } .post-av { width: 84px; height: 84px; border-radius: 42px; background: {ink}; color: {paper}; display: flex; align-items: center; justify-content: center; font-size: 44px; font-weight: 800; }
+.post-n { font-size: 36px; font-weight: 800; } .post-u { font-size: 28px; color: {mid}; }
+.post-t { font-size: 35px; line-height: 1.32; margin-top: 22px; } .post-t mark { background: transparent; color: inherit; background-image: linear-gradient({accent}40, {accent}40); background-size: 0% 100%; background-repeat: no-repeat; border-radius: 6px; }
+.post-img { margin-top: 18px; height: 260px; border-radius: 18px; overflow: hidden; border: 3px solid {edge}; } .post-img img { width: 100%; height: 100%; object-fit: cover; }
+.post-f { display: flex; gap: 34px; margin-top: 18px; font-size: 27px; color: {mid}; } .post-f b { color: {ink}; }
+.term { position: absolute; left: 110px; width: 860px; top: 0; background: {card}; border-radius: 28px; padding: 24px 30px 28px; box-sizing: border-box; box-shadow: 16px 18px 0 {soft}; font-family: "IBM Plex Mono", monospace; font-size: 27px; color: #e9e6df; min-height: 560px; }
+.term .tl { white-space: pre; line-height: 1.6; opacity: 0; overflow: hidden; } .term .tl .dim { color: #8d8a84; } .term .tl .ok { color: #7bd88f; } .term .tl .pr { color: {accent}; }
+.tprog { display: flex; justify-content: space-between; margin: 14px 0 8px; font-weight: 500; opacity: 0; } .tprog b { color: {accent}; font-weight: 500; }
+.tpk { white-space: nowrap; line-height: 1.55; opacity: 0; color: #e9e6df; position: relative; } .tpk i { color: {accent}; font-style: normal; margin-right: 14px; }
+.tpk s { text-decoration: none; position: relative; } .tpk s::after { content: ""; position: absolute; left: 0; right: 0; top: 52%; height: 3px; background: {accent}; transform: scaleX(var(--k, 0)); transform-origin: 0 50%; }
+.tbadge { display: inline-block; margin-top: 16px; background: {accent}; color: #fff; padding: 8px 22px; border-radius: 12px; font-weight: 500; opacity: 0; }
+.tdone { position: absolute; left: 0; right: 0; top: 230px; text-align: center; opacity: 0; font-family: "Space Grotesk", sans-serif; }
+.tdone .ck { width: 170px; height: 170px; border-radius: 85px; background: {accent}; margin: 0 auto 22px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 60px {accent}80; }
+.tdone div:last-child { font-size: 52px; font-weight: 800; color: #fff; }
+.repo { position: absolute; left: 120px; width: 840px; top: 0; background: {surface}; border: 5px solid {edge}; border-radius: 30px; padding: 30px 38px 34px; box-sizing: border-box; box-shadow: 16px 18px 0 {shadow}; }
+.repo-n { display: flex; align-items: center; gap: 16px; font-size: 40px; } .repo-n b { font-weight: 800; } .repo-n .pub { font-size: 22px; border: 3px solid {grey}; color: {mid}; border-radius: 30px; padding: 2px 14px; }
+.repo-d { font-size: 36px; line-height: 1.32; margin-top: 22px; } .repo-d mark { background: transparent; color: inherit; background-image: linear-gradient({accent}40, {accent}40); background-size: 0% 100%; background-repeat: no-repeat; border-radius: 6px; }
+.repo-t { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; } .repo-t span { font-size: 25px; background: {paper}; border-radius: 20px; padding: 6px 18px; }
+.repo-s { display: flex; gap: 30px; margin-top: 26px; font-size: 30px; color: {mid}; border-top: 3px dashed {grey}; padding-top: 20px; } .repo-s b { color: {accent}; }
+.cap.short .acc { margin: 0 0.07em; }

@@ -95,3 +95,14 @@ Playfair Display accents, JetBrains Mono; the heavy look of big explainer reels)
 ## Header
 `"header": "chips"` swaps the mono `// 02 · label   NAME 1/3` header for a red number tag, a bold uppercase label in the
 caption font, and the counter in an outlined pill.
+`"header": "none"` removes the top header entirely.
+
+## Short captions, headline, presenter-off shots
+`"captions": "short"` shows one short phrase at a time (write lines of 1–4 words), centred: just above the presenter's
+head in `"box"` scenes, under the card in `"layout": "none"` scenes (presenter off screen, card zoomed up), near the
+top in `"full"` scenes. Cards cut in and out with a zoom-blur and a swish; accent words get a soft pop. Move rows with
+`"caption_y": {"box": 850, "none": 1260, "full": 200}`. A scene's `"headline": ["bold line", "accent block line"]`
+puts a title at the top. The script's `"camera"` overrides the character's (e.g. `"box": [x, y, w, h]`, `box_scale`).
+New cards: `post` (a quoted social post, `[[phrase]]` highlights at `highlight_at`), `terminal` (typed `lines`,
+a `progress` list that strikes items off with a counter and badge, a `done` check overlay) and `repo` (owner/name,
+description with `[[highlight]]`, topics, stats row). Example: a 40 s tool reel with no music, voice + SFX only.

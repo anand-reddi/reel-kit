@@ -130,7 +130,9 @@ class Film:
             cnt = sc.get("counter") or {}
             cid = f"hv{i}"; cv = cnt.get("value", cnt.get("from", ""))
             right = f'{esc(cnt.get("name", ""))} <b id="{cid}" class="redt">{esc(cv)}</b>' if cnt else ""
-            if s.sc.get("header") == "chips":   # red number tag + bold uppercase label, counter in an outlined pill
+            if s.sc.get("header") == "none":   # no top header at all (hidden node keeps counter ids valid)
+                hdr += f'<div id="hd{i}" class="hdr" style="display:none"><b id="{cid}"></b></div>'
+            elif s.sc.get("header") == "chips":   # red number tag + bold uppercase label, counter in an outlined pill
                 pill = f'<span class="hcnt">{esc(cnt.get("name", ""))} <b id="{cid}">{esc(cv)}</b></span>' if cnt else ""
                 hdr += (f'<div id="hd{i}" class="hdr chips"><span class="hl"><span class="hnum">{i + 1:02d}</span>'
                         f'<span class="hlab">{esc(sc.get("label", ""))}</span></span>{pill}</div>')
@@ -143,16 +145,45 @@ class Film:
             for k, v in enumerate(cnt.get("steps", [])):
                 A(f'tl.set("#{cid}", {{ innerText: "{esc(v)}" }}, {r3(lns[min(k, len(lns) - 1)]["start"] + 0.05)});')
             # caption: every word shows grey just before it is said, then ink (accent words red serif with a pop)
+            short = s.sc.get("captions") == "short"   # reference-reel captions: one short phrase at a time, centred
+            lay_i = sc.get("layout", "box") if any(x.get("layout") for x in scenes) else None
+            if short:
+                cy = {"box": 850, "none": 1260, "full": 200, None: 980, **s.sc.get("caption_y", {})}[lay_i]
+                for k, ln in enumerate(lns):
+                    spans = []
+                    for j, w in enumerate(ln["words"]):
+                        wid = f"w{i}_{ln['line']}_{j}"; spans.append(f'<span id="{wid}" class="w{" acc" if w["accent"] else ""}">{esc(w["w"])}</span>')
+                        A(f'tl.fromTo("#{wid}", {{ opacity: 0, y: 16 }}, {{ opacity: 1, y: 0, duration: 0.12, ease: "power3.out" }}, {r3(max(st, w["t"] - 0.12))});')
+                        A(f'tl.to("#{wid}", {{ color: "{th["accent"] if w["accent"] else th["ink"]}", duration: 0.05 }}, {r3(w["t"])});')
+                        if w["accent"]:
+                            A(f'tl.fromTo("#{wid}", {{ scale: 1.35 }}, {{ scale: 1, duration: 0.3, ease: "back.out(3)" }}, {r3(w["t"])});')
+                            s.cues.append((round(w["t"], 3), "pro_pop/tink", -15))
+                    cid = f"cap{i}_{k}"
+                    caps += f'<div id="{cid}" class="cap short" style="top:{cy}px">{" ".join(spans)}</div>'
+                    on = st if k == 0 else ln["start"] - 0.1
+                    A(f'tl.set("#{cid}", {{ opacity: 1 }}, {r3(on)});')
+                    off = lns[k + 1]["start"] - 0.1 if k + 1 < len(lns) else (en if i < n - 1 else None)
+                    if off is not None: A(f'tl.set("#{cid}", {{ opacity: 0 }}, {r3(off)});')
+            hl_ = sc.get("headline")
+            if hl_:   # a title at the top: a bold line and a line in an accent block
+                hl_ = [hl_] if isinstance(hl_, str) else hl_
+                caps += (f'<div id="hl{i}" class="headline"><div class="h1">{esc(hl_[0])}</div>'
+                         + (f'<div class="h2"><span>{esc(hl_[1])}</span></div>' if len(hl_) > 1 else "") + "</div>")
+                A(f'tl.fromTo("#hl{i} .h1", {{ opacity: 0, y: -30 }}, {{ opacity: 1, y: 0, duration: 0.3, ease: "power3.out" }}, {r3(st)});')
+                A(f'tl.fromTo("#hl{i} .h2 span", {{ opacity: 0, scale: 0.6, rotation: -3 }}, {{ opacity: 1, scale: 1, rotation: -2, duration: 0.35, ease: "back.out(2.4)" }}, {r3(st + 0.15)});')
+                s.cues.append((round(st + 0.2, 3), "pro_pop_in/round", -12))
+                if i < n - 1: A(f'tl.to("#hl{i}", {{ opacity: 0, duration: 0.12 }}, {r3(en - 0.12)});')
             spans = []
-            for ln in lns:
+            for ln in ([] if short else lns):
                 for j, w in enumerate(ln["words"]):
                     wid = f"w{i}_{ln['line']}_{j}"; spans.append(f'<span id="{wid}" class="w{" acc" if w["accent"] else ""}">{esc(w["w"])}</span>')
                     A(f'tl.fromTo("#{wid}", {{ opacity: 0, y: 22 }}, {{ opacity: 1, y: 0, duration: 0.16, ease: "power3.out" }}, {r3(max(st, w["t"] - 0.16))});')
                     A(f'tl.to("#{wid}", {{ color: "{th["accent"] if w["accent"] else th["ink"]}", duration: 0.06 }}, {r3(w["t"])});')
                     if w["accent"]: A(f'tl.fromTo("#{wid}", {{ scale: 1.25 }}, {{ scale: 1, duration: 0.35, ease: "back.out(3)" }}, {r3(w["t"])});')
-            caps += f'<div id="cap{i}" class="cap{" small" if sum(len(l["text"]) for l in lns) > 60 else ""}">{" ".join(spans)}</div>'
-            A(f'tl.set("#cap{i}", {{ opacity: 1 }}, {r3(st)});')
-            if i < n - 1: A(f'tl.to("#cap{i}", {{ opacity: 0, y: -30, duration: 0.14, ease: "power2.in" }}, {r3(en - 0.14)});')
+            if not short:
+                caps += f'<div id="cap{i}" class="cap{" small" if sum(len(l["text"]) for l in lns) > 60 else ""}">{" ".join(spans)}</div>'
+                A(f'tl.set("#cap{i}", {{ opacity: 1 }}, {r3(st)});')
+                if i < n - 1: A(f'tl.to("#cap{i}", {{ opacity: 0, y: -30, duration: 0.14, ease: "power2.in" }}, {r3(en - 0.14)});')
             # card
             card = sc.get("card")
             if card:
@@ -162,12 +193,20 @@ class Film:
                 if card.get("stamp"):
                     stp = card["stamp"]; stp = {"text": stp} if isinstance(stp, str) else stp
                     ctx.stamp(stp["text"], ctx.at(stp.get("at", "end-0.45")), stp)
-                top = card.get("top", (510 if card["type"] == "figure" else 600) if s.char else 720)
-                cards += f'<div id="{p}" class="card-wrap" style="top:{top}px">{inner}@@EXTRA_{p}@@</div>'
-                rot = [-4, 4, -3, 3][i % 4]
-                A(f'tl.fromTo("#{p}", {{ opacity: 0, y: 80, rotation: {rot}, scale: 0.88 }}, {{ opacity: 1, y: 0, rotation: 0, scale: 1, duration: 0.45, ease: "back.out(1.6)" }}, {r3(st + (0.05 if i == 0 else 0))});')
-                if i < n - 1: A(f'tl.to("#{p}", {{ opacity: 0, y: -70, scale: 0.92, duration: 0.18, ease: "power2.in" }}, {r3(en - 0.18)});')
-            if i: s.cues.append((round(st, 3), "swipe/glide", -17))
+                if short:   # zoom-blur cut in and out, cards sized up when the presenter is off screen
+                    top = card.get("top", {"none": 360}.get(lay_i, 290 + (150 if hl_ else 0)))
+                    k = card.get("scale", 1.14 if lay_i == "none" else 1.0)
+                    cards += (f'<div id="{p}" class="card-wrap" style="top:{top}px"><div style="position:absolute;inset:0;transform:scale({k});transform-origin:50% 0">'
+                              f'{inner}@@EXTRA_{p}@@</div></div>')
+                    A(f'tl.fromTo("#{p}", {{ opacity: 0, scale: 1.2, filter: "blur(16px)" }}, {{ opacity: 1, scale: 1, filter: "blur(0px)", duration: 0.32, ease: "power3.out" }}, {r3(st + (0.05 if i == 0 else 0))});')
+                    if i < n - 1: A(f'tl.to("#{p}", {{ opacity: 0, scale: 0.9, filter: "blur(12px)", duration: 0.16, ease: "power2.in" }}, {r3(en - 0.16)});')
+                else:
+                    top = card.get("top", (510 if card["type"] == "figure" else 600) if s.char else 720)
+                    cards += f'<div id="{p}" class="card-wrap" style="top:{top}px">{inner}@@EXTRA_{p}@@</div>'
+                    rot = [-4, 4, -3, 3][i % 4]
+                    A(f'tl.fromTo("#{p}", {{ opacity: 0, y: 80, rotation: {rot}, scale: 0.88 }}, {{ opacity: 1, y: 0, rotation: 0, scale: 1, duration: 0.45, ease: "back.out(1.6)" }}, {r3(st + (0.05 if i == 0 else 0))});')
+                    if i < n - 1: A(f'tl.to("#{p}", {{ opacity: 0, y: -70, scale: 0.92, duration: 0.18, ease: "power2.in" }}, {r3(en - 0.18)});')
+            if i: s.cues.append((round(st, 3), "swish/soft", -13) if s.sc.get("captions") == "short" else (round(st, 3), "swipe/glide", -17))
         for p, h in s.extra.items(): cards = cards.replace(f"@@EXTRA_{p}@@", h)
         cards = re.sub(r"@@EXTRA_k\d+@@", "", cards)
         pres = s.presenter(scenes, lines_of, start, dur)
@@ -300,19 +339,20 @@ class Film:
         hard-cuts per scene between "box" (a rounded frame at bottom centre under the cards; the default) and "full"
         (the presenter fills the frame, close-up, for hooks and opinions; give those scenes no card)."""
         A, th = s.js.append, s.th
-        cv = c.get("camera", {})
+        cv = {**c.get("camera", {}), **s.sc.get("camera", {})}
         hat = cv.get("top_y", 78)                 # svg y of the top of the character (hat / hair)
         k_box, k_full = cv.get("box_scale", 0.82), cv.get("full_scale", 1.55)
-        bw, bh, bx, by = 780, 500, 150, 1330
+        bx, by, bw, bh = cv.get("box", [150, 1330, 780, 500])
         lay = {
             # box: head and hands break out over the top and sides (only the bottom edge clips), and the box sits above all
-            "box":  dict(cam=dict(left=bx, top=by, width=bw, height=bh, zIndex=10),
+            "box":  dict(cam=dict(left=bx, top=by, width=bw, height=bh, zIndex=10, autoAlpha=1),
                          back=dict(borderRadius=28, borderWidth=3), clip=dict(clipPath='"inset(-900px -600px 0px -600px)"'),
                          svg=dict(left=bw / 2 - 600 * k_box, top=cv.get("box_pop", -90) - hat * k_box, width=1200 * k_box)),
-            "full": dict(cam=dict(left=0, top=0, width=W, height=H, zIndex=1),
+            "full": dict(cam=dict(left=0, top=0, width=W, height=H, zIndex=1, autoAlpha=1),
                          back=dict(borderRadius=0, borderWidth=0), clip=dict(clipPath='"inset(0px 0px 0px 0px)"'),
                          svg=dict(left=W / 2 - 600 * k_full, top=cv.get("full_top", 600) - hat * k_full, width=1200 * k_full)),
         }
+        lay["none"] = {**lay["box"], "cam": {**lay["box"]["cam"], "autoAlpha": 0}}   # presenter off screen (visual-only shots)
         js = lambda d: ", ".join(f"{k}: {round(v, 1) if isinstance(v, float) else v}" for k, v in d.items())
         cur = None
         for i, sc in enumerate(scenes):
