@@ -81,7 +81,13 @@ Example: `examples/figures.json`.
 
 ## Camera layouts
 Setting `"layout"` on any scene turns on the presenter camera: the character sits in a backdrop that hard-cuts per scene
-between `"box"` (a rounded frame at the bottom centre, under the card) and `"full"` (a close-up filling the frame, for the
+between `"box"` (a rounded frame at the bottom centre; the head breaks out over its top edge and the box stacks above
+cards and captions) and `"full"` (a close-up filling the frame, for the
 hook, opinions and punchlines; give those scenes no card). Tune per character in `character.json` with
-`"camera": {"top_y": 78, "box_scale": 0.75, "full_scale": 1.55, "full_top": 600, "backdrop": "<css background>"}`.
+`"camera": {"top_y": 78, "box_scale": 0.82, "box_pop": -90, "full_scale": 1.55, "full_top": 600, "backdrop": "<css background>"}`.
 SVG characters only. Without any `"layout"` the presenter stays at the bottom as before.
+
+## Fonts
+`"fonts"` in the script picks a preset: `"grotesk"` (default: Space Grotesk, Instrument Serif accents, IBM Plex Mono),
+`"bricolage"` (Bricolage Grotesque bold, DM Serif Display accents, JetBrains Mono) or `"archivo"` (Archivo extra-bold,
+Playfair Display accents, JetBrains Mono; the heavy look of big explainer reels). All OFL, vendored in `assets/fonts/`.

@@ -15,6 +15,30 @@ THEMES = {
 }
 THEME = THEMES["light"]
 W, H = 1080, 1920
+
+# Font presets ("fonts" in the script): headline sans, accent italic serif, mono. Files live in assets/fonts.
+FONTS = {
+    "grotesk":   None,   # Space Grotesk / Instrument Serif / IBM Plex Mono (style.css defaults)
+    "bricolage": dict(sans=("Bricolage Grotesque", {500: "bricolage-grotesque-latin-500-normal.woff2", 700: "bricolage-grotesque-latin-700-normal.woff2",
+                                                    800: "bricolage-grotesque-latin-800-normal.woff2"}, 700, -2.5),
+                      serif=("DM Serif Display", "dm-serif-display-latin-400-italic.woff2", 400),
+                      mono=("JetBrains Mono", "jetbrains-mono-latin-500-normal.woff2")),
+    "archivo":   dict(sans=("Archivo", {600: "archivo-latin-600-normal.woff2", 800: "archivo-latin-800-normal.woff2"}, 800, -3),
+                      serif=("Playfair Display", "playfair-display-latin-600-italic.woff2", 600),
+                      mono=("JetBrains Mono", "jetbrains-mono-latin-500-normal.woff2")),
+}
+
+def fonts_css(name):
+    f = FONTS.get(name)
+    if not f: return ""
+    (sn, files, cap_w, ls), (se, sef, sew), (mn, mf) = f["sans"], f["serif"], f["mono"]
+    css = "".join(f'@font-face {{ font-family: "{sn}"; src: url("assets/{fn}"); font-weight: {w}; }}' for w, fn in files.items())
+    css += f'@font-face {{ font-family: "{se}"; src: url("assets/{sef}"); font-style: italic; font-weight: {sew}; }}'
+    css += f'@font-face {{ font-family: "{mn}"; src: url("assets/{mf}"); font-weight: 500; }}'
+    css += (f'#root {{ font-family: "{sn}", sans-serif; }} .cap {{ font-weight: {cap_w}; letter-spacing: {ls}px; }}'
+            f'.acc {{ font-family: "{se}", serif; font-weight: {sew}; letter-spacing: -1px; }} .sv {{ font-family: "{se}", serif; }}'
+            f'.mono, .ptxt, .code, .gl, .gm {{ font-family: "{mn}", monospace; }}')
+    return css
 r3 = lambda v: round(float(v), 3)
 
 class Ctx:
@@ -273,12 +297,15 @@ class Film:
         A, th = s.js.append, s.th
         cv = c.get("camera", {})
         hat = cv.get("top_y", 78)                 # svg y of the top of the character (hat / hair)
-        k_box, k_full = cv.get("box_scale", 0.75), cv.get("full_scale", 1.55)
+        k_box, k_full = cv.get("box_scale", 0.82), cv.get("full_scale", 1.55)
         bw, bh, bx, by = 780, 500, 150, 1330
         lay = {
-            "box":  dict(cam=dict(left=bx, top=by, width=bw, height=bh, borderRadius=28, borderWidth=3),
-                         svg=dict(left=bw / 2 - 600 * k_box, top=30 - hat * k_box, width=1200 * k_box)),
-            "full": dict(cam=dict(left=0, top=0, width=W, height=H, borderRadius=0, borderWidth=0),
+            # box: the head breaks out over the top edge (clip only the sides and bottom), and the box sits above all
+            "box":  dict(cam=dict(left=bx, top=by, width=bw, height=bh, zIndex=10),
+                         back=dict(borderRadius=28, borderWidth=3), clip=dict(clipPath='"inset(-900px 0px 0px 0px round 0px 0px 28px 28px)"'),
+                         svg=dict(left=bw / 2 - 600 * k_box, top=cv.get("box_pop", -90) - hat * k_box, width=1200 * k_box)),
+            "full": dict(cam=dict(left=0, top=0, width=W, height=H, zIndex=1),
+                         back=dict(borderRadius=0, borderWidth=0), clip=dict(clipPath='"inset(0px 0px 0px 0px)"'),
                          svg=dict(left=W / 2 - 600 * k_full, top=cv.get("full_top", 600) - hat * k_full, width=1200 * k_full)),
         }
         js = lambda d: ", ".join(f"{k}: {round(v, 1) if isinstance(v, float) else v}" for k, v in d.items())
@@ -287,7 +314,8 @@ class Film:
             L = sc.get("layout", "box"); L = L if L in lay else "box"
             if L == cur: continue
             t = 0 if i == 0 else start[i]
-            A(f'tl.set("#cam", {{ {js(lay[L]["cam"])} }}, {r3(t)}); tl.set("#pres", {{ {js(lay[L]["svg"])} }}, {r3(t)});')
+            for sel, key in (("#cam", "cam"), ("#camback", "back"), ("#camclip", "clip"), ("#pres", "svg")):
+                A(f'tl.set("{sel}", {{ {js(lay[L][key])} }}, {r3(t)});')
             if i: A(f'tl.fromTo("#cam", {{ scale: 1.04 }}, {{ scale: 1, duration: 0.3, ease: "power2.out" }}, {r3(t)});')
             cur = L
         dark = s.sc.get("theme") == "dark"
@@ -295,8 +323,10 @@ class Film:
                                       else "radial-gradient(120% 80% at 50% 30%, #f4efe6 0%, #e2dacb 60%, #cfc6b5 100%)")
         lights = "".join(f'<div style="position:absolute;left:{x}%;top:{y}%;width:{r}px;height:{r}px;border-radius:50%;background:{col};filter:blur({r // 3}px);opacity:{o}"></div>'
                          for x, y, r, col, o in ((8, 18, 160, "#ffb46b", 0.35), (78, 12, 200, "#6b8cff", 0.25), (86, 52, 120, "#ffd59a", 0.25)))
-        return (f'<div id="cam" style="position:absolute;overflow:hidden;background:{wall};border:0 solid {th["edge"]};'
-                f'box-shadow:0 18px 50px rgba(0,0,0,0.35);transform-origin:50% 50%">{lights}{body}</div>')
+        return (f'<div id="cam" style="position:absolute;transform-origin:50% 50%">'
+                f'<div id="camback" style="position:absolute;inset:0;overflow:hidden;background:{wall};border:0 solid {th["edge"]};'
+                f'box-shadow:0 18px 50px rgba(0,0,0,0.35)">{lights}</div>'
+                f'<div id="camclip" style="position:absolute;inset:0">{body}</div></div>')
 
     def rig_presenter(s, c, beats, dur):
         """A cut-out rig: nested full-canvas parts with pivots (character.json "parts"), a pose library ("poses": part ->
@@ -380,7 +410,7 @@ class Film:
                 A(f'tl.to("{rc["sel"]}", {{ y: {rc.get("y", -30)}, rotation: {rc.get("rot", 0)}, duration: 0.14, ease: "power2.out", yoyo: true, repeat: 1{o} }}, {r3(t - 0.02)});')
 
     def write(s, hdr, caps, cards, pres, dur):
-        th = s.th; css = open(os.path.join(HERE, "style.css")).read()
+        th = s.th; css = open(os.path.join(HERE, "style.css")).read() + fonts_css(s.sc.get("fonts", "grotesk"))
         for k, v in th.items(): css = css.replace("{" + k + "}", v)
         for f in os.listdir(os.path.join(KIT, "assets", "fonts")): shutil.copy(os.path.join(KIT, "assets", "fonts", f), os.path.join(s.out, "assets", f))
         shutil.copy(os.path.join(KIT, "assets", "gsap.min.js"), os.path.join(s.out, "gsap.min.js"))
