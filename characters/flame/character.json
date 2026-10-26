@@ -104,45 +104,21 @@
   }
  ],
  "brows": {
-  "sel": "#flames",
-  "raise": -16
+  "sel": "#hat",
+  "raise": -10
  },
  "idle": [
   {
-   "sel": "#tongueM",
-   "rot": 4,
-   "period": 1.3,
-   "origin": "602 330"
-  },
-  {
-   "sel": "#tongueL",
-   "rot": 5,
-   "period": 1.1,
-   "origin": "522 340"
-  },
-  {
-   "sel": "#tongueR",
-   "rot": 5,
-   "period": 1.5,
-   "origin": "680 340"
-  },
-  {
-   "sel": "#tongueMR",
-   "rot": 5,
-   "period": 1.0,
-   "origin": "638 334"
-  },
-  {
-   "sel": "#tongueLL",
-   "rot": 6,
-   "period": 1.7,
-   "origin": "486 374"
-  },
-  {
-   "sel": "#tongueRR",
-   "rot": 6,
-   "period": 1.25,
-   "origin": "716 374"
+   "sel": "#pendant",
+   "rot": 9,
+   "period": 1.4,
+   "origin": "600 652"
   }
- ]
+ ],
+ "react": {
+  "sel": "#pendant",
+  "y": -8,
+  "rot": 14,
+  "origin": "600 652"
+ }
 }

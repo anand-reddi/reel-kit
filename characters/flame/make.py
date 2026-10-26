@@ -13,6 +13,7 @@ LINE, LW = "#0c0c0e", 3
 BTN = "#9a9aa2"
 SKIN, SKIN_SH, SKIN_LN, HAND_OUT = "#3a3442", "#2a2531", "#5a5368", "#121016"  # shadow-figure neck and hands
 BL = "#8fb2ff"
+HAT, HAT_HI, BAND, FACE_C = "#18181c", "#303038", "#2a2a30", "#0a090e"
 
 # ------------------------------------------------------------------ layout (svg coords)
 SHL, SHR = (414, 640), (786, 640)     # shoulder joints at the outer top corners of the torso
@@ -105,8 +106,6 @@ TONGUES = {   # rooted deep inside the head and swaying around their own base, s
 }
 
 def head():
-    bloom = "".join(f'<path d="{d}" fill="url(#fl)"/>' for d in [FACE] + [d for d, *_ in TONGUES.values()])
-    tongues = "".join(f'<g id="{k}"><path d="{d}" fill="url(#fl)" filter="url(#b2)"/></g>' for k, (d, *_) in TONGUES.items())
     def eye(cx, cy):
         return (f'<ellipse cx="{cx}" cy="{cy}" rx="20" ry="24" fill="#3d6dff" opacity="0.6" filter="url(#b8)"/>'
                 f'<ellipse cx="{cx}" cy="{cy}" rx="9" ry="12" fill="{BL}" filter="url(#b2)"/>'
@@ -124,21 +123,21 @@ def head():
         "smile": halo(84, 26) + f'<path d="M572,{my - 8} Q600,{my + 14} 628,{my - 8}" stroke="{BL}" stroke-width="7" fill="none" stroke-linecap="round"/>',
     }
     mouths = "".join(f'<g id="m-{k}" class="mth" opacity="{1 if k == "smile" else 0}">{v}</g>' for k, v in m.items())
-    void = 'transform="translate(600 384) scale(0.74 0.8) translate(-600 -384)"'
-    core = 'transform="translate(600 378) scale(0.44 0.56) translate(-600 -378)"'
+    hat = (  # black fedora: brim first, then the pinched crown with a band over its back half
+        f'<path d="M386,266 C394,236 478,224 600,224 C722,224 806,236 814,266 C806,292 722,288 600,286 C478,288 394,292 386,266 Z" fill="{HAT}" stroke="{LINE}" stroke-width="{LW}" stroke-linejoin="round"/>'
+        f'<path d="M404,272 C440,284 520,282 600,280 C680,282 760,284 796,272" stroke="{HAT_HI}" stroke-width="4" fill="none" stroke-linecap="round"/>'
+        f'<path d="M478,258 C470,206 474,152 498,116 C538,100 572,122 600,112 C628,122 662,100 702,116 C726,152 730,206 722,258 C650,272 550,272 478,258 Z" fill="{HAT}" stroke="{LINE}" stroke-width="{LW}" stroke-linejoin="round"/>'
+        f'<path d="M600,114 C596,140 598,170 604,196" stroke="{LINE}" stroke-width="3" fill="none" opacity="0.8"/>'
+        f'<path d="M514,130 C500,160 496,200 500,236" stroke="{HAT_HI}" stroke-width="7" fill="none" stroke-linecap="round" opacity="0.8"/>'
+        f'<path d="M480,222 C552,236 648,236 720,222 L722,258 C650,272 550,272 478,258 Z" fill="{BAND}" stroke="{LINE}" stroke-width="{LW}" stroke-linejoin="round"/>'
+        f'<path d="M484,232 C556,246 644,246 716,232" stroke="#4a4a52" stroke-width="2.5" fill="none" opacity="0.8"/>')
     return f'''<g id="head">
-  <g opacity="0.55" filter="url(#b18)">{bloom}</g>
-  <g id="flames">{tongues}</g>
-  <path d="{FACE}" fill="url(#fl)" filter="url(#b2)"/>
-  <path d="{FACE}" fill="url(#rim)" filter="url(#b2)"/>
-  <path d="{edge(1, 12)}" stroke="#fff3d6" stroke-width="13" fill="none" stroke-linecap="round" opacity="0.55" filter="url(#b8)"/>
-  <path d="M598,98 C588,132 572,164 562,204" stroke="#fff6dc" stroke-width="10" fill="none" stroke-linecap="round" opacity="0.5" filter="url(#b8)"/>
-  <path d="{edge(-1, 12)}" stroke="#ff4f9a" stroke-width="15" fill="none" stroke-linecap="round" opacity="0.5" filter="url(#b8)"/>
-  <path d="M540,{CHIN - 22} Q600,{CHIN + 2} 660,{CHIN - 22}" stroke="#4f7dff" stroke-width="10" fill="none" stroke-linecap="round" opacity="0.5" filter="url(#b8)"/>
-  <path d="{FACE}" fill="url(#void)" {void} filter="url(#b8)"/>
-  <path d="{FACE}" fill="#050309" opacity="0.85" {core} filter="url(#b18)"/>
+  <path d="{FACE}" fill="{FACE_C}" stroke="{LINE}" stroke-width="{LW}"/>
+  <path d="{edge(-1, 22)}" stroke="#2a2833" stroke-width="12" fill="none" stroke-linecap="round" opacity="0.9" filter="url(#b8)"/>
+  <ellipse cx="600" cy="380" rx="90" ry="110" fill="#000" opacity="0.5" filter="url(#b18)"/>
   {eyes}
   {mouths}
+  <g id="hat">{hat}</g>
 </g>'''
 
 # ------------------------------------------------------------------ arm: thick sleeve from the shoulder seam, smooth elbow,
@@ -178,11 +177,11 @@ def locket():
     chain = "M566,556 C566,610 584,642 600,650 C616,642 634,610 634,556"
     return (f'<path d="{chain}" stroke="{LINE}" stroke-width="7" fill="none" stroke-linecap="round"/>'
             f'<path d="{chain}" stroke="#c9ccd3" stroke-width="4" fill="none" stroke-dasharray="5 3" stroke-linecap="round"/>'
-            f'<circle cx="600" cy="652" r="6" fill="none" stroke="#c9ccd3" stroke-width="3"/>'
-            f'<clipPath id="lk"><circle cx="600" cy="690" r="30"/></clipPath>'
-            f'<circle cx="600" cy="690" r="35" fill="#e2e4e9" stroke="{LINE}" stroke-width="3"/>'
-            f'<image href="data:image/png;base64,{b64}" x="566" y="656" width="68" height="68" clip-path="url(#lk)"/>'
-            f'<path d="M578,668 A30,30 0 0 1 604,660" stroke="#fff" stroke-width="2.5" fill="none" opacity="0.5"/>')
+            f'<g id="pendant"><circle cx="600" cy="652" r="5" fill="none" stroke="#c9ccd3" stroke-width="3"/>'
+            f'<clipPath id="lk"><circle cx="600" cy="680" r="20"/></clipPath>'
+            f'<circle cx="600" cy="680" r="24" fill="#e2e4e9" stroke="{LINE}" stroke-width="2.5"/>'
+            f'<image href="data:image/png;base64,{b64}" x="577" y="657" width="46" height="46" clip-path="url(#lk)"/>'
+            f'<path d="M585,664 A20,20 0 0 1 603,659" stroke="#fff" stroke-width="2" fill="none" opacity="0.55"/></g>')
 
 def body():
     sw = ("M540,548 C480,556 424,572 396,602 C374,624 366,652 366,700 L362,1010 L838,1010 L834,700 "
@@ -249,7 +248,8 @@ json.dump({
     "poses": list(POSES_L),
     "arms": [{"id": "armL", "shoulder": list(SHL), "upper": U, "hands": ["point", "palm", "thumb"], "poses": POSES_L},
              {"id": "armR", "shoulder": list(SHR), "upper": U, "hands": ["palm", "point"], "poses": POSES_R}],
-    "brows": {"sel": "#flames", "raise": -16},
-    "idle": [{"sel": "#" + k, "rot": r, "period": p, "origin": o} for k, (d, o, r, p) in TONGUES.items()],
+    "brows": {"sel": "#hat", "raise": -10},
+    "idle": [{"sel": "#pendant", "rot": 9, "period": 1.4, "origin": "600 652"}],
+    "react": {"sel": "#pendant", "y": -8, "rot": 14, "origin": "600 652"},
 }, open(os.path.join(here, "character.json"), "w"), indent=1)
 print("wrote character.svg + character.json")
