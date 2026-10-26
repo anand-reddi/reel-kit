@@ -300,9 +300,9 @@ class Film:
         k_box, k_full = cv.get("box_scale", 0.82), cv.get("full_scale", 1.55)
         bw, bh, bx, by = 780, 500, 150, 1330
         lay = {
-            # box: the head breaks out over the top edge (clip only the sides and bottom), and the box sits above all
+            # box: head and hands break out over the top and sides (only the bottom edge clips), and the box sits above all
             "box":  dict(cam=dict(left=bx, top=by, width=bw, height=bh, zIndex=10),
-                         back=dict(borderRadius=28, borderWidth=3), clip=dict(clipPath='"inset(-900px 0px 0px 0px round 0px 0px 28px 28px)"'),
+                         back=dict(borderRadius=28, borderWidth=3), clip=dict(clipPath='"inset(-900px -600px 0px -600px)"'),
                          svg=dict(left=bw / 2 - 600 * k_box, top=cv.get("box_pop", -90) - hat * k_box, width=1200 * k_box)),
             "full": dict(cam=dict(left=0, top=0, width=W, height=H, zIndex=1),
                          back=dict(borderRadius=0, borderWidth=0), clip=dict(clipPath='"inset(0px 0px 0px 0px)"'),

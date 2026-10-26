@@ -81,7 +81,7 @@ Example: `examples/figures.json`.
 
 ## Camera layouts
 Setting `"layout"` on any scene turns on the presenter camera: the character sits in a backdrop that hard-cuts per scene
-between `"box"` (a rounded frame at the bottom centre; the head breaks out over its top edge and the box stacks above
+between `"box"` (a rounded frame at the bottom centre; head and hands break out over its top and sides, and the box stacks above
 cards and captions) and `"full"` (a close-up filling the frame, for the
 hook, opinions and punchlines; give those scenes no card). Tune per character in `character.json` with
 `"camera": {"top_y": 78, "box_scale": 0.82, "box_pop": -90, "full_scale": 1.55, "full_top": 600, "backdrop": "<css background>"}`.
