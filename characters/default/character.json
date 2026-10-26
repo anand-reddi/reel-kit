@@ -1,9 +1,124 @@
 {
-  "type": "svg",
-  "file": "character.svg",
-  "x": -60, "y": 1130, "width": 1200,
-  "head_origin": "600 480",
-  "wave_origin": "800 560",
-  "avatar_view": "395 70 410 410",
-  "poses": ["up", "palms", "card", "thumb", "shrug", "wave"]
+ "type": "svg",
+ "file": "character.svg",
+ "x": 60,
+ "y": 1290,
+ "width": 960,
+ "head_origin": "600 500",
+ "avatar_view": "380 40 440 500",
+ "head_tilt": 0.35,
+ "poses": [
+  "rest",
+  "up",
+  "card",
+  "palms",
+  "shrug",
+  "thumb",
+  "wave"
+ ],
+ "arms": [
+  {
+   "id": "armL",
+   "shoulder": [
+    414,
+    640
+   ],
+   "upper": 150,
+   "hands": [
+    "point",
+    "palm",
+    "thumb"
+   ],
+   "poses": {
+    "rest": {
+     "u": 96,
+     "f": -4,
+     "hand": "palm"
+    },
+    "up": {
+     "u": 172,
+     "f": 96,
+     "hand": "point"
+    },
+    "card": {
+     "u": 190,
+     "f": 55,
+     "hand": "point"
+    },
+    "palms": {
+     "u": 128,
+     "f": 100,
+     "hand": "palm"
+    },
+    "shrug": {
+     "u": 122,
+     "f": 88,
+     "hand": "palm"
+    },
+    "thumb": {
+     "u": 162,
+     "f": 108,
+     "hand": "thumb"
+    },
+    "wave": {
+     "u": 170,
+     "f": 94,
+     "hand": "palm",
+     "wave": true
+    }
+   }
+  },
+  {
+   "id": "armR",
+   "shoulder": [
+    786,
+    640
+   ],
+   "upper": 150,
+   "hands": [
+    "palm",
+    "point"
+   ],
+   "poses": {
+    "rest": {
+     "u": 84,
+     "f": 4,
+     "hand": "palm"
+    },
+    "up": {
+     "u": 8,
+     "f": -96,
+     "hand": "point"
+    },
+    "palms": {
+     "u": 52,
+     "f": -100,
+     "hand": "palm"
+    },
+    "shrug": {
+     "u": 58,
+     "f": -88,
+     "hand": "palm"
+    }
+   }
+  }
+ ],
+ "brows": {
+  "sel": "#hat",
+  "raise": -10
+ },
+ "idle": [
+  {
+   "sel": "#pendant",
+   "rot": 9,
+   "period": 1.4,
+   "origin": "600 652"
+  }
+ ],
+ "react": {
+  "sel": "#pendant",
+  "y": -8,
+  "rot": 14,
+  "origin": "600 652"
+ }
 }

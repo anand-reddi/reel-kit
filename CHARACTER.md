@@ -2,7 +2,7 @@
 
 A character is a folder with a `character.json`. Point a script at it with `"character": "characters/<name>"` (relative to the
 script or the kit) or `"character": "none"` for no presenter (cards then sit lower). `characters/default/` is the
-placeholder.
+@techinsixty presenter (black face, fedora, 60 pendant).
 
 ## Option A: SVG (full lip sync, blinks, gestures). Best result.
 
@@ -24,7 +24,7 @@ placeholder.
 
 Pose names are free; the script's `pose` / `pose_cycle` use them. Built-in scripts expect `up` (point up), `palms` (open hands),
 `card` (point at the card), `thumb` (at chest), `shrug`, `wave`. `avatar_view` is the crop used for the profile-card avatar.
-The default's generator (`characters/default/make.py`) is a working template.
+The default's generator (`characters/default/make.py`) is a working template (it uses the arm rig below).
 
 ### Arm rigs (SVG)
 An SVG character can carry real two-bone arms instead of whole pose groups: `"arms": [{"id": "armL", "shoulder": [x, y],
@@ -33,7 +33,7 @@ An SVG character can carry real two-bone arms instead of whole pose groups: `"ar
 inside it bends at the elbow (`translate(upper, 0)`) by `f`; one `#armL-<hand>` group per hand shape. On each beat the
 arm winds up, swings with a small overshoot and swaps the hand mid-swing (transforms are applied by a timeline hook, so
 nested rotations stay exact). `"brows": {"sel": "#brows", "raise": -9, "end": "#browL"}` lifts the brows on accented
-words and shrugs, and raises one brow with the final smirk. `characters/dev/` is the reference.
+words and shrugs, and raises one brow with the final smirk. `characters/default/` is the reference.
 `"head_tilt": 0.35` scales the head tilt on each beat (1 = default; lower keeps the face looking straight).
 
 ### Secondary motion (both options)
@@ -58,7 +58,7 @@ Extra PNG keys: `"layers": [{"id", "src", "z", "hidden"}]` (z < 0 = behind the b
 
 ## Option C: cut-out rig from an illustration (best fidelity: the art is never redrawn)
 
-`characters/presenter/` (the @techinsixty presenter + kitten) is the reference. `build.py` cuts the master image into
+No rig character is bundled right now; the approach: a `build.py` cuts the master image into
 full-canvas layers (body, head, kitten body/head/ear, tail), gives every pixel to exactly one part, in-paints what each
 moving part hides (neck under the jaw, shirt under the kitten, fur under the ear and tail base) so motion never tears,
 and paints only what the art lacks (open mouths, closed eyes, kitten blink). `rig/character.json`:
