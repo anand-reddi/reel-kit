@@ -12,7 +12,7 @@ SHIRT, SHIRT_SH, SHIRT_HI, CUFF = "#232327", "#17171a", "#3b3b42", "#2e2e34"    
 TEE, TEE_SH = "#f3f1ec", "#d8d4cb"                                              # white tee
 LINE, LW = "#0c0c0e", 3
 BTN = "#9a9aa2"
-SKIN, SKIN_SH, SKIN_LN, HAND_OUT = "#3a3442", "#2a2531", "#5a5368", "#121016"  # shadow-figure neck and hands
+SKIN, SKIN_SH, SKIN_LN, HAND_OUT = "#0e0d13", "#000000", "#3a3846", "#000000"  # hands in the same black as the face and neck
 BL = "#8fb2ff"
 HAT, HAT_HI, BAND, FACE_C = "#18181c", "#303038", "#2a2a30", "#0a090e"
 

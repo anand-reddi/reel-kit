@@ -80,3 +80,11 @@ html, body { margin: 0; background: {paper}; }
 #cam { z-index: 1; }
 .hdr, .cap { z-index: 6; }
 .card-wrap { z-index: 4; }
+
+/* "header": "chips" */
+.hdr.chips { align-items: center; color: {ink}; letter-spacing: 0; top: 104px; }
+.hdr.chips .hl { display: flex; align-items: center; gap: 18px; }
+.hdr.chips .hnum { background: {accent}; color: #fff; font-weight: 800; font-size: 26px; padding: 8px 14px; border-radius: 10px; letter-spacing: 1px; }
+.hdr.chips .hlab { font-weight: 800; font-size: 28px; text-transform: uppercase; letter-spacing: 3px; }
+.hdr.chips .hcnt { border: 2px solid {mid}; border-radius: 999px; padding: 8px 20px; font-weight: 700; font-size: 24px; letter-spacing: 2px; text-transform: uppercase; color: {mid}; }
+.hdr.chips .hcnt b { color: {accent}; margin-left: 6px; }

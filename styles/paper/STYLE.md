@@ -91,3 +91,7 @@ SVG characters only. Without any `"layout"` the presenter stays at the bottom as
 `"fonts"` in the script picks a preset: `"grotesk"` (default: Space Grotesk, Instrument Serif accents, IBM Plex Mono),
 `"bricolage"` (Bricolage Grotesque bold, DM Serif Display accents, JetBrains Mono) or `"archivo"` (Archivo extra-bold,
 Playfair Display accents, JetBrains Mono; the heavy look of big explainer reels). All OFL, vendored in `assets/fonts/`.
+
+## Header
+`"header": "chips"` swaps the mono `// 02 · label   NAME 1/3` header for a red number tag, a bold uppercase label in the
+caption font, and the counter in an outlined pill.

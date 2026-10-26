@@ -130,7 +130,12 @@ class Film:
             cnt = sc.get("counter") or {}
             cid = f"hv{i}"; cv = cnt.get("value", cnt.get("from", ""))
             right = f'{esc(cnt.get("name", ""))} <b id="{cid}" class="redt">{esc(cv)}</b>' if cnt else ""
-            hdr += f'<div id="hd{i}" class="hdr mono"><span>// {i + 1:02d} · {esc(sc.get("label", ""))}</span><span>{right}</span></div>'
+            if s.sc.get("header") == "chips":   # red number tag + bold uppercase label, counter in an outlined pill
+                pill = f'<span class="hcnt">{esc(cnt.get("name", ""))} <b id="{cid}">{esc(cv)}</b></span>' if cnt else ""
+                hdr += (f'<div id="hd{i}" class="hdr chips"><span class="hl"><span class="hnum">{i + 1:02d}</span>'
+                        f'<span class="hlab">{esc(sc.get("label", ""))}</span></span>{pill}</div>')
+            else:
+                hdr += f'<div id="hd{i}" class="hdr mono"><span>// {i + 1:02d} · {esc(sc.get("label", ""))}</span><span>{right}</span></div>'
             A(f'tl.set("#hd{i}", {{ opacity: 1 }}, {r3(st)});')
             if i < n - 1: A(f'tl.set("#hd{i}", {{ opacity: 0 }}, {r3(en)});')
             ctx = Ctx(s, i, st, en, lns, p)
