@@ -1,9 +1,9 @@
 {
  "type": "svg",
  "file": "character.svg",
- "x": -60,
- "y": 1130,
- "width": 1200,
+ "x": 60,
+ "y": 1290,
+ "width": 960,
  "head_origin": "600 530",
  "avatar_view": "380 40 440 500",
  "head_tilt": 0.35,
@@ -125,6 +125,24 @@
    "rot": 5,
    "period": 1.5,
    "origin": "680 340"
+  },
+  {
+   "sel": "#tongueMR",
+   "rot": 5,
+   "period": 1.0,
+   "origin": "638 334"
+  },
+  {
+   "sel": "#tongueLL",
+   "rot": 6,
+   "period": 1.7,
+   "origin": "486 374"
+  },
+  {
+   "sel": "#tongueRR",
+   "rot": 6,
+   "period": 1.25,
+   "origin": "716 374"
   }
  ]
 }

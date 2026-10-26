@@ -99,6 +99,9 @@ TONGUES = {   # rooted deep inside the head and swaying around their own base, s
     "tongueM": ("M550,330 C542,204 588,132 604,52 C640,120 676,192 654,330 Z", "602 330", 4, 1.3),
     "tongueL": ("M494,350 C474,270 482,200 510,150 C528,210 552,252 556,340 Z", "522 340", 5, 1.1),
     "tongueR": ("M644,340 C648,252 670,204 694,152 C722,206 728,276 708,350 Z", "680 340", 5, 1.5),
+    "tongueMR": ("M608,334 C612,250 636,196 648,124 C672,184 684,254 666,334 Z", "638 334", 5, 1.0),
+    "tongueLL": ("M462,384 C438,322 442,262 464,212 C478,262 500,302 508,364 Z", "486 374", 6, 1.7),
+    "tongueRR": ("M694,364 C700,302 722,262 736,212 C758,262 762,322 738,384 Z", "716 374", 6, 1.25),
 }
 
 def head():
@@ -168,6 +171,19 @@ def arm(side, rest_u, rest_f):
             f'</g></g></g></g>')
 
 # ------------------------------------------------------------------ torso: open black overshirt over a white tee
+def locket():
+    """Silver chain with a round pendant carrying the @techinsixty 60 logo (logo60.png, embedded)."""
+    import base64
+    b64 = base64.b64encode(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "logo60.png"), "rb").read()).decode()
+    chain = "M566,556 C566,610 584,642 600,650 C616,642 634,610 634,556"
+    return (f'<path d="{chain}" stroke="{LINE}" stroke-width="7" fill="none" stroke-linecap="round"/>'
+            f'<path d="{chain}" stroke="#c9ccd3" stroke-width="4" fill="none" stroke-dasharray="5 3" stroke-linecap="round"/>'
+            f'<circle cx="600" cy="652" r="6" fill="none" stroke="#c9ccd3" stroke-width="3"/>'
+            f'<clipPath id="lk"><circle cx="600" cy="690" r="30"/></clipPath>'
+            f'<circle cx="600" cy="690" r="35" fill="#e2e4e9" stroke="{LINE}" stroke-width="3"/>'
+            f'<image href="data:image/png;base64,{b64}" x="566" y="656" width="68" height="68" clip-path="url(#lk)"/>'
+            f'<path d="M578,668 A30,30 0 0 1 604,660" stroke="#fff" stroke-width="2.5" fill="none" opacity="0.5"/>')
+
 def body():
     sw = ("M540,548 C480,556 424,572 396,602 C374,624 366,652 366,700 L362,1010 L838,1010 L834,700 "
           "C834,652 826,624 804,602 C776,572 720,556 660,548 Z")
@@ -198,6 +214,7 @@ def body():
   {"".join(f'<circle cx="{538 - (y - 600) * 0.05:.1f}" cy="{y}" r="5" fill="{BTN}"/>' for y in (700, 810, 920))}
   {collar(1)}{collar(-1)}
   {pocket(436)}{pocket(676)}
+  {locket()}
   <path d="M470,860 C490,880 500,920 498,960 M730,850 C716,890 712,930 716,970" stroke="{LINE}" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.6"/>'''
 
 # ------------------------------------------------------------------ poses (u: shoulder angle, f: elbow bend; 90 = straight down)
@@ -227,7 +244,7 @@ svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1000" width=
 here = os.path.dirname(os.path.abspath(__file__))
 open(os.path.join(here, "character.svg"), "w").write(svg)
 json.dump({
-    "type": "svg", "file": "character.svg", "x": -60, "y": 1130, "width": 1200,
+    "type": "svg", "file": "character.svg", "x": 60, "y": 1290, "width": 960,
     "head_origin": "600 530", "avatar_view": "380 40 440 500", "head_tilt": 0.35,
     "poses": list(POSES_L),
     "arms": [{"id": "armL", "shoulder": list(SHL), "upper": U, "hands": ["point", "palm", "thumb"], "poses": POSES_L},
