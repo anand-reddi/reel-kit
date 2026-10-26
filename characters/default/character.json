@@ -5,7 +5,7 @@
  "y": 1290,
  "width": 960,
  "head_origin": "600 500",
- "avatar_view": "380 110 440 400",
+ "avatar_view": "380 40 440 500",
  "head_tilt": 0.35,
  "poses": [
   "rest",
@@ -104,8 +104,8 @@
   }
  ],
  "brows": {
-  "sel": "#eyes-all",
-  "raise": -7
+  "sel": "#hat",
+  "raise": -10
  },
  "faces": {
   "names": [
@@ -121,7 +121,7 @@
    "angry"
   ],
   "default": "neutral",
-  "origin": "600 318",
+  "origin": "600 316",
   "start": "happy",
   "stamp": "surprised",
   "end": "wink",
@@ -131,9 +131,6 @@
    "wave": "happy",
    "shrug": "bored"
   }
- },
- "camera": {
-  "top_y": 148
  },
  "idle": [
   {

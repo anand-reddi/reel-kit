@@ -1,5 +1,6 @@
-"""The @techinsixty presenter (default character): an original faceless figure with a black oval face (two blue glowing
-eyes, a blue LED bot mouth that shows equaliser bars while talking), ears, a black fedora that lifts on accented words,
+"""The @techinsixty presenter (default character): an original faceless figure with a black oval face (blue glowing LED
+expression eyes: neutral happy wink surprised content angel bored sad cry angry; a blue LED bot mouth that shows
+equaliser bars while talking), ears, a black fedora that lifts on accented words,
 an open black overshirt over a white tee, and a silver chain with the 60-logo pendant that swings.
 Arms are built like a cartoon explainer presenter: broad shoulders, thick sleeves from the shoulder seam, smooth elbow,
 rolled cuffs near the wrist, a bare wrist and big hands with thin outlines. Two-bone arm rig.
@@ -139,7 +140,8 @@ def head():
   <path d="{FACE}" fill="{FACE_C}" stroke="{LINE}" stroke-width="{LW}"/>
   <path d="{edge(-1, 22)}" stroke="#2a2833" stroke-width="12" fill="none" stroke-linecap="round" opacity="0.9" filter="url(#b8)"/>
   <ellipse cx="600" cy="380" rx="90" ry="110" fill="#000" opacity="0.5" filter="url(#b18)"/>
-  {eyes}
+  <clipPath id="faceclip"><path d="{FACE}"/></clipPath>
+  {('<g id="eyes-all">' + "".join(face_group(k) for k in FACES) + '</g>') if EXPRESSIONS else eyes}
   {mouths}
   <g id="hat">{hat}</g>
 </g></g>'''
@@ -152,15 +154,23 @@ SHELL_RIGHT = [(0, 156), (112, 162), (180, 190), (212, 248), (220, 318), (210, 3
 SCREEN_RIGHT = [(0, 180), (106, 184), (164, 210), (192, 260), (198, 320), (190, 384), (162, 436), (110, 464), (0, 472)]
 SHELL = smooth([(600 + x, y) for x, y in SHELL_RIGHT] + [(600 - x, y) for x, y in reversed(SHELL_RIGHT[1:-1])])
 SCREEN = smooth([(600 + x, y) for x, y in SCREEN_RIGHT] + [(600 - x, y) for x, y in reversed(SCREEN_RIGHT[1:-1])])
-EX, EY, EK = 88, 318, 1.45   # eye offset from the centre line, eye line, eye scale
 FACES = ["neutral", "happy", "wink", "surprised", "content", "angel", "bored", "sad", "cry", "angry"]
+# where and how the expression faces are drawn, per head: eye offset / eye line / eye scale, LED colours, the clip the
+# tears and the angel band stay inside, the halo height, and whether the face draws its own small mouth
+GEO = {
+    "helmet": dict(ex=88, ey=318, ek=1.45, col=LED, glow=LED_GLOW, clip="screenclip", band="M380,182 L820,182 L820,204 L380,204 Z",
+                   halo_y=108, halo_rx=130, mouth=True),
+    # black face (drawn inside the head's translate(0 -34) group, so these are pre-shift coordinates); his blue glow
+    "face":   dict(ex=60, ey=350, ek=1.0, col=BL, glow="#3d6dff", clip="faceclip", band=None, halo_y=74, halo_rx=118, mouth=False),
+}
+G = GEO["helmet"]
 
 def led(d, stroke=0):
     """A glowing LED shape: blurred bloom under a crisp fill (or a round-capped stroke when stroke > 0)."""
     if stroke:
         s = lambda col, w, extra="": f'<path d="{d}" stroke="{col}" stroke-width="{w}" fill="none" stroke-linecap="round" stroke-linejoin="round"{extra}/>'
-        return s(LED_GLOW, stroke + 10, ' opacity="0.75" filter="url(#b8)"') + s(LED, stroke)
-    return (f'<path d="{d}" fill="{LED_GLOW}" opacity="0.75" filter="url(#b8)"/><path d="{d}" fill="{LED}"/>')
+        return s(G["glow"], stroke + 10, ' opacity="0.75" filter="url(#ledb)"') + s(G["col"], stroke)
+    return (f'<path d="{d}" fill="{G["glow"]}" opacity="0.75" filter="url(#ledb)"/><path d="{d}" fill="{G["col"]}"/>')
 
 def eye_shape(kind, cx, cy):
     """Left-eye shapes (the right eye is the mirror image). Returns (path d, stroke width or 0)."""
@@ -176,6 +186,7 @@ def eye_shape(kind, cx, cy):
     raise SystemExit(kind)
 
 def face_group(kind):
+    EX, EY, EK = G["ex"], G["ey"], G["ek"]
     lx, rx = 600 - EX, 600 + EX
     at = lambda x, flip, inner: f'<g transform="translate({x} {EY}) scale({-EK if flip else EK} {EK})">{inner}</g>'
     if kind == "wink":
@@ -185,17 +196,19 @@ def face_group(kind):
         d, w = eye_shape(kind, 0, 0)
         eyes = at(lx, False, led(d, w)) + at(rx, True, led(d, w))
     extra = ""
-    if kind == "surprised": extra = led("M588,404 a12,18 0 1,0 24,0 a12,18 0 1,0 -24,0 Z")
+    if kind == "surprised" and G["mouth"]: extra = led("M588,404 a12,18 0 1,0 24,0 a12,18 0 1,0 -24,0 Z")
     if kind == "angel":
-        extra = (led("M580,398 Q600,416 620,398", 9)
-                 + f'<path d="M380,182 L820,182 L820,204 L380,204 Z" fill="#9a7650" opacity="0.75" clip-path="url(#screenclip)"/>'
-                 + '<g id="halo"><ellipse cx="600" cy="108" rx="130" ry="22" fill="none" stroke="#fff3c4" stroke-width="22" opacity="0.6" filter="url(#b8)"/>'
-                   '<ellipse cx="600" cy="108" rx="130" ry="22" fill="none" stroke="#fbe9b0" stroke-width="13"/>'
-                   '<ellipse cx="600" cy="104" rx="124" ry="18" fill="none" stroke="#fffbe8" stroke-width="3" opacity="0.9"/></g>')
+        hy, hr = G["halo_y"], G["halo_rx"]
+        extra = ((led("M580,398 Q600,416 620,398", 9) if G["mouth"] else "")
+                 + (f'<path d="{G["band"]}" fill="#9a7650" opacity="0.75" clip-path="url(#{G["clip"]})"/>' if G["band"] else "")
+                 + f'<g id="halo"><ellipse cx="600" cy="{hy}" rx="{hr}" ry="22" fill="none" stroke="#fff3c4" stroke-width="22" opacity="0.6" filter="url(#b8)"/>'
+                   f'<ellipse cx="600" cy="{hy}" rx="{hr}" ry="22" fill="none" stroke="#fbe9b0" stroke-width="13"/>'
+                   f'<ellipse cx="600" cy="{hy - 4}" rx="{hr - 6}" ry="18" fill="none" stroke="#fffbe8" stroke-width="3" opacity="0.9"/></g>')
     if kind == "cry":   # wavy streams running from each eye down the screen
         tear = lambda x, s: (f"M{x - 16 * s},{EY + 34} C{x - 26 * s},{EY + 70} {x - 4 * s},{EY + 92} {x - 16 * s},{EY + 120} "
                              f"C{x - 26 * s},{EY + 140} {x - 8 * s},{EY + 152} {x - 14 * s},{EY + 175}")
-        extra = f'<g id="tears" clip-path="url(#screenclip)">{led(tear(lx + 6, 1), 18)}{led(tear(rx - 6, -1), 18)}</g>'
+        tw = round(18 * EK)
+        extra = f'<g id="tears" clip-path="url(#{G["clip"]})">{led(tear(lx + 6, 1), tw)}{led(tear(rx - 6, -1), tw)}</g>'
     return f'<g id="face-{kind}" opacity="{1 if kind == "neutral" else 0}">{eyes}{extra}</g>'
 
 def helmet():
@@ -225,6 +238,7 @@ HELMET_DEFS = f'''<defs>
   <linearGradient id="shell" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="0.55" stop-color="#eceef1"/><stop offset="1" stop-color="#c9ced6"/></linearGradient>
   <radialGradient id="screen" cx="0.5" cy="0.42" r="0.62"><stop offset="0" stop-color="#1f3560"/><stop offset="0.7" stop-color="#11203f"/><stop offset="1" stop-color="#070d1c"/></radialGradient>
   <clipPath id="screenclip"><path d="{SCREEN}"/></clipPath>
+  <filter id="ledb" filterUnits="userSpaceOnUse" x="-700" y="-700" width="2600" height="2400"><feGaussianBlur stdDeviation="8"/></filter>
 </defs>'''
 
 # ------------------------------------------------------------------ arm: thick sleeve from the shoulder seam, smooth elbow,
@@ -323,7 +337,9 @@ POSES_R = {
     "shrug": dict(u=58, f=-88, hand="palm"),
 }
 
-HEAD = "face" if "--head=face" in sys.argv else "helmet"     # helmet (default) | face (black oval face + fedora)
+HEAD = "helmet" if "--head=helmet" in sys.argv else "face"   # face (default: black oval face + fedora) | helmet (robot)
+EXPRESSIONS = "--fixed-eyes" not in sys.argv                    # expression faces (default) or the original fixed eyes
+G = GEO[HEAD]
 svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1000" width="1200" height="1000">
 {DEFS}{HELMET_DEFS}<g id="pres-body">
   {body()}
@@ -340,11 +356,12 @@ json.dump({
     "arms": [{"id": "armL", "shoulder": list(SHL), "upper": U, "hands": ["point", "palm", "thumb"], "poses": POSES_L},
              {"id": "armR", "shoulder": list(SHR), "upper": U, "hands": ["palm", "point"], "poses": POSES_R}],
     "brows": {"sel": "#eyes-all", "raise": -7} if HEAD == "helmet" else {"sel": "#hat", "raise": -10},
-    **({"faces": {"names": FACES, "default": "neutral", "origin": f"600 {EY}", "start": "happy", "stamp": "surprised", "end": "wink",
-                  "by_pose": {"palms": "happy", "thumb": "happy", "wave": "happy", "shrug": "bored"}},
-        "camera": {"top_y": 148}} if HEAD == "helmet" else {}),
+    **({"faces": {"names": FACES, "default": "neutral", "origin": f"600 {G['ey'] - (34 if HEAD == 'face' else 0)}", "start": "happy",
+                  "stamp": "surprised", "end": "wink", "by_pose": {"palms": "happy", "thumb": "happy", "wave": "happy", "shrug": "bored"}}}
+       if EXPRESSIONS else {}),
+    **({"camera": {"top_y": 148}} if HEAD == "helmet" else {}),
     "idle": [{"sel": "#pendant", "rot": 9, "period": 1.4, "origin": "600 652"}]
-            + ([{"sel": "#halo", "y": -10, "period": 1.3}, {"sel": "#tears", "y": 7, "period": 0.5}] if HEAD == "helmet" else []),
+            + ([{"sel": "#halo", "y": -10, "period": 1.3}, {"sel": "#tears", "y": 7, "period": 0.5}] if EXPRESSIONS else []),
     "react": {"sel": "#pendant", "y": -8, "rot": 14, "origin": "600 652"},
 }, open(os.path.join(here, "character.json"), "w"), indent=1)
 print("wrote character.svg + character.json")
