@@ -144,6 +144,89 @@ def head():
   <g id="hat">{hat}</g>
 </g></g>'''
 
+
+# ------------------------------------------------------------------ head: robot helmet (white glossy shell, dark glass screen, LED-matrix eyes)
+# Expressions are separate groups (#face-<name>) swapped by the composer: see FACES. The screen glows cyan.
+LED, LED_GLOW, LED_HI = "#3fd6f7", "#119fe0", "#a6f0ff"
+SHELL_RIGHT = [(0, 156), (112, 162), (180, 190), (212, 248), (220, 318), (210, 390), (178, 448), (118, 482), (0, 492)]
+SCREEN_RIGHT = [(0, 180), (106, 184), (164, 210), (192, 260), (198, 320), (190, 384), (162, 436), (110, 464), (0, 472)]
+SHELL = smooth([(600 + x, y) for x, y in SHELL_RIGHT] + [(600 - x, y) for x, y in reversed(SHELL_RIGHT[1:-1])])
+SCREEN = smooth([(600 + x, y) for x, y in SCREEN_RIGHT] + [(600 - x, y) for x, y in reversed(SCREEN_RIGHT[1:-1])])
+EX, EY, EK = 88, 318, 1.45   # eye offset from the centre line, eye line, eye scale
+FACES = ["neutral", "happy", "wink", "surprised", "content", "angel", "bored", "sad", "cry", "angry"]
+
+def led(d, stroke=0):
+    """A glowing LED shape: blurred bloom under a crisp fill (or a round-capped stroke when stroke > 0)."""
+    if stroke:
+        s = lambda col, w, extra="": f'<path d="{d}" stroke="{col}" stroke-width="{w}" fill="none" stroke-linecap="round" stroke-linejoin="round"{extra}/>'
+        return s(LED_GLOW, stroke + 10, ' opacity="0.75" filter="url(#b8)"') + s(LED, stroke)
+    return (f'<path d="{d}" fill="{LED_GLOW}" opacity="0.75" filter="url(#b8)"/><path d="{d}" fill="{LED}"/>')
+
+def eye_shape(kind, cx, cy):
+    """Left-eye shapes (the right eye is the mirror image). Returns (path d, stroke width or 0)."""
+    if kind == "neutral":   return (f"M{cx - 24},{cy} a24,30 0 1,0 48,0 a24,30 0 1,0 -48,0 Z", 0)
+    if kind == "happy":     return (f"M{cx - 32},{cy + 14} C{cx - 34},{cy - 34} {cx + 34},{cy - 34} {cx + 32},{cy + 14} Q{cx},{cy - 4} {cx - 32},{cy + 14} Z", 0)
+    if kind == "surprised": return (f"M{cx - 30},{cy - 2} a30,40 0 1,0 60,0 a30,40 0 1,0 -60,0 Z", 0)
+    if kind == "content":   return (f"M{cx - 30},{cy + 2} Q{cx},{cy + 26} {cx + 30},{cy + 2}", 9)
+    if kind == "angel":     return (f"M{cx - 30},{cy + 10} Q{cx},{cy - 20} {cx + 30},{cy + 10}", 9)
+    if kind == "bored":     return (f"M{cx - 36},{cy - 4} L{cx + 36},{cy - 4} Q{cx + 36},{cy + 18} {cx},{cy + 18} Q{cx - 36},{cy + 18} {cx - 36},{cy - 4} Z", 0)
+    if kind in ("sad", "cry"):
+        return (f"M{cx - 38},{cy + 10} Q{cx - 4},{cy - 2} {cx + 30},{cy - 22} Q{cx + 40},{cy + 26} {cx + 4},{cy + 30} Q{cx - 36},{cy + 30} {cx - 38},{cy + 10} Z", 0)
+    if kind == "angry":     return (f"M{cx - 36},{cy - 18} L{cx + 32},{cy + 8} Q{cx + 22},{cy + 30} {cx - 6},{cy + 28} Q{cx - 38},{cy + 22} {cx - 36},{cy - 18} Z", 0)
+    raise SystemExit(kind)
+
+def face_group(kind):
+    lx, rx = 600 - EX, 600 + EX
+    at = lambda x, flip, inner: f'<g transform="translate({x} {EY}) scale({-EK if flip else EK} {EK})">{inner}</g>'
+    if kind == "wink":
+        d, w = eye_shape("happy", 0, 0)
+        eyes = at(lx, False, led(d, w)) + at(rx, False, led("M18,-22 Q-22,-4 18,16", 9))
+    else:
+        d, w = eye_shape(kind, 0, 0)
+        eyes = at(lx, False, led(d, w)) + at(rx, True, led(d, w))
+    extra = ""
+    if kind == "surprised": extra = led("M588,404 a12,18 0 1,0 24,0 a12,18 0 1,0 -24,0 Z")
+    if kind == "angel":
+        extra = (led("M580,398 Q600,416 620,398", 9)
+                 + f'<path d="M380,182 L820,182 L820,204 L380,204 Z" fill="#9a7650" opacity="0.75" clip-path="url(#screenclip)"/>'
+                 + '<g id="halo"><ellipse cx="600" cy="108" rx="130" ry="22" fill="none" stroke="#fff3c4" stroke-width="22" opacity="0.6" filter="url(#b8)"/>'
+                   '<ellipse cx="600" cy="108" rx="130" ry="22" fill="none" stroke="#fbe9b0" stroke-width="13"/>'
+                   '<ellipse cx="600" cy="104" rx="124" ry="18" fill="none" stroke="#fffbe8" stroke-width="3" opacity="0.9"/></g>')
+    if kind == "cry":   # wavy streams running from each eye down the screen
+        tear = lambda x, s: (f"M{x - 16 * s},{EY + 34} C{x - 26 * s},{EY + 70} {x - 4 * s},{EY + 92} {x - 16 * s},{EY + 120} "
+                             f"C{x - 26 * s},{EY + 140} {x - 8 * s},{EY + 152} {x - 14 * s},{EY + 175}")
+        extra = f'<g id="tears" clip-path="url(#screenclip)">{led(tear(lx + 6, 1), 18)}{led(tear(rx - 6, -1), 18)}</g>'
+    return f'<g id="face-{kind}" opacity="{1 if kind == "neutral" else 0}">{eyes}{extra}</g>'
+
+def helmet():
+    ear = lambda k: (f'<rect x="{600 + k * 222 - 13}" y="270" width="26" height="104" rx="11" fill="#20383d" stroke="{LINE}" stroke-width="{LW}"/>'
+                     + "".join(f'<path d="M{600 + k * 222 - 7},{y} L{600 + k * 222 + 7},{y}" stroke="#6fd3cf" stroke-width="4" stroke-linecap="round"/>' for y in (294, 322, 350))
+                     + f'<rect x="{600 + k * 210 - 6}" y="292" width="12" height="60" rx="5" fill="#cfd4db"/>')
+    led_grid = ('<g clip-path="url(#screenclip)" opacity="0.5">'
+                + "".join(f'<path d="M380,{y} H820" stroke="#0a1224" stroke-width="1.6"/>' for y in range(180, 476, 6))
+                + "".join(f'<path d="M{x},178 V476" stroke="#0a1224" stroke-width="1.6"/>' for x in range(380, 822, 6)) + "</g>")
+    m = {"closed": "", "o": led("M588,402 a12,17 0 1,0 24,0 a12,17 0 1,0 -24,0 Z"), "smile": led("M578,396 Q600,416 622,396", 9)}
+    mouths = "".join(f'<g id="m-{k}" class="mth" opacity="{1 if k == "smile" else 0}">{v}</g>' for k, v in m.items())
+    faces = "".join(face_group(k) for k in FACES)
+    return f'''<g id="head">
+  {ear(-1)}{ear(1)}
+  <path d="{SHELL}" fill="url(#shell)" stroke="{LINE}" stroke-width="{LW}"/>
+  <path d="M440,206 C484,176 544,166 600,166" stroke="#ffffff" stroke-width="10" fill="none" stroke-linecap="round" opacity="0.95"/>
+  <path d="M430,436 C474,476 536,486 600,486 C664,486 726,476 770,436" stroke="#aeb4bd" stroke-width="10" fill="none" stroke-linecap="round" opacity="0.6"/>
+  <rect x="574" y="148" width="52" height="17" rx="7" fill="#5fc6c3" stroke="{LINE}" stroke-width="2.5"/><rect x="581" y="151" width="22" height="4" rx="2" fill="#b9f0ee"/>
+  <path d="{SCREEN}" fill="url(#screen)" stroke="#05080f" stroke-width="5"/>
+  <path d="M450,222 C510,194 556,190 600,190" stroke="#ffffff" stroke-width="7" fill="none" stroke-linecap="round" opacity="0.10"/>
+  <g id="eyes-all">{faces}</g>
+  {mouths}
+  {led_grid}
+</g>'''
+
+HELMET_DEFS = f'''<defs>
+  <linearGradient id="shell" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="0.55" stop-color="#eceef1"/><stop offset="1" stop-color="#c9ced6"/></linearGradient>
+  <radialGradient id="screen" cx="0.5" cy="0.42" r="0.62"><stop offset="0" stop-color="#1f3560"/><stop offset="0.7" stop-color="#11203f"/><stop offset="1" stop-color="#070d1c"/></radialGradient>
+  <clipPath id="screenclip"><path d="{SCREEN}"/></clipPath>
+</defs>'''
+
 # ------------------------------------------------------------------ arm: thick sleeve from the shoulder seam, smooth elbow,
 # rolled cuff near the wrist, bare wrist, big hand
 def arm(side, rest_u, rest_f):
@@ -240,10 +323,11 @@ POSES_R = {
     "shrug": dict(u=58, f=-88, hand="palm"),
 }
 
+HEAD = "face" if "--head=face" in sys.argv else "helmet"     # helmet (default) | face (black oval face + fedora)
 svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1000" width="1200" height="1000">
-{DEFS}<g id="pres-body">
+{DEFS}{HELMET_DEFS}<g id="pres-body">
   {body()}
-  {head()}
+  {helmet() if HEAD == "helmet" else head()}
   {arm("L", POSES_L["rest"]["u"], POSES_L["rest"]["f"])}{arm("R", POSES_R["rest"]["u"], POSES_R["rest"]["f"])}
 </g></svg>'''
 
@@ -251,12 +335,16 @@ here = os.path.dirname(os.path.abspath(__file__))
 open(os.path.join(here, "character.svg"), "w").write(svg)
 json.dump({
     "type": "svg", "file": "character.svg", "x": 60, "y": 1290, "width": 960,
-    "head_origin": "600 500", "avatar_view": "380 40 440 500", "head_tilt": 0.35,
+    "head_origin": "600 500", "avatar_view": ("380 110 440 400" if HEAD == "helmet" else "380 40 440 500"), "head_tilt": 0.35,
     "poses": list(POSES_L),
     "arms": [{"id": "armL", "shoulder": list(SHL), "upper": U, "hands": ["point", "palm", "thumb"], "poses": POSES_L},
              {"id": "armR", "shoulder": list(SHR), "upper": U, "hands": ["palm", "point"], "poses": POSES_R}],
-    "brows": {"sel": "#hat", "raise": -10},
-    "idle": [{"sel": "#pendant", "rot": 9, "period": 1.4, "origin": "600 652"}],
+    "brows": {"sel": "#eyes-all", "raise": -7} if HEAD == "helmet" else {"sel": "#hat", "raise": -10},
+    **({"faces": {"names": FACES, "default": "neutral", "origin": f"600 {EY}", "start": "happy", "stamp": "surprised", "end": "wink",
+                  "by_pose": {"palms": "happy", "thumb": "happy", "wave": "happy", "shrug": "bored"}},
+        "camera": {"top_y": 148}} if HEAD == "helmet" else {}),
+    "idle": [{"sel": "#pendant", "rot": 9, "period": 1.4, "origin": "600 652"}]
+            + ([{"sel": "#halo", "y": -10, "period": 1.3}, {"sel": "#tears", "y": 7, "period": 0.5}] if HEAD == "helmet" else []),
     "react": {"sel": "#pendant", "y": -8, "rot": 14, "origin": "600 652"},
 }, open(os.path.join(here, "character.json"), "w"), indent=1)
 print("wrote character.svg + character.json")

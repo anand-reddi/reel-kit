@@ -286,9 +286,14 @@ class Film:
                     t += 0.09 + (0.03 if k % 3 == 2 else 0); k += 1
                 if cur != "closed": A(f'tl.set("#m-{cur}", {{ opacity: 0 }}, {r3(ln["end"])}); tl.set("#m-closed", {{ opacity: 1 }}, {r3(ln["end"])});'); cur = "closed"
             A(f'tl.set("#m-closed", {{ opacity: 0 }}, {r3(s.tm["lines"][-1]["end"] + 0.05)}); tl.set("#m-smile", {{ opacity: 1 }}, {r3(s.tm["lines"][-1]["end"] + 0.05)});')
+            fc = c.get("faces")
+            face_at = s.faces(c, fc, scenes, lines_of, start, beats) if fc else None
             b = 1.95
             while b < dur - 0.3:
-                A(f'tl.set("#eyes-open", {{ opacity: 0 }}, {r3(b)}); tl.set("#eyes-shut", {{ opacity: 1 }}, {r3(b)}); tl.set("#eyes-open", {{ opacity: 1 }}, {r3(b + 0.1)}); tl.set("#eyes-shut", {{ opacity: 0 }}, {r3(b + 0.1)});')
+                if not fc:
+                    A(f'tl.set("#eyes-open", {{ opacity: 0 }}, {r3(b)}); tl.set("#eyes-shut", {{ opacity: 1 }}, {r3(b)}); tl.set("#eyes-open", {{ opacity: 1 }}, {r3(b + 0.1)}); tl.set("#eyes-shut", {{ opacity: 0 }}, {r3(b + 0.1)});')
+                elif face_at(b) not in ("content", "angel", "wink", "bored"):   # blink = a quick squash of whatever eyes are showing
+                    A(f'tl.to("#eyes-all", {{ scaleY: 0.12, duration: 0.05, yoyo: true, repeat: 1, ease: "power1.in", svgOrigin: "{fc.get("origin", "600 320")}" }}, {r3(b)});')
                 b += 3.0
             body = re.sub(r"<\?xml[^>]*>", "", c["svg"])
             body = re.sub(r"<svg\b", f'<svg id="pres" style="position:absolute;left:{c.get("x", -60)}px;top:{c.get("y", 1130)}px;width:{c.get("width", 1200)}px;height:auto"', body, count=1)
@@ -333,6 +338,44 @@ class Film:
         if c["type"] == "svg" and any(sc.get("layout") for sc in scenes):
             body = s.camera(body, c, scenes, start)
         return body
+
+    def faces(s, c, fc, scenes, lines_of, start, beats):
+        """Expression faces (character.json "faces"): groups #face-<name> swapped with a squash-pop. A scene's "face" (a name,
+        or a list: one per line) sets them; otherwise the pose picks one (by_pose), the first beat uses "start", a stamp
+        flashes "stamp" for 0.9 s, and the end of the voice shows "end" then "happy". Returns face_at(t)."""
+        A, names = s.js.append, fc["names"]; org = fc.get("origin", "600 320"); dflt = fc.get("default", "neutral")
+        base = []
+        for i, sc in enumerate(scenes):
+            want, lns = sc.get("face"), lines_of[i]
+            if want:
+                for k, f in enumerate(want if isinstance(want, list) else [want]):
+                    if f not in names: raise SystemExit(f"scene {i + 1}: face '{f}' unknown; have: {', '.join(names)}")
+                    base.append((0.0 if i == 0 and k == 0 else lns[min(k, len(lns) - 1)]["start"] - 0.08, f))
+            else:
+                for t, pose in beats:
+                    j = max([k for k in range(len(scenes)) if start[k] <= t + 0.15] or [0])
+                    if j == i: base.append((t, fc["by_pose"].get(pose, dflt) if fc.get("by_pose") else dflt))
+        if base and base[0][0] > 0.01 or not base: base.insert(0, (0.0, dflt))
+        if not scenes[0].get("face") and fc.get("start"): base[0] = (0.0, fc["start"])
+        end = s.tm["lines"][-1]["end"] + 0.05
+        if fc.get("end"): base += [(end, fc["end"]), (end + 0.8, "happy" if "happy" in names else fc["end"])]
+        base.sort(key=lambda e: e[0])
+        at = lambda T, ev: ([f for t, f in ev if t <= T + 1e-6] or [dflt])[-1]
+        seq = list(base)
+        if fc.get("stamp"):
+            for t in s.stamp_times:
+                seq += [(t - 0.05, fc["stamp"]), (t + 0.9, at(t + 0.9, base))]
+        seq.sort(key=lambda e: e[0])
+        # the opening face is baked into the svg (sets at time 0 do not survive the renderer's seek back to frame 0)
+        cur = seq[0][1]; seq = seq[1:]
+        c["svg"] = re.sub(r'(<g id="face-([a-z]+)" opacity=")[01](")', lambda m: m.group(1) + ("1" if m.group(2) == cur else "0") + m.group(3), c["svg"])
+        for t, f in seq:
+            if f == cur: continue
+            if cur: A(f'tl.set("#face-{cur}", {{ opacity: 0 }}, {r3(t)});')
+            A(f'tl.set("#face-{f}", {{ opacity: 1 }}, {r3(t)});')
+            if cur: A(f'tl.fromTo("#face-{f}", {{ scaleY: 0.3, scaleX: 1.15, svgOrigin: "{org}" }}, {{ scaleY: 1, scaleX: 1, duration: 0.24, ease: "back.out(2.5)", svgOrigin: "{org}", immediateRender: false }}, {r3(t)});')
+            cur = f
+        return lambda T: at(T, seq)
 
     def camera(s, body, c, scenes, start):
         """Camera layouts (opt-in: any scene sets "layout"). The presenter lives in a backdrop "camera" (#cam) that

@@ -24,6 +24,7 @@ Keep each line under ~8 words: one line = one caption beat.
     { "label": "one prompt",                           // header: "// 01 · one prompt"
       "counter": { "name": "PROMPTS", "value": "0", "steps": ["1"] },
       "pose": "up",                                    // or a list (one per beat), or omit to auto-cycle
+      "face": "happy",                                 // expression (characters with faces, see CHARACTER.md), or a list per line
       "layout": "full",                                // optional camera layout: "full" (presenter fills the frame, no card)
                                                        // or "box" (presenter in a rounded frame at bottom centre; default once any scene sets a layout)
       "lines": ["This reel was made from one *prompt.*"],   // *word* or *two words* = red serif accent
