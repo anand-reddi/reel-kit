@@ -191,7 +191,7 @@ def locket():
 def body():
     sw = ("M540,548 C480,556 424,572 396,602 C374,624 366,652 366,700 L362,1010 L838,1010 L834,700 "
           "C834,652 826,624 804,602 C776,572 720,556 660,548 Z")
-    tee = "M552,548 Q600,540 648,548 L674,1010 L526,1010 Z"
+    tee = "M552,548 Q600,606 648,548 L674,1010 L526,1010 Z"   # crew neckline dips in front of the neck
     collar = lambda k: (f'<path d="M{600 - k * 46},544 L{600 - k * 96},556 Q{600 - k * 112},566 {600 - k * 104},588 L{600 - k * 56},640 L{600 - k * 42},586 Z" '
                         f'fill="{SHIRT}" stroke="{LINE}" stroke-width="{LW}" stroke-linejoin="round"/>'
                         f'<path d="M{600 - k * 94},566 L{600 - k * 58},620" stroke="{SHIRT_HI}" stroke-width="3" opacity="0.8"/>')
@@ -200,19 +200,21 @@ def body():
                         f'<path d="M{x + 2},694 L{x + 86},694" stroke="{SHIRT_HI}" stroke-width="2.5" opacity="0.7"/>'
                         f'<circle cx="{x + 44}" cy="716" r="4.5" fill="{BTN}"/>')
     return f'''
-  <path d="M570,440 C566,490 564,530 564,566 L636,566 C636,530 634,490 630,440 Z" fill="{FACE_C}" stroke="{LINE}" stroke-width="{LW}"/>
-  <path d="M572,500 Q600,512 628,500" stroke="#2c2a36" stroke-width="5" fill="none" stroke-linecap="round"/>
-  <path d="M548,552 C548,530 576,522 600,522 C624,522 652,530 652,552 Z" fill="{SHIRT_SH}" stroke="{LINE}" stroke-width="{LW}"/>
   <path d="{sw}" fill="{SHIRT}" stroke="{LINE}" stroke-width="{LW}" stroke-linejoin="round"/>
   <clipPath id="swc"><path d="{sw}"/></clipPath>
   <g clip-path="url(#swc)">
     <path d="M708,600 C752,630 780,680 790,760 L800,1010 L736,1010 C744,860 740,720 708,600 Z" fill="{SHIRT_SH}"/>
     <path d="M412,650 C404,730 400,860 398,1010" stroke="{SHIRT_HI}" stroke-width="9" fill="none" opacity="0.7"/>
   </g>
+  <path d="M548,552 C552,532 578,526 600,526 C622,526 648,532 652,552 Q600,566 548,552 Z" fill="{TEE_SH}" stroke="{LINE}" stroke-width="2.5"/>
+  <path d="M570,440 C566,490 564,530 563,592 L637,592 C636,530 634,490 630,440 Z" fill="{FACE_C}" stroke="{LINE}" stroke-width="{LW}"/>
+  <path d="M572,500 Q600,512 628,500" stroke="#2c2a36" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M566,560 Q600,574 634,560" stroke="#000" stroke-width="10" fill="none" opacity="0.45"/>
   <path d="{tee}" fill="{TEE}"/>
   <path d="M640,560 L664,1010 L674,1010 L648,548 Z" fill="{TEE_SH}"/>
-  <path d="M554,550 Q600,580 646,550" stroke="{TEE_SH}" stroke-width="10" fill="none" stroke-linecap="round"/>
-  <path d="M554,550 Q600,580 646,550" stroke="{LINE}" stroke-width="2" fill="none" opacity="0.5"/>
+  <path d="M552,550 Q600,606 648,550" stroke="{TEE_SH}" stroke-width="12" fill="none" stroke-linecap="round"/>
+  <path d="M549,546 Q600,598 651,546" stroke="{LINE}" stroke-width="2.5" fill="none"/>
+  <path d="M556,556 Q600,614 644,556" stroke="{LINE}" stroke-width="1.5" fill="none" opacity="0.5"/>
   <path d="M552,548 L526,1010 M648,548 L674,1010" stroke="{LINE}" stroke-width="{LW}"/>
   <path d="M542,600 L520,1010" stroke="{SHIRT_HI}" stroke-width="3" opacity="0.6"/>
   {"".join(f'<circle cx="{538 - (y - 600) * 0.05:.1f}" cy="{y}" r="5" fill="{BTN}"/>' for y in (700, 810, 920))}
