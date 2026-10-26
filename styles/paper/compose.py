@@ -66,6 +66,10 @@ class Ctx:
         else: raise SystemExit(f"bad time '{spec}'")
         return t + off
     def sfx(s, t, sid, gain): s.f.cues.append((round(t, 3), sid, gain))
+    def typing(s, t, dur, gain=-15, sid="pro_typing_run/soft"):
+        """Typing sound that starts with the first letter and lasts exactly as long as the text types in. Only for a
+        single line of text: several lines typing at once never stay in sync, so cards skip it there."""
+        s.f.cues.append((round(t, 3), sid, gain, {"dur": round(max(0.2, dur), 3), "align": "start"}))
     def shake(s, t, amt=14):
         s.A(f'tl.to("#stage", {{ keyframes: [{{ x: {amt}, y: {-amt / 2} }}, {{ x: {-amt}, y: {amt / 2} }}, {{ x: {amt / 2}, y: 0 }}, {{ x: 0, y: 0 }}], duration: 0.2, ease: "none" }}, {r3(t)});')
     def stamp(s, text, t, o=None):

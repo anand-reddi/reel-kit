@@ -37,11 +37,14 @@ def mix(work, cues, dur, cfg):
     mus = beat(n, cfg.get("music", {}))
     sfx = np.zeros(n + SR); ear = earshot(); os.makedirs(os.path.join(work, "sfx"), exist_ok=True); used = []
     if not ear: print("  ! earshot not found: rendering without sound effects (run setup.sh)")
-    for k, (at, sid, g) in enumerate(cues if ear else []):
+    for k, cue in enumerate(cues if ear else []):
+        at, sid, g = cue[:3]; opt = cue[3] if len(cue) > 3 else {}   # opt: {"dur": exact length, "align": "start"}
         out = os.path.join(work, "sfx", f"{k:03d}.wav")
-        r = subprocess.run([ear, "sfx", "render", sid, "-o", out, "--json"], capture_output=True, text=True)
+        cmd = [ear, "sfx", "render", sid, "-o", out, "--json"] + (["--dur", f'{opt["dur"]:.3f}'] if opt.get("dur") else [])
+        r = subprocess.run(cmd, capture_output=True, text=True)
         if r.returncode: print(f"  ! sfx {sid}: {r.stderr.strip()[-120:]}"); continue
         pk = float(json.loads(r.stdout[r.stdout.index("{"):])["meta"]["peak_s"]); a, sr = sf.read(out); a = a.mean(1) if a.ndim > 1 else a
+        if opt.get("align") == "start": pk = 0.0   # starts on the cue (typing runs follow the text from its first letter)
         if sr != SR: a = resample_poly(a, SR, sr)
         e = int(.003 * SR); a[:e] *= np.linspace(0, 1, e); a[-e:] *= np.linspace(1, 0, e)
         i0 = int((at - pk) * SR)

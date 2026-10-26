@@ -14,7 +14,7 @@ def prompt(p, c, x):
     step = min(0.045, max(0.015, (send - 0.15 - t0) / max(1, len(text))))
     for i in range(len(text)):
         x.A(f'tl.set("#{p} .ch:nth-child({i + 1})", {{ opacity: 1 }}, {x.r(t0 + i * step)});')
-    x.sfx(t0 + 0.05, "pro_typing_run/soft", -15)
+    x.typing(t0, len(text) * step)
     x.A(f'tl.to("#{p}-send", {{ scale: 0.82, duration: 0.07, yoyo: true, repeat: 1 }}, {x.r(send)});')
     x.A(f'tl.to("#{p}-send", {{ backgroundColor: "{x.th["accent"]}", duration: 0.05 }}, {x.r(send)});')
     x.A(f'tl.fromTo("#{p} .spark i", {{ scaleX: 0, opacity: 1 }}, {{ scaleX: 1, opacity: 0, duration: 0.4, ease: "power2.out", stagger: 0.02, immediateRender: false }}, {x.r(send + 0.04)});')
@@ -76,7 +76,7 @@ def code(p, c, x):
     body = "".join(f'<div class="cl" id="{p}-l{i}"><em>{i + 1}</em>{hl(ln)}</div>' for i, ln in enumerate(lines))
     for i in range(len(lines)):
         x.A(f'tl.fromTo("#{p}-l{i}", {{ opacity: 0, x: -20 }}, {{ opacity: 1, x: 0, duration: 0.12 }}, {x.r(t0 + i * step)});')
-    x.sfx(t0, "pro_typing_run/tick", -15)
+    if len(lines) == 1: x.typing(t0, 0.3, -16, "pro_typing_run/tick")
     rej = ""
     if c.get("reject"):
         r = c["reject"]; ta = x.at(r.get("at", "line:1-0.25")); st = x.at(r.get("stamp_at", "line:1:end-0.2"))
@@ -222,7 +222,7 @@ def terminal(p, c, x):
     body = "".join(f'<div class="tl" id="{p}-l{i}">{_tline(l)}</div>' for i, l in enumerate(lines))
     for i in range(len(lines)):
         x.A(f'tl.fromTo("#{p}-l{i}", {{ opacity: 0, clipPath: "inset(0 100% 0 0)" }}, {{ opacity: 1, clipPath: "inset(0 0% 0 0)", duration: 0.22, ease: "none" }}, {x.r(t0 + i * step)});')
-        x.sfx(t0 + i * step, "pro_typing_run/tick", -17)
+        if len(lines) == 1: x.typing(t0, 0.25, -16, "pro_typing_run/tick")
     pr = c.get("progress")
     if pr:
         ta = x.at(pr.get("at", "line:1")); items = pr.get("items", []); total = pr.get("total", len(items)); dur = pr.get("for", 2.0)

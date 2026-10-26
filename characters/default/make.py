@@ -116,7 +116,7 @@ def head():
             f'<g id="eyes-shut" opacity="0"><path d="M551,356 Q567,364 583,356 M617,356 Q633,364 649,356" stroke="{BL}" stroke-width="6" fill="none" '
             'stroke-linecap="round" filter="url(#b2)"/></g>')
     # LED bot mouth: a thin bar at rest, an equaliser while talking, a curved bar for the smile
-    my = 432
+    my = 452
     halo = lambda w, h: f'<rect x="{600 - w / 2}" y="{my - h / 2}" width="{w}" height="{h}" rx="{h / 2}" fill="#3d6dff" opacity="0.55" filter="url(#b8)"/>'
     bars = "".join(f'<rect x="{x - 4}" y="{my - h / 2}" width="8" height="{h}" rx="4" fill="{BL}"/>' for x, h in ((572, 10), (586, 22), (600, 32), (614, 22), (628, 10)))
     m = {
