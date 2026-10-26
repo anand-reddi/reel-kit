@@ -43,8 +43,6 @@ Instead of `eyes-open`/`eyes-shut`, a character can carry whole expressions: one
 A scene's `"face": "sad"` (or a list, one per line) picks them; otherwise the pose does, a stamp flashes `stamp`, and
 the end of the voice shows `end`. Each change pops the new face in with a squash. The default character (black face,
 fedora, blue LED eyes and bar mouth) has: neutral happy wink surprised content angel (halo) bored sad cry (tears) angry.
-`python3 make.py --head=helmet` builds the robot-helmet head (white shell, LED-matrix screen) with the same faces;
-`--fixed-eyes` builds the old two-dot eyes without expressions.
 
 ### Secondary motion (both options)
 Optional keys in `character.json`, all tied to the timeline:

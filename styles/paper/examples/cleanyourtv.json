@@ -1,0 +1,296 @@
+{
+ "credits": "TV screenshots (cyt-*.jpg) from github.com/Gathin23/cleanyourtv, MIT License, (c) 2026 Gathin",
+ "style": "paper",
+ "theme": "light",
+ "fonts": "archivo",
+ "header": "none",
+ "captions": "short",
+ "title": "Remove your TV's ads with Claude Code",
+ "brand": {
+  "handle": "@techinsixty",
+  "bio": "dev tools · AI · security\nexplained in 60 seconds"
+ },
+ "voice": {
+  "name": "am_michael",
+  "speed": 1.15
+ },
+ "music": {
+  "style": "none"
+ },
+ "levels": {
+  "sfx": -21
+ },
+ "character": "default",
+ "camera": {
+  "box": [
+   80,
+   1330,
+   920,
+   640
+  ],
+  "box_scale": 1.15,
+  "box_pop": -200,
+  "full_scale": 1.9,
+  "full_top": 420
+ },
+ "scenes": [
+  {
+   "label": "hook",
+   "layout": "box",
+   "pose": [
+    "palms",
+    "up"
+   ],
+   "headline": [
+    "Remove your TV's ads",
+    "with Claude Code"
+   ],
+   "lines": [
+    "People are hacking",
+    "their *TVs*",
+    "with Claude Code",
+    "to strip the *bloatware*",
+    "and the ads."
+   ],
+   "card": {
+    "type": "image",
+    "src": "cyt-stock-home.jpg",
+    "height": 380,
+    "highlight": {
+     "x": 10,
+     "y": 18,
+     "w": 46,
+     "h": 30,
+     "at": "word:bloatware"
+    }
+   }
+  },
+  {
+   "label": "viral",
+   "layout": "box",
+   "pose": "shrug",
+   "lines": [
+    "And it's *blowing up*",
+    "right now."
+   ],
+   "card": {
+    "type": "image",
+    "src": "cyt-stock-vs-new-side.jpg",
+    "height": 500,
+    "fit": "cover"
+   }
+  },
+  {
+   "label": "post",
+   "layout": "box",
+   "pose": [
+    "card",
+    "thumb"
+   ],
+   "lines": [
+    "It started with one post.",
+    "A dev gave Claude Code",
+    "his parents' *TV model.*"
+   ],
+   "card": {
+    "type": "post",
+    "name": "Gathin",
+    "handle": "@gathint",
+    "date": "Oct 17, 2026",
+    "highlight_at": "word:model",
+    "text": "Vibe coded my parents' TV this afternoon. It was showing a sponsored ad before you could even get to Netflix. [[Gave Claude Code the model number]], it found the TV on wifi, removed 25 Xiaomi packages and wrote a new launcher. Looks like an Apple TV now lol",
+    "footer": [
+     "7.4M views",
+     "before → after"
+    ]
+   }
+  },
+  {
+   "label": "debloat",
+   "layout": "none",
+   "lines": [
+    "It found the TV",
+    "on *Wi-Fi,*",
+    "and switched off",
+    "*25* packages:",
+    "telemetry, ads,",
+    "junk apps."
+   ],
+   "card": {
+    "type": "terminal",
+    "title": "claude · parents-tv",
+    "line_step": 0.4,
+    "lines": [
+     "> Xiaomi Mi TV 4A",
+     "$ adb connect 192.168.1.50:5555",
+     "✓ connected to 192.168.1.50"
+    ],
+    "progress": {
+     "label": "Disabling 25 packages",
+     "total": 25,
+     "at": "line:2",
+     "for": 3.6,
+     "badge": "25 disabled",
+     "items": [
+      "com.miui.tv.analytics",
+      "com.xiaomi.statistic",
+      "com.mitv.tvhome.atv",
+      "com.mitv.tvhome.mitvplus",
+      "com.xm.webcontent",
+      "com.xiaomi.mitv.tvmanager",
+      "com.xiaomi.mimusic2",
+      "com.google.android.feedback",
+      "com.google.android.tvrecommendations"
+     ]
+    }
+   }
+  },
+  {
+   "label": "launcher",
+   "layout": "none",
+   "lines": [
+    "Then it built",
+    "a *new* home screen",
+    "from *scratch.*"
+   ],
+   "card": {
+    "type": "image",
+    "src": "cyt-new-home.jpg",
+    "height": 520,
+    "fit": "cover"
+   }
+  },
+  {
+   "label": "repo",
+   "layout": "box",
+   "pose": [
+    "up",
+    "palms"
+   ],
+   "lines": [
+    "Now it's a free",
+    "*GitHub* repo",
+    "that does the same",
+    "for *anyone.*"
+   ],
+   "card": {
+    "type": "repo",
+    "owner": "Gathin23",
+    "name": "cleanyourtv",
+    "highlight_at": "word:anyone",
+    "description": "Strip the bloatware from [[any Android TV or Google TV]] over Wi-Fi, with a launcher that looks like an Apple TV.",
+    "topics": [
+     "android-tv",
+     "adb",
+     "claude-code",
+     "launcher"
+    ],
+    "stats": [
+     "MIT",
+     "#1 trending, Oct 19–25",
+     "No root"
+    ],
+    "stats_at": "line:2"
+   }
+  },
+  {
+   "label": "models",
+   "layout": "box",
+   "pose": "thumb",
+   "lines": [
+    "Over *300* TV models",
+    "already tested."
+   ],
+   "card": {
+    "type": "stat",
+    "value": 316,
+    "from": 0,
+    "label": "TV models · 89 brands",
+    "title": "tested lists",
+    "tag": "community",
+    "count_for": 1.4
+   }
+  },
+  {
+   "label": "prompt",
+   "layout": "none",
+   "lines": [
+    "You just paste",
+    "*one prompt*",
+    "into Claude Code",
+    "with your model."
+   ],
+   "card": {
+    "type": "prompt",
+    "label": "// PROMPT.md",
+    "text": "debloat my TV · Mi TV 4A",
+    "tag": "one prompt",
+    "send_at": "line:2:end-0.2"
+   }
+  },
+  {
+   "label": "you pick",
+   "layout": "none",
+   "lines": [
+    "It asks what you *use*",
+    "and disables the rest."
+   ],
+   "card": {
+    "type": "checklist",
+    "title": "keep these?",
+    "items": [
+     {
+      "label": "Netflix",
+      "icon": "play"
+     },
+     {
+      "label": "YouTube",
+      "icon": "play"
+     },
+     {
+      "label": "Prime",
+      "icon": "play"
+     }
+    ]
+   }
+  },
+  {
+   "label": "restore",
+   "layout": "box",
+   "pose": [
+    "palms",
+    "thumb"
+   ],
+   "lines": [
+    "Change your mind?",
+    "*One command*",
+    "puts it all back."
+   ],
+   "card": {
+    "type": "terminal",
+    "title": "restore",
+    "line_step": 0.3,
+    "lines": [
+     "$ TV_HOST=192.168.1.50 tools/restore.sh",
+     "  examples/xiaomi-mi-tv-4a/debloat.txt",
+     "# nothing was uninstalled",
+     "✓ stock launcher back"
+    ],
+    "done": {
+     "text": "Back the way it was",
+     "at": "word:back-0.3"
+    }
+   }
+  },
+  {
+   "label": "cta",
+   "layout": "full",
+   "pose": "wave",
+   "lines": [
+    "Try it yourself.",
+    "Comment *“TV”*",
+    "and I'll send the link."
+   ]
+  }
+ ]
+}

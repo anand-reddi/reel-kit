@@ -3,7 +3,8 @@
 Off-white dotted paper, black/white UI cards with one red accent, a mono header (`// 01 · label`) with a live
 counter, captions that land word by word with the voice (accent words in red italic serif), and a presenter at the
 bottom who changes gesture on every beat. 1080×1920, 30 fps. Reference: a 66 s "AI reels system" explainer reel.
-Examples: `examples/one-prompt.json` (10 s, every core card), `examples/card-tour.json` (stat, graph, image).
+Examples: `examples/one-prompt.json` (10 s, every core card), `examples/card-tour.json` (stat, graph, image),
+`examples/cleanyourtv.json` (40 s tool reel: camera layouts, short captions, expressions).
 
 ## 1. Write the script (this is the creative part)
 Before writing JSON, settle the story with the user when the topic is new: hook (first 2 s must make a claim or a
@@ -106,4 +107,5 @@ top in `"full"` scenes. Cards cut in and out with a zoom-blur and a swish; accen
 puts a title at the top. The script's `"camera"` overrides the character's (e.g. `"box": [x, y, w, h]`, `box_scale`).
 New cards: `post` (a quoted social post, `[[phrase]]` highlights at `highlight_at`), `terminal` (typed `lines`,
 a `progress` list that strikes items off with a counter and badge, a `done` check overlay) and `repo` (owner/name,
-description with `[[highlight]]`, topics, stats row). Example: a 40 s tool reel with no music, voice + SFX only.
+description with `[[highlight]]`, topics, stats row). Example: `examples/cleanyourtv.json`, a 40 s tool reel in this
+format with no music, voice + SFX only (screenshots from the MIT-licensed cleanyourtv repo, credited in the file).

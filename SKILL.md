@@ -52,7 +52,7 @@ When the user shares a reference video and wants "videos like this":
 
 ## 3. Characters
 `characters/<name>/` + `character.json`; a script picks one with `"character"`. Format and required ids:
-`CHARACTER.md`. `default` is a placeholder; the user will supply their own.
+`CHARACTER.md`. `default` is the @techinsixty presenter (black face, fedora, blue LED expression faces, overshirt, 60 chain).
 
 ## Notes
 - Fonts and GSAP are vendored: renders need no network. Rendering needs Node (npx hyperframes), ffmpeg and a headless
