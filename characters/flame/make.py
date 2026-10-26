@@ -131,14 +131,17 @@ def head():
         f'<path d="M514,130 C500,160 496,200 500,236" stroke="{HAT_HI}" stroke-width="7" fill="none" stroke-linecap="round" opacity="0.8"/>'
         f'<path d="M480,222 C552,236 648,236 720,222 L722,258 C650,272 550,272 478,258 Z" fill="{BAND}" stroke="{LINE}" stroke-width="{LW}" stroke-linejoin="round"/>'
         f'<path d="M484,232 C556,246 644,246 716,232" stroke="#4a4a52" stroke-width="2.5" fill="none" opacity="0.8"/>')
-    return f'''<g id="head">
+    ear = lambda k: (f'<path d="M{600 + k * 146},330 C{600 + k * 186},318 {600 + k * 192},392 {600 + k * 150},404 Z" fill="{FACE_C}" stroke="{LINE}" stroke-width="{LW}" stroke-linejoin="round"/>'
+                     f'<path d="M{600 + k * 158},344 C{600 + k * 176},346 {600 + k * 176},382 {600 + k * 158},388" stroke="#2c2a36" stroke-width="5" fill="none" stroke-linecap="round"/>')
+    return f'''<g id="head"><g transform="translate(0 -34)">
+  {ear(-1)}{ear(1)}
   <path d="{FACE}" fill="{FACE_C}" stroke="{LINE}" stroke-width="{LW}"/>
   <path d="{edge(-1, 22)}" stroke="#2a2833" stroke-width="12" fill="none" stroke-linecap="round" opacity="0.9" filter="url(#b8)"/>
   <ellipse cx="600" cy="380" rx="90" ry="110" fill="#000" opacity="0.5" filter="url(#b18)"/>
   {eyes}
   {mouths}
   <g id="hat">{hat}</g>
-</g>'''
+</g></g>'''
 
 # ------------------------------------------------------------------ arm: thick sleeve from the shoulder seam, smooth elbow,
 # rolled cuff near the wrist, bare wrist, big hand
@@ -178,10 +181,11 @@ def locket():
     return (f'<path d="{chain}" stroke="{LINE}" stroke-width="7" fill="none" stroke-linecap="round"/>'
             f'<path d="{chain}" stroke="#c9ccd3" stroke-width="4" fill="none" stroke-dasharray="5 3" stroke-linecap="round"/>'
             f'<g id="pendant"><circle cx="600" cy="652" r="5" fill="none" stroke="#c9ccd3" stroke-width="3"/>'
-            f'<clipPath id="lk"><circle cx="600" cy="680" r="20"/></clipPath>'
-            f'<circle cx="600" cy="680" r="24" fill="#e2e4e9" stroke="{LINE}" stroke-width="2.5"/>'
-            f'<image href="data:image/png;base64,{b64}" x="577" y="657" width="46" height="46" clip-path="url(#lk)"/>'
-            f'<path d="M585,664 A20,20 0 0 1 603,659" stroke="#fff" stroke-width="2" fill="none" opacity="0.55"/></g>')
+            f'<clipPath id="lk"><circle cx="600" cy="690" r="29"/></clipPath>'
+            f'<circle cx="600" cy="690" r="35" fill="#e2e4e9" stroke="{LINE}" stroke-width="3"/>'
+            f'<circle cx="600" cy="690" r="29" fill="#000"/>'
+            f'<image href="data:image/png;base64,{b64}" x="581" y="671" width="38" height="38" clip-path="url(#lk)"/>'
+            f'<path d="M578,668 A30,30 0 0 1 604,660" stroke="#fff" stroke-width="2.5" fill="none" opacity="0.55"/></g>')
 
 def body():
     sw = ("M540,548 C480,556 424,572 396,602 C374,624 366,652 366,700 L362,1010 L838,1010 L834,700 "
@@ -195,8 +199,8 @@ def body():
                         f'<path d="M{x + 2},694 L{x + 86},694" stroke="{SHIRT_HI}" stroke-width="2.5" opacity="0.7"/>'
                         f'<circle cx="{x + 44}" cy="716" r="4.5" fill="{BTN}"/>')
     return f'''
-  <path d="M566,460 C562,500 560,530 560,566 L640,566 C640,530 638,500 634,460 Z" fill="{SKIN}"/>
-  <path d="M562,520 Q600,546 638,520 L640,566 L560,566 Z" fill="{SKIN_SH}"/>
+  <path d="M570,440 C566,490 564,530 564,566 L636,566 C636,530 634,490 630,440 Z" fill="{FACE_C}" stroke="{LINE}" stroke-width="{LW}"/>
+  <path d="M572,500 Q600,512 628,500" stroke="#2c2a36" stroke-width="5" fill="none" stroke-linecap="round"/>
   <path d="M548,552 C548,530 576,522 600,522 C624,522 652,530 652,552 Z" fill="{SHIRT_SH}" stroke="{LINE}" stroke-width="{LW}"/>
   <path d="{sw}" fill="{SHIRT}" stroke="{LINE}" stroke-width="{LW}" stroke-linejoin="round"/>
   <clipPath id="swc"><path d="{sw}"/></clipPath>
@@ -244,7 +248,7 @@ here = os.path.dirname(os.path.abspath(__file__))
 open(os.path.join(here, "character.svg"), "w").write(svg)
 json.dump({
     "type": "svg", "file": "character.svg", "x": 60, "y": 1290, "width": 960,
-    "head_origin": "600 530", "avatar_view": "380 40 440 500", "head_tilt": 0.35,
+    "head_origin": "600 500", "avatar_view": "380 40 440 500", "head_tilt": 0.35,
     "poses": list(POSES_L),
     "arms": [{"id": "armL", "shoulder": list(SHL), "upper": U, "hands": ["point", "palm", "thumb"], "poses": POSES_L},
              {"id": "armR", "shoulder": list(SHR), "upper": U, "hands": ["palm", "point"], "poses": POSES_R}],
