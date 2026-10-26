@@ -262,7 +262,41 @@ class Film:
                     f'<div id="presin" style="position:absolute;inset:0;transform-origin:50% 100%">{imgs}</div></div>')
         s.rigs(c, dur)
         A(f'tl.fromTo("#pres", {{ y: 260 }}, {{ y: 0, duration: 0.5, ease: "back.out(1.4)" }}, 0);')
+        if c["type"] == "svg" and any(sc.get("layout") for sc in scenes):
+            body = s.camera(body, c, scenes, start)
         return body
+
+    def camera(s, body, c, scenes, start):
+        """Camera layouts (opt-in: any scene sets "layout"). The presenter lives in a backdrop "camera" (#cam) that
+        hard-cuts per scene between "box" (a rounded frame at bottom centre under the cards; the default) and "full"
+        (the presenter fills the frame, close-up, for hooks and opinions; give those scenes no card)."""
+        A, th = s.js.append, s.th
+        cv = c.get("camera", {})
+        hat = cv.get("top_y", 78)                 # svg y of the top of the character (hat / hair)
+        k_box, k_full = cv.get("box_scale", 0.75), cv.get("full_scale", 1.55)
+        bw, bh, bx, by = 780, 500, 150, 1330
+        lay = {
+            "box":  dict(cam=dict(left=bx, top=by, width=bw, height=bh, borderRadius=28, borderWidth=3),
+                         svg=dict(left=bw / 2 - 600 * k_box, top=30 - hat * k_box, width=1200 * k_box)),
+            "full": dict(cam=dict(left=0, top=0, width=W, height=H, borderRadius=0, borderWidth=0),
+                         svg=dict(left=W / 2 - 600 * k_full, top=cv.get("full_top", 600) - hat * k_full, width=1200 * k_full)),
+        }
+        js = lambda d: ", ".join(f"{k}: {round(v, 1) if isinstance(v, float) else v}" for k, v in d.items())
+        cur = None
+        for i, sc in enumerate(scenes):
+            L = sc.get("layout", "box"); L = L if L in lay else "box"
+            if L == cur: continue
+            t = 0 if i == 0 else start[i]
+            A(f'tl.set("#cam", {{ {js(lay[L]["cam"])} }}, {r3(t)}); tl.set("#pres", {{ {js(lay[L]["svg"])} }}, {r3(t)});')
+            if i: A(f'tl.fromTo("#cam", {{ scale: 1.04 }}, {{ scale: 1, duration: 0.3, ease: "power2.out" }}, {r3(t)});')
+            cur = L
+        dark = s.sc.get("theme") == "dark"
+        wall = cv.get("backdrop") or ("radial-gradient(120% 80% at 50% 30%, #4b5260 0%, #2c3039 55%, #1a1c22 100%)" if dark
+                                      else "radial-gradient(120% 80% at 50% 30%, #f4efe6 0%, #e2dacb 60%, #cfc6b5 100%)")
+        lights = "".join(f'<div style="position:absolute;left:{x}%;top:{y}%;width:{r}px;height:{r}px;border-radius:50%;background:{col};filter:blur({r // 3}px);opacity:{o}"></div>'
+                         for x, y, r, col, o in ((8, 18, 160, "#ffb46b", 0.35), (78, 12, 200, "#6b8cff", 0.25), (86, 52, 120, "#ffd59a", 0.25)))
+        return (f'<div id="cam" style="position:absolute;overflow:hidden;background:{wall};border:0 solid {th["edge"]};'
+                f'box-shadow:0 18px 50px rgba(0,0,0,0.35);transform-origin:50% 50%">{lights}{body}</div>')
 
     def rig_presenter(s, c, beats, dur):
         """A cut-out rig: nested full-canvas parts with pivots (character.json "parts"), a pose library ("poses": part ->

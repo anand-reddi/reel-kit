@@ -24,6 +24,8 @@ Keep each line under ~8 words: one line = one caption beat.
     { "label": "one prompt",                           // header: "// 01 · one prompt"
       "counter": { "name": "PROMPTS", "value": "0", "steps": ["1"] },
       "pose": "up",                                    // or a list (one per beat), or omit to auto-cycle
+      "layout": "full",                                // optional camera layout: "full" (presenter fills the frame, no card)
+                                                       // or "box" (presenter in a rounded frame at bottom centre; default once any scene sets a layout)
       "lines": ["This reel was made from one *prompt.*"],   // *word* or *two words* = red serif accent
       "card": { "type": "prompt", "text": "make a 10s reel", "tag": "1 prompt" } }
   ]
@@ -76,3 +78,10 @@ reaction on that word. Without a path the figure plays its own tour (slow to sta
 Recipes: vault dial = 9 points on a circle centred (0.42, 0.5), radius 0.22, 0.22 s apart; padlock opens = from
 (0.1, 0.95) to (0.55, 0.22) ending on the word; terminal scroll = y 0.25 → 0.8 across the scene.
 Example: `examples/figures.json`.
+
+## Camera layouts
+Setting `"layout"` on any scene turns on the presenter camera: the character sits in a backdrop that hard-cuts per scene
+between `"box"` (a rounded frame at the bottom centre, under the card) and `"full"` (a close-up filling the frame, for the
+hook, opinions and punchlines; give those scenes no card). Tune per character in `character.json` with
+`"camera": {"top_y": 78, "box_scale": 0.75, "full_scale": 1.55, "full_top": 600, "backdrop": "<css background>"}`.
+SVG characters only. Without any `"layout"` the presenter stays at the bottom as before.

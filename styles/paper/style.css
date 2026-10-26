@@ -75,3 +75,8 @@ html, body { margin: 0; background: {paper}; }
 .imcap { position: absolute; left: 150px; top: -46px; font-size: 26px; color: {mid}; }
 .figwrap { position: absolute; top: 0; --hairline-plate: {paper}; --hairline-hi: {ink}; --hairline-edge: #55524c; --hairline-mid: #a8a39a; --hairline-lo: #d6d1c8; --hairline-stroke: 2.6; }
 .figcap { font-size: 26px; color: {mid}; height: 34px; } .figread { position: absolute; right: 0; top: 0; font-size: 28px; color: {accent}; }
+
+/* camera layouts: the presenter camera sits under the header, captions and cards */
+#cam { z-index: 1; }
+.hdr, .cap { z-index: 6; }
+.card-wrap { z-index: 4; }
