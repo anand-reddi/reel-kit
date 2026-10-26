@@ -1,10 +1,10 @@
-"""The @techinsixty flame head: an original faceless presenter. A soft gradient flame shaped as a triangle face (small
-rounded forehead, straight sides flaring to a heavy jaw with clear corners, short pointed chin), a dark void that
+"""The @techinsixty flame head: an original faceless presenter. A soft gradient flame shaped as a face from the
+face-shape chart (oval by default; round, heart, square, oblong, diamond, triangle via `python3 make.py <shape>`), a dark void that
 follows the face with two blue eyes and a blue LED bot mouth, in an open black overshirt over a white tee.
 Arms are built like a cartoon explainer presenter: broad shoulders, thick sleeves from the shoulder seam, smooth elbow,
 rolled cuffs near the wrist, a bare wrist and big hands with thin outlines. Two-bone arm rig.
 Run: python3 make.py -> character.svg + character.json"""
-import json, math, os
+import json, math, os, sys
 
 # ------------------------------------------------------------------ palette
 SHIRT, SHIRT_SH, SHIRT_HI, CUFF = "#232327", "#17171a", "#3b3b42", "#2e2e34"     # black overshirt
@@ -65,10 +65,36 @@ DEFS = '''<defs>
   <filter id="b18" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="18"/></filter>
 </defs>'''
 
-# triangle face (as in a face-shape chart): small rounded forehead, straight sides flaring out, wide heavy jaw with clear
-# corners, then the jaw line runs in to a short pointed chin
-FACE = ("M600,206 C650,206 690,226 702,262 L742,384 C752,414 762,442 754,462 C744,482 712,496 676,506 L632,520 "
-        "Q600,530 568,520 L524,506 C488,496 456,482 446,462 C438,442 448,414 458,384 L498,262 C510,226 550,206 600,206 Z")
+# face shapes from the classic face-shape chart, as the right half (x offset from the centre line, y) from the top of the
+# head to the chin; mirrored and smoothed. Pick one with `python3 make.py <shape>` (default: oval).
+SHAPES = {
+    "oval":     [(0, 204), (70, 210), (122, 242), (148, 296), (156, 356), (150, 414), (128, 464), (90, 504), (42, 528), (0, 534)],
+    "round":    [(0, 212), (82, 218), (138, 254), (164, 320), (166, 384), (148, 446), (106, 498), (50, 524), (0, 530)],
+    "heart":    [(0, 220), (44, 206), (104, 204), (152, 232), (168, 290), (160, 356), (132, 428), (86, 488), (38, 524), (0, 536)],
+    "square":   [(0, 206), (96, 208), (146, 226), (160, 280), (162, 380), (158, 450), (134, 496), (74, 518), (0, 522)],
+    "oblong":   [(0, 192), (70, 196), (118, 226), (136, 290), (138, 380), (132, 452), (106, 502), (58, 532), (0, 538)],
+    "diamond":  [(0, 206), (52, 212), (100, 246), (146, 318), (160, 360), (144, 420), (100, 482), (46, 524), (0, 534)],
+    "triangle": [(0, 206), (60, 210), (100, 250), (128, 330), (148, 400), (160, 452), (142, 490), (78, 512), (34, 526), (0, 530)],
+}
+FACE_SHAPE = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] in SHAPES else "oval"
+
+def smooth(pts, closed=True, k=1.0):
+    n = len(pts); d = f"M{pts[0][0]:.1f},{pts[0][1]:.1f} "
+    for i in range(n if closed else n - 1):
+        p0, p1, p2, p3 = pts[(i - 1) % n], pts[i], pts[(i + 1) % n], pts[(i + 2) % n]
+        if not closed: p0, p3 = pts[max(i - 1, 0)], pts[min(i + 2, n - 1)]
+        c1 = (p1[0] + (p2[0] - p0[0]) * k / 6, p1[1] + (p2[1] - p0[1]) * k / 6)
+        c2 = (p2[0] - (p3[0] - p1[0]) * k / 6, p2[1] - (p3[1] - p1[1]) * k / 6)
+        d += f"C{c1[0]:.1f},{c1[1]:.1f} {c2[0]:.1f},{c2[1]:.1f} {p2[0]:.1f},{p2[1]:.1f} "
+    return d + ("Z" if closed else "")
+
+HALF = SHAPES[FACE_SHAPE]
+FACE = smooth([(600 + x, y) for x, y in HALF] + [(600 - x, y) for x, y in reversed(HALF[1:-1])])
+CHIN = HALF[-1][1]
+def edge(side, inset):   # a soft highlight running down one cheek, following the face outline
+    pts = [(600 + side * (x - inset), y) for x, y in HALF if 270 <= y <= 470]
+    return smooth(pts, closed=False)
+
 TONGUES = {   # rooted deep inside the head and swaying around their own base, so they never lift off
     "tongueM": ("M550,330 C542,204 588,132 604,52 C640,120 676,192 654,330 Z", "602 330", 4, 1.3),
     "tongueL": ("M494,350 C474,270 482,200 510,150 C528,210 552,252 556,340 Z", "522 340", 5, 1.1),
@@ -102,10 +128,10 @@ def head():
   <g id="flames">{tongues}</g>
   <path d="{FACE}" fill="url(#fl)" filter="url(#b2)"/>
   <path d="{FACE}" fill="url(#rim)" filter="url(#b2)"/>
-  <path d="M708,282 L740,384 C750,414 756,436 752,452" stroke="#fff3d6" stroke-width="13" fill="none" stroke-linecap="round" opacity="0.55" filter="url(#b8)"/>
+  <path d="{edge(1, 12)}" stroke="#fff3d6" stroke-width="13" fill="none" stroke-linecap="round" opacity="0.55" filter="url(#b8)"/>
   <path d="M598,98 C588,132 572,164 562,204" stroke="#fff6dc" stroke-width="10" fill="none" stroke-linecap="round" opacity="0.5" filter="url(#b8)"/>
-  <path d="M490,290 L460,384 C452,414 448,436 452,456" stroke="#ff4f9a" stroke-width="15" fill="none" stroke-linecap="round" opacity="0.5" filter="url(#b8)"/>
-  <path d="M530,512 Q600,536 670,512" stroke="#4f7dff" stroke-width="10" fill="none" stroke-linecap="round" opacity="0.5" filter="url(#b8)"/>
+  <path d="{edge(-1, 12)}" stroke="#ff4f9a" stroke-width="15" fill="none" stroke-linecap="round" opacity="0.5" filter="url(#b8)"/>
+  <path d="M540,{CHIN - 22} Q600,{CHIN + 2} 660,{CHIN - 22}" stroke="#4f7dff" stroke-width="10" fill="none" stroke-linecap="round" opacity="0.5" filter="url(#b8)"/>
   <path d="{FACE}" fill="url(#void)" {void} filter="url(#b8)"/>
   <path d="{FACE}" fill="#050309" opacity="0.85" {core} filter="url(#b18)"/>
   {eyes}
