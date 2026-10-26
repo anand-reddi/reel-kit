@@ -4,8 +4,9 @@
  "x": -60,
  "y": 1130,
  "width": 1200,
- "head_origin": "600 500",
- "avatar_view": "380 40 440 470",
+ "head_origin": "600 530",
+ "avatar_view": "380 40 440 500",
+ "head_tilt": 0.35,
  "poses": [
   "rest",
   "up",
@@ -19,10 +20,10 @@
   {
    "id": "armL",
    "shoulder": [
-    476,
-    626
+    414,
+    640
    ],
-   "upper": 104,
+   "upper": 150,
    "hands": [
     "point",
     "palm",
@@ -30,38 +31,38 @@
    ],
    "poses": {
     "rest": {
-     "u": 100,
-     "f": -6,
+     "u": 96,
+     "f": -4,
      "hand": "palm"
     },
     "up": {
-     "u": 160,
-     "f": 110,
+     "u": 172,
+     "f": 96,
      "hand": "point"
     },
     "card": {
-     "u": 156,
-     "f": 94,
+     "u": 190,
+     "f": 55,
      "hand": "point"
     },
     "palms": {
-     "u": 138,
+     "u": 128,
      "f": 100,
      "hand": "palm"
     },
     "shrug": {
-     "u": 128,
-     "f": 86,
+     "u": 122,
+     "f": 88,
      "hand": "palm"
     },
     "thumb": {
-     "u": 128,
-     "f": 156,
+     "u": 162,
+     "f": 108,
      "hand": "thumb"
     },
     "wave": {
-     "u": 162,
-     "f": 106,
+     "u": 170,
+     "f": 94,
      "hand": "palm",
      "wave": true
     }
@@ -70,34 +71,34 @@
   {
    "id": "armR",
    "shoulder": [
-    724,
-    626
+    786,
+    640
    ],
-   "upper": 104,
+   "upper": 150,
    "hands": [
     "palm",
     "point"
    ],
    "poses": {
     "rest": {
-     "u": 80,
-     "f": 6,
+     "u": 84,
+     "f": 4,
      "hand": "palm"
     },
+    "up": {
+     "u": 8,
+     "f": -96,
+     "hand": "point"
+    },
     "palms": {
-     "u": 42,
+     "u": 52,
      "f": -100,
      "hand": "palm"
     },
     "shrug": {
-     "u": 52,
-     "f": -86,
+     "u": 58,
+     "f": -88,
      "hand": "palm"
-    },
-    "up": {
-     "u": 20,
-     "f": -110,
-     "hand": "point"
     }
    }
   }
@@ -106,7 +107,6 @@
   "sel": "#flames",
   "raise": -16
  },
- "head_tilt": 0.35,
  "idle": [
   {
    "sel": "#tongueM",
@@ -118,13 +118,13 @@
    "sel": "#tongueL",
    "rot": 5,
    "period": 1.1,
-   "origin": "518 340"
+   "origin": "522 340"
   },
   {
    "sel": "#tongueR",
    "rot": 5,
    "period": 1.5,
-   "origin": "684 340"
+   "origin": "680 340"
   }
  ]
 }
