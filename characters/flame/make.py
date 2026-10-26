@@ -1,12 +1,12 @@
 """The @techinsixty flame head: an original faceless presenter with a soft gradient flame for a head (yellow to pink
 to violet, a dark void face with a blue under-glow) in a dark hoodie. The flame tongues flicker, leap on accented
-words, and an ember glows in the void while he talks. Two-bone arm rig. Run: python3 make.py"""
+words, and an blue glow under the void is his mouth; two blue eyes glow inside it. Two-bone arm rig. Run: python3 make.py"""
 import math, os
 
-OUT = "#100e16"
-SKIN, SKIN_SH, SKIN_HI = "#2c2838", "#4a4560", "#3a3548"
+OUT = "#120c24"
+SKIN, SKIN_SH, SKIN_HI = "#2c2354", "#4b3c86", "#3a2e6a"
 HAIR, HAIR_HI = "#161616", "#2e2e33"
-JK, JK_SH, JK_HI, STITCH = "#2a2636", "#1a1823", "#4a4560", "#1a1823"
+JK, JK_SH, JK_HI, STITCH = "#2a2150", "#1c1638", "#4b3c86", "#1c1638"
 RED = "#e5372d"
 W = 6
 
@@ -106,44 +106,53 @@ DEFS = '''<defs>
     <stop offset="0.6" stop-color="#ff8a3a"/><stop offset="0.85" stop-color="#ffc24a"/><stop offset="1" stop-color="#ffe08a"/></linearGradient>
   <radialGradient id="rim" gradientUnits="userSpaceOnUse" cx="590" cy="330" r="190">
     <stop offset="0.55" stop-color="#ff6aa8" stop-opacity="0"/><stop offset="1" stop-color="#ff6aa8" stop-opacity="0.75"/></radialGradient>
-  <radialGradient id="void" cx="0.5" cy="0.45" r="0.5">
-    <stop offset="0" stop-color="#040309"/><stop offset="0.62" stop-color="#0a0714"/><stop offset="0.85" stop-color="#2a1030" stop-opacity="0.75"/>
-    <stop offset="1" stop-color="#3a1030" stop-opacity="0"/></radialGradient>
-  <linearGradient id="hood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2e2a3d"/><stop offset="1" stop-color="#14121c"/></linearGradient>
+  <radialGradient id="void" cx="0.5" cy="0.46" r="0.5">
+    <stop offset="0" stop-color="#030208"/><stop offset="0.45" stop-color="#070410"/><stop offset="0.64" stop-color="#1c0a2a"/>
+    <stop offset="0.78" stop-color="#5a1446" stop-opacity="0.75"/><stop offset="0.9" stop-color="#c03a5a" stop-opacity="0.3"/><stop offset="1" stop-color="#ff7a50" stop-opacity="0"/></radialGradient>
+  <linearGradient id="hood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2f2556"/><stop offset="1" stop-color="#120d26"/></linearGradient>
   <filter id="b2" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="2"/></filter>
   <filter id="b8" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="8"/></filter>
   <filter id="b18" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="18"/></filter>
 </defs>'''
 
-BLOB = "M468,392 C452,320 470,250 522,222 C566,200 604,214 642,206 C704,198 744,252 744,322 C746,404 702,474 612,484 C530,490 484,452 468,392 Z"
-TONGUES = {
-    "tongueM": ("M520,262 C530,170 588,128 612,48 C648,116 704,166 676,262 Z", "604 250", 5, 1.3),
-    "tongueL": ("M460,330 C448,256 462,190 496,140 C516,196 546,232 552,284 Z", "520 300", 7, 1.1),
-    "tongueR": ("M650,272 C686,214 716,176 750,160 C762,214 778,270 760,346 Z", "690 300", 6, 1.5),
+BLOB = "M454,392 C436,312 458,236 520,210 C566,192 606,206 646,196 C716,188 762,248 762,326 C764,410 712,480 612,490 C524,494 470,456 454,392 Z"
+TONGUES = {   # each tongue is rooted deep inside the head blob and sways around its own base, so it never lifts off
+    "tongueM": ("M530,330 C522,200 584,128 612,48 C650,116 708,170 680,330 Z", "605 330", 4, 1.3),
+    "tongueL": ("M472,360 C450,262 462,190 496,140 C520,200 556,240 560,340 Z", "515 350", 5, 1.1),
+    "tongueR": ("M640,340 C676,230 714,180 748,162 C760,214 766,270 750,340 Z", "700 345", 4, 1.5),
 }
 
 def flame_paths():
     return [BLOB] + [d for d, *_ in TONGUES.values()]
 
 def head():
-    glow = "".join(f'<path d="{d}" fill="url(#fl)"/>' for d in flame_paths())
+    bloom = "".join(f'<path d="{d}" fill="url(#fl)"/>' for d in flame_paths())
     tongues = "".join(f'<g id="{k}"><path d="{d}" fill="url(#fl)" filter="url(#b2)"/></g>' for k, (d, *_) in TONGUES.items())
+    def eye(cx, cy):
+        return (f'<ellipse cx="{cx}" cy="{cy}" rx="20" ry="24" fill="#3d6dff" opacity="0.6" filter="url(#b8)"/>'
+                f'<ellipse cx="{cx}" cy="{cy}" rx="9" ry="12" fill="#8fb2ff" filter="url(#b2)"/>'
+                f'<ellipse cx="{cx}" cy="{cy - 1}" rx="4" ry="5.5" fill="#eef4ff"/>')
+    eyes = (f'<g id="eyes-open">{eye(536, 326)}{eye(602, 322)}</g>'
+            '<g id="eyes-shut" opacity="0"><path d="M520,330 Q536,338 552,330 M586,326 Q602,334 618,326" stroke="#8fb2ff" stroke-width="6" fill="none" '
+            'stroke-linecap="round" filter="url(#b2)"/></g>')
+    glow = lambda rx, ry, op, crx, cry, cop, cy=456: (f'<ellipse cx="588" cy="{cy}" rx="{rx}" ry="{ry}" fill="#3d6dff" opacity="{op}" filter="url(#b8)"/>'
+                                                      f'<ellipse cx="588" cy="{cy + 3}" rx="{crx}" ry="{cry}" fill="#b8d0ff" opacity="{cop}" filter="url(#b2)"/>')
     m = {
-        "closed": '<ellipse cx="582" cy="392" rx="30" ry="10" fill="#ff8a4c" opacity="0.18" filter="url(#b8)"/>',
-        "o": '<ellipse cx="582" cy="388" rx="46" ry="20" fill="#ff8a4c" opacity="0.75" filter="url(#b8)"/><ellipse cx="582" cy="388" rx="20" ry="7" fill="#ffd27a" opacity="0.7" filter="url(#b2)"/>',
-        "smile": '<path d="M540,378 Q582,410 624,378" stroke="#ff9a52" stroke-width="12" fill="none" stroke-linecap="round" opacity="0.8" filter="url(#b8)"/>',
+        "closed": glow(70, 16, 0.8, 34, 6, 0.5),
+        "o": glow(88, 27, 1, 48, 11, 0.9, cy=452),
+        "smile": ('<path d="M526,438 Q588,480 650,438" stroke="#3d6dff" stroke-width="24" fill="none" stroke-linecap="round" opacity="0.9" filter="url(#b8)"/>'
+                  '<path d="M548,446 Q588,470 628,446" stroke="#c8daff" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.85" filter="url(#b2)"/>'),
     }
     mouths = "".join(f'<g id="m-{k}" class="mth" opacity="{1 if k == "smile" else 0}">{v}</g>' for k, v in m.items())
     return f'''<g id="head">
-  <g opacity="0.55" filter="url(#b18)">{glow}</g>
+  <g opacity="0.55" filter="url(#b18)">{bloom}</g>
   <g id="flames">{tongues}</g>
   <path d="{BLOB}" fill="url(#fl)" filter="url(#b2)"/>
   <path d="{BLOB}" fill="url(#rim)" filter="url(#b2)"/>
   <path d="M716,236 C740,280 746,334 732,388" stroke="#fff3d6" stroke-width="14" fill="none" stroke-linecap="round" opacity="0.6" filter="url(#b8)"/><path d="M600,96 C590,130 570,160 556,200" stroke="#fff6dc" stroke-width="10" fill="none" stroke-linecap="round" opacity="0.5" filter="url(#b8)"/><path d="M480,300 C470,350 478,400 500,436" stroke="#ff4f9a" stroke-width="16" fill="none" stroke-linecap="round" opacity="0.5" filter="url(#b8)"/>
-  <ellipse cx="572" cy="344" rx="104" ry="124" fill="url(#void)" filter="url(#b8)"/>
-  <ellipse cx="566" cy="336" rx="76" ry="96" fill="#06050b" filter="url(#b8)"/>
-  <ellipse cx="590" cy="458" rx="78" ry="20" fill="#3d6dff" opacity="0.9" filter="url(#b8)"/><ellipse cx="590" cy="462" rx="40" ry="8" fill="#9fc0ff" opacity="0.6" filter="url(#b2)"/>
-  <g id="eyes-open"></g><g id="eyes-shut" opacity="0"><path d="{BLOB}" fill="#000" opacity="0.12"/></g>
+  <ellipse cx="570" cy="356" rx="128" ry="142" fill="url(#void)" filter="url(#b8)"/>
+  <ellipse cx="566" cy="346" rx="70" ry="94" fill="#050309" opacity="0.9" filter="url(#b18)"/>
+  {eyes}
   {mouths}
 </g>'''
 
@@ -167,14 +176,15 @@ def arm(side, rest_u, rest_f):
 def body():
     sw = "M524,546 C466,552 418,578 408,646 L396,1010 L804,1010 L792,646 C782,578 734,552 676,546 Z"
     return f'''
-  <path d="M494,600 C480,530 530,494 600,494 C676,494 724,530 708,600 Z" fill="#2b2738"/>
-  <path d="M566,440 C562,480 560,520 562,570 L638,570 C640,520 638,480 634,440 Z" fill="#1c1925"/>
+  <path d="M494,600 C480,530 530,494 600,494 C676,494 724,530 708,600 Z" fill="#2b2150"/>
+  <path d="M568,450 C562,490 558,530 560,570 L640,570 C642,530 638,490 632,450 Z" fill="#1a1433" filter="url(#b2)"/>
   <path d="{sw}" fill="url(#hood)"/>
-  <path d="M498,580 C510,540 548,536 572,560 L600,624 L628,560 C652,536 694,540 704,580 C712,620 680,652 630,660 L600,634 L570,660 C520,652 488,620 498,580 Z" fill="#27232f"/>
-  <path d="M572,560 L600,624 L628,560" stroke="#0e0c14" stroke-width="8" fill="none" opacity="0.7" filter="url(#b2)"/>
-  <path d="M500,600 C520,640 556,660 600,664 C644,660 682,640 702,600" stroke="#0e0c14" stroke-width="5" fill="none" opacity="0.5" filter="url(#b2)"/>
+  <path d="M498,580 C510,540 548,536 572,560 L600,624 L628,560 C652,536 694,540 704,580 C712,620 680,652 630,660 L600,634 L570,660 C520,652 488,620 498,580 Z" fill="#2a2052"/>
+  <path d="M572,560 L600,624 L628,560" stroke="#0c0819" stroke-width="8" fill="none" opacity="0.7" filter="url(#b2)"/>
+  <path d="M500,600 C520,640 556,660 600,664 C644,660 682,640 702,600" stroke="#0c0819" stroke-width="5" fill="none" opacity="0.5" filter="url(#b2)"/>
   <path d="M416,640 C410,720 404,840 400,1010" stroke="#ff7aa0" stroke-width="12" fill="none" opacity="0.35" filter="url(#b8)"/>
-  <path d="M540,720 C532,780 530,840 532,920 M682,710 C692,780 696,850 694,950" stroke="#0e0c14" stroke-width="6" fill="none" opacity="0.55" filter="url(#b2)"/>'''
+  <path d="M790,650 C796,740 800,860 802,1010" stroke="#5b7cff" stroke-width="12" fill="none" opacity="0.35" filter="url(#b8)"/>
+  <path d="M540,720 C532,780 530,840 532,920 M682,710 C692,780 696,850 694,950" stroke="#0c0819" stroke-width="6" fill="none" opacity="0.55" filter="url(#b2)"/>'''
 
 # ------------------------------------------------------------------ poses
 POSES_L = {
