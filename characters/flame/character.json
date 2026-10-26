@@ -106,24 +106,25 @@
   "sel": "#flames",
   "raise": -16
  },
+ "head_tilt": 0.35,
  "idle": [
   {
    "sel": "#tongueM",
    "rot": 4,
    "period": 1.3,
-   "origin": "605 330"
+   "origin": "602 330"
   },
   {
    "sel": "#tongueL",
    "rot": 5,
    "period": 1.1,
-   "origin": "515 350"
+   "origin": "518 340"
   },
   {
    "sel": "#tongueR",
-   "rot": 4,
+   "rot": 5,
    "period": 1.5,
-   "origin": "700 345"
+   "origin": "684 340"
   }
  ]
 }

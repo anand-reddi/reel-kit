@@ -1,12 +1,14 @@
 """The @techinsixty flame head: an original faceless presenter with a soft gradient flame for a head (yellow to pink
-to violet, a dark void face with a blue under-glow) in a dark hoodie. The flame tongues flicker, leap on accented
-words, and an blue glow under the void is his mouth; two blue eyes glow inside it. Two-bone arm rig. Run: python3 make.py"""
+to violet, a dark void face with a blue under-glow) with a triangle face, in an open orange overshirt over a black tee. The flame tongues flicker, leap on accented
+words, and an blue LED bot mouth (equaliser bars while talking) and two blue eyes glow inside the void. Two-bone arm rig. Run: python3 make.py"""
 import math, os
 
-OUT = "#120c24"
-SKIN, SKIN_SH, SKIN_HI = "#2c2354", "#4b3c86", "#3a2e6a"
+OUT = "#1a1420"
+SKIN, SKIN_SH, SKIN_HI = "#2b2633", "#4a4458", "#3a3446"     # dark shadow-figure hands
 HAIR, HAIR_HI = "#161616", "#2e2e33"
-JK, JK_SH, JK_HI, STITCH = "#2a2150", "#1c1638", "#4b3c86", "#1c1638"
+JK, JK_SH, JK_HI, STITCH = "#e8772e", "#c25d1c", "#f6974f", "#c25d1c"     # orange overshirt
+CUFF, BTN, TEE, TEE_HI, NECK = "#cf6421", "#3a2114", "#16141a", "#2e2b35", "#241e2c"
+LINE, LW = "#3a2114", 3
 RED = "#e5372d"
 W = 6
 
@@ -99,27 +101,28 @@ def smooth(pts, closed=True, k=0.8):
         d += f"C{c1[0]:.1f},{c1[1]:.1f} {c2[0]:.1f},{c2[1]:.1f} {p2[0]:.1f},{p2[1]:.1f} "
     return d + ("Z" if closed else "")
 
-# ------------------------------------------------------------------ head: soft gradient flame with a dark void face (global coords)
+# ------------------------------------------------------------------ head: soft gradient flame, triangle face, centred void (global coords)
 DEFS = '''<defs>
-  <linearGradient id="fl" gradientUnits="userSpaceOnUse" x1="600" y1="490" x2="600" y2="60">
-    <stop offset="0" stop-color="#4f7dff"/><stop offset="0.18" stop-color="#b064ff"/><stop offset="0.38" stop-color="#ff5f8f"/>
-    <stop offset="0.6" stop-color="#ff8a3a"/><stop offset="0.85" stop-color="#ffc24a"/><stop offset="1" stop-color="#ffe08a"/></linearGradient>
-  <radialGradient id="rim" gradientUnits="userSpaceOnUse" cx="590" cy="330" r="190">
-    <stop offset="0.55" stop-color="#ff6aa8" stop-opacity="0"/><stop offset="1" stop-color="#ff6aa8" stop-opacity="0.75"/></radialGradient>
+  <linearGradient id="fl" gradientUnits="userSpaceOnUse" x1="600" y1="510" x2="600" y2="60">
+    <stop offset="0" stop-color="#4f7dff"/><stop offset="0.16" stop-color="#b064ff"/><stop offset="0.36" stop-color="#ff5f8f"/>
+    <stop offset="0.58" stop-color="#ff8a3a"/><stop offset="0.84" stop-color="#ffc24a"/><stop offset="1" stop-color="#ffe08a"/></linearGradient>
+  <radialGradient id="rim" gradientUnits="userSpaceOnUse" cx="600" cy="350" r="200">
+    <stop offset="0.55" stop-color="#ff6aa8" stop-opacity="0"/><stop offset="1" stop-color="#ff6aa8" stop-opacity="0.7"/></radialGradient>
   <radialGradient id="void" cx="0.5" cy="0.46" r="0.5">
     <stop offset="0" stop-color="#030208"/><stop offset="0.45" stop-color="#070410"/><stop offset="0.64" stop-color="#1c0a2a"/>
     <stop offset="0.78" stop-color="#5a1446" stop-opacity="0.75"/><stop offset="0.9" stop-color="#c03a5a" stop-opacity="0.3"/><stop offset="1" stop-color="#ff7a50" stop-opacity="0"/></radialGradient>
-  <linearGradient id="hood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2f2556"/><stop offset="1" stop-color="#120d26"/></linearGradient>
   <filter id="b2" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="2"/></filter>
   <filter id="b8" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="8"/></filter>
   <filter id="b18" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="18"/></filter>
 </defs>'''
 
-BLOB = "M454,392 C436,312 458,236 520,210 C566,192 606,206 646,196 C716,188 762,248 762,326 C764,410 712,480 612,490 C524,494 470,456 454,392 Z"
-TONGUES = {   # each tongue is rooted deep inside the head blob and sways around its own base, so it never lifts off
-    "tongueM": ("M530,330 C522,200 584,128 612,48 C650,116 708,170 680,330 Z", "605 330", 4, 1.3),
-    "tongueL": ("M472,360 C450,262 462,190 496,140 C520,200 556,240 560,340 Z", "515 350", 5, 1.1),
-    "tongueR": ("M640,340 C676,230 714,180 748,162 C760,214 766,270 750,340 Z", "700 345", 4, 1.5),
+# triangle face: small forehead, heavy wide jaw, weak cheekbones, pointed chin; symmetric so he looks straight ahead
+BLOB = ("M600,204 C652,204 700,222 716,268 C734,320 764,372 762,420 C760,456 716,480 664,496 C636,505 616,512 600,522 "
+        "C584,512 564,505 536,496 C484,480 440,456 438,420 C436,372 466,320 484,268 C500,222 548,204 600,204 Z")
+TONGUES = {   # rooted deep inside the head and swaying around their own base, so they never lift off
+    "tongueM": ("M548,330 C540,204 588,132 604,52 C640,120 676,192 656,330 Z", "602 330", 4, 1.3),
+    "tongueL": ("M486,350 C470,270 478,200 506,150 C526,210 552,252 556,340 Z", "518 340", 5, 1.1),
+    "tongueR": ("M644,340 C648,252 674,204 700,152 C726,206 734,276 716,350 Z", "684 340", 5, 1.5),
 }
 
 def flame_paths():
@@ -128,20 +131,21 @@ def flame_paths():
 def head():
     bloom = "".join(f'<path d="{d}" fill="url(#fl)"/>' for d in flame_paths())
     tongues = "".join(f'<g id="{k}"><path d="{d}" fill="url(#fl)" filter="url(#b2)"/></g>' for k, (d, *_) in TONGUES.items())
+    BL = "#8fb2ff"
     def eye(cx, cy):
         return (f'<ellipse cx="{cx}" cy="{cy}" rx="20" ry="24" fill="#3d6dff" opacity="0.6" filter="url(#b8)"/>'
-                f'<ellipse cx="{cx}" cy="{cy}" rx="9" ry="12" fill="#8fb2ff" filter="url(#b2)"/>'
+                f'<ellipse cx="{cx}" cy="{cy}" rx="9" ry="12" fill="{BL}" filter="url(#b2)"/>'
                 f'<ellipse cx="{cx}" cy="{cy - 1}" rx="4" ry="5.5" fill="#eef4ff"/>')
-    eyes = (f'<g id="eyes-open">{eye(536, 326)}{eye(602, 322)}</g>'
-            '<g id="eyes-shut" opacity="0"><path d="M520,330 Q536,338 552,330 M586,326 Q602,334 618,326" stroke="#8fb2ff" stroke-width="6" fill="none" '
+    eyes = (f'<g id="eyes-open">{eye(567, 336)}{eye(633, 336)}</g>'
+            f'<g id="eyes-shut" opacity="0"><path d="M551,340 Q567,348 583,340 M617,340 Q633,348 649,340" stroke="{BL}" stroke-width="6" fill="none" '
             'stroke-linecap="round" filter="url(#b2)"/></g>')
-    glow = lambda rx, ry, op, crx, cry, cop, cy=456: (f'<ellipse cx="588" cy="{cy}" rx="{rx}" ry="{ry}" fill="#3d6dff" opacity="{op}" filter="url(#b8)"/>'
-                                                      f'<ellipse cx="588" cy="{cy + 3}" rx="{crx}" ry="{cry}" fill="#b8d0ff" opacity="{cop}" filter="url(#b2)"/>')
+    # LED bot mouth: a thin bar at rest, an equaliser while talking, a curved bar for the smile
+    halo = lambda w, h: f'<rect x="{600 - w / 2}" y="{416 - h / 2}" width="{w}" height="{h}" rx="{h / 2}" fill="#3d6dff" opacity="0.55" filter="url(#b8)"/>'
+    bars = "".join(f'<rect x="{x - 4}" y="{416 - h / 2}" width="8" height="{h}" rx="4" fill="{BL}"/>' for x, h in ((572, 10), (586, 22), (600, 32), (614, 22), (628, 10)))
     m = {
-        "closed": glow(70, 16, 0.8, 34, 6, 0.5),
-        "o": glow(88, 27, 1, 48, 11, 0.9, cy=452),
-        "smile": ('<path d="M526,438 Q588,480 650,438" stroke="#3d6dff" stroke-width="24" fill="none" stroke-linecap="round" opacity="0.9" filter="url(#b8)"/>'
-                  '<path d="M548,446 Q588,470 628,446" stroke="#c8daff" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.85" filter="url(#b2)"/>'),
+        "closed": halo(80, 20) + f'<rect x="574" y="413" width="52" height="7" rx="3.5" fill="{BL}"/>',
+        "o": halo(84, 44) + bars,
+        "smile": halo(84, 26) + f'<path d="M572,408 Q600,430 628,408" stroke="{BL}" stroke-width="7" fill="none" stroke-linecap="round"/>',
     }
     mouths = "".join(f'<g id="m-{k}" class="mth" opacity="{1 if k == "smile" else 0}">{v}</g>' for k, v in m.items())
     return f'''<g id="head">
@@ -149,42 +153,67 @@ def head():
   <g id="flames">{tongues}</g>
   <path d="{BLOB}" fill="url(#fl)" filter="url(#b2)"/>
   <path d="{BLOB}" fill="url(#rim)" filter="url(#b2)"/>
-  <path d="M716,236 C740,280 746,334 732,388" stroke="#fff3d6" stroke-width="14" fill="none" stroke-linecap="round" opacity="0.6" filter="url(#b8)"/><path d="M600,96 C590,130 570,160 556,200" stroke="#fff6dc" stroke-width="10" fill="none" stroke-linecap="round" opacity="0.5" filter="url(#b8)"/><path d="M480,300 C470,350 478,400 500,436" stroke="#ff4f9a" stroke-width="16" fill="none" stroke-linecap="round" opacity="0.5" filter="url(#b8)"/>
-  <ellipse cx="570" cy="356" rx="128" ry="142" fill="url(#void)" filter="url(#b8)"/>
-  <ellipse cx="566" cy="346" rx="70" ry="94" fill="#050309" opacity="0.9" filter="url(#b18)"/>
+  <path d="M720,280 C742,330 754,380 748,426" stroke="#fff3d6" stroke-width="14" fill="none" stroke-linecap="round" opacity="0.55" filter="url(#b8)"/>
+  <path d="M598,98 C588,132 572,164 562,204" stroke="#fff6dc" stroke-width="10" fill="none" stroke-linecap="round" opacity="0.5" filter="url(#b8)"/>
+  <path d="M478,290 C458,340 452,392 462,436" stroke="#ff4f9a" stroke-width="16" fill="none" stroke-linecap="round" opacity="0.5" filter="url(#b8)"/>
+  <ellipse cx="600" cy="366" rx="122" ry="136" fill="url(#void)" filter="url(#b8)"/>
+  <ellipse cx="600" cy="360" rx="70" ry="94" fill="#050309" opacity="0.9" filter="url(#b18)"/>
   {eyes}
   {mouths}
 </g>'''
 
-# ------------------------------------------------------------------ two-bone arm: hoodie sleeves, shadowy hands
+# ------------------------------------------------------------------ two-bone arm: orange overshirt sleeves with buttoned cuffs, dark hands
 def tube(x0, x1, w0, w1): return f"M{x0},{-w0} L{x1},{-w1} L{x1},{w1} L{x0},{w0} Z"
 
 def arm(side, rest_u, rest_f):
     flip = side == "R"; sx, sy = SHL if side == "L" else SHR
-    up_t, fo_t = tube(0, U + 4, 40, 34), tube(0, F - 6, 34, 28)
+    up_t, fo_t = tube(0, U + 4, 40, 35), tube(0, F - 6, 35, 30)
+    cuff = tube(F - 32, F - 4, 33, 33)
+    ink = lambda d, w=2 * LW: f'<path d="{d}" fill="{LINE}" stroke="{LINE}" stroke-width="{w}" stroke-linejoin="round"/>'
     hands = {"L": {"point": 0, "palm": -8, "thumb": -25}, "R": {"palm": 8, "point": 0}}[side]
     hg = "".join(f'<g id="arm{side}-{k}" opacity="0"><g transform="translate({F} 0) rotate({90 + hr})">{hand(k, flip)}</g></g>' for k, hr in hands.items())
     fore = f'transform="rotate({rest_f} {U} 0)"'
     return (f'<g id="arm{side}" transform="rotate({rest_u} {sx} {sy})"><g transform="translate({sx} {sy})">'
-            f'<path d="{up_t}" fill="{JK}"/><circle r="42" fill="{JK}"/>'
-            f'<path d="M14,-24 L{U * 0.8:.0f},-22" stroke="{JK_HI}" stroke-width="8" stroke-linecap="round" opacity="0.6" filter="url(#b2)"/>'
-            f'<g class="fore" {fore}><g transform="translate({U} 0)">{hg}<circle r="36" fill="{JK}"/><path d="{fo_t}" fill="{JK}"/>'
-            f'<path d="{tube(F - 26, F - 6, 30, 30)}" fill="{JK_SH}"/></g></g>'
+            f'{ink(up_t)}<g class="fore" {fore}><g transform="translate({U} 0)">{ink(fo_t)}<circle r="{35 + LW}" fill="{LINE}"/></g></g>'
+            f'<path d="{up_t}" fill="{JK}"/><circle r="44" fill="{JK}"/>'
+            f'<path d="M14,22 L{U * 0.85:.0f},20" stroke="{JK_SH}" stroke-width="10" stroke-linecap="round"/>'
+            f'<path d="M20,-24 L{U * 0.7:.0f},-22" stroke="{JK_HI}" stroke-width="6" stroke-linecap="round" opacity="0.8"/>'
+            f'<g class="fore" {fore}><g transform="translate({U} 0)">{hg}<circle r="35" fill="{JK}"/><path d="{fo_t}" fill="{JK}"/>'
+            f'<path d="M-6,-18 Q8,-4 -2,14" stroke="{JK_SH}" stroke-width="4" fill="none" stroke-linecap="round"/>'
+            f'<path d="M8,18 L{F - 40},17" stroke="{JK_SH}" stroke-width="8" stroke-linecap="round"/>'
+            f'<path d="{cuff}" fill="{CUFF}" stroke="{LINE}" stroke-width="3" stroke-linejoin="round"/>'
+            f'<circle cx="{F - 18}" cy="-20" r="3.5" fill="{BTN}"/></g></g>'
             f'</g></g>')
 
-# ------------------------------------------------------------------ torso: soft hoodie with the hood draped around the neck, warm rim light
+# ------------------------------------------------------------------ torso: open orange overshirt over a black tee
 def body():
     sw = "M524,546 C466,552 418,578 408,646 L396,1010 L804,1010 L792,646 C782,578 734,552 676,546 Z"
+    tee = "M556,540 Q600,530 644,540 L664,1010 L536,1010 Z"
+    collarL = "M556,540 L500,556 Q488,572 508,600 L552,636 L568,574 Z"
+    collarR = "M644,540 L700,556 Q712,572 692,600 L648,636 L632,574 Z"
+    pocket = lambda x: (f'<path d="M{x},700 L{x + 86},700 L{x + 86},790 Q{x + 43},800 {x},790 Z" fill="none" stroke="{JK_SH}" stroke-width="4" stroke-linejoin="round"/>'
+                        f'<path d="M{x - 4},690 L{x + 90},690 L{x + 86},722 Q{x + 43},732 {x},722 Z" fill="{JK}" stroke="{LINE}" stroke-width="3" stroke-linejoin="round"/>'
+                        f'<circle cx="{x + 43}" cy="718" r="4.5" fill="{BTN}"/>')
     return f'''
-  <path d="M494,600 C480,530 530,494 600,494 C676,494 724,530 708,600 Z" fill="#2b2150"/>
-  <path d="M568,450 C562,490 558,530 560,570 L640,570 C642,530 638,490 632,450 Z" fill="#1a1433" filter="url(#b2)"/>
-  <path d="{sw}" fill="url(#hood)"/>
-  <path d="M498,580 C510,540 548,536 572,560 L600,624 L628,560 C652,536 694,540 704,580 C712,620 680,652 630,660 L600,634 L570,660 C520,652 488,620 498,580 Z" fill="#2a2052"/>
-  <path d="M572,560 L600,624 L628,560" stroke="#0c0819" stroke-width="8" fill="none" opacity="0.7" filter="url(#b2)"/>
-  <path d="M500,600 C520,640 556,660 600,664 C644,660 682,640 702,600" stroke="#0c0819" stroke-width="5" fill="none" opacity="0.5" filter="url(#b2)"/>
-  <path d="M416,640 C410,720 404,840 400,1010" stroke="#ff7aa0" stroke-width="12" fill="none" opacity="0.35" filter="url(#b8)"/>
-  <path d="M790,650 C796,740 800,860 802,1010" stroke="#5b7cff" stroke-width="12" fill="none" opacity="0.35" filter="url(#b8)"/>
-  <path d="M540,720 C532,780 530,840 532,920 M682,710 C692,780 696,850 694,950" stroke="#0c0819" stroke-width="6" fill="none" opacity="0.55" filter="url(#b2)"/>'''
+  <path d="M568,450 C562,490 558,530 560,570 L640,570 C642,530 638,490 632,450 Z" fill="{NECK}"/>
+  <path d="M568,520 Q600,540 632,520 L632,560 L568,560 Z" fill="#000" opacity="0.25"/>
+  <path d="{sw}" fill="{JK}" stroke="{LINE}" stroke-width="{LW}" stroke-linejoin="round"/>
+  <clipPath id="swc"><path d="{sw}"/></clipPath>
+  <g clip-path="url(#swc)">
+    <path d="M700,600 C740,620 770,660 780,720 L804,1010 L720,1010 C730,860 728,720 700,600 Z" fill="{JK_SH}" opacity="0.6"/>
+    <path d="M430,640 C424,720 420,860 418,1010" stroke="{JK_HI}" stroke-width="10" fill="none" opacity="0.6"/>
+  </g>
+  <path d="{tee}" fill="{TEE}"/>
+  <path d="M556,540 Q600,566 644,540" stroke="{TEE_HI}" stroke-width="12" fill="none" stroke-linecap="round"/>
+  <path d="M566,600 L600,606 M582,660 L620,700" stroke="{TEE_HI}" stroke-width="3" opacity="0.6" stroke-linecap="round"/>
+  <path d="M556,540 L536,1010 M644,540 L664,1010" stroke="{LINE}" stroke-width="3.5"/>
+  <path d="M548,580 L528,1010" stroke="{JK_SH}" stroke-width="5"/>
+  {"".join(f'<circle cx="{548 - (y - 580) * 0.046:.1f}" cy="{y}" r="5" fill="{BTN}"/>' for y in (680, 790, 900))}
+  <path d="{collarL}" fill="{JK_HI}" stroke="{LINE}" stroke-width="3" stroke-linejoin="round"/>
+  <path d="{collarR}" fill="{JK_HI}" stroke="{LINE}" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M512,596 L552,630 M688,596 L648,630" stroke="{JK_SH}" stroke-width="4" stroke-linecap="round"/>
+  {pocket(440)}{pocket(674)}
+  <path d="M452,640 C470,600 500,580 530,572 M748,640 C730,600 700,580 670,572" stroke="{JK_SH}" stroke-width="4" fill="none" stroke-linecap="round"/>'''
 
 # ------------------------------------------------------------------ poses
 POSES_L = {
@@ -216,7 +245,7 @@ json.dump({
     "poses": list(POSES_L),
     "arms": [{"id": "armL", "shoulder": list(SHL), "upper": U, "hands": ["point", "palm", "thumb"], "poses": POSES_L},
              {"id": "armR", "shoulder": list(SHR), "upper": U, "hands": ["palm", "point"], "poses": POSES_R}],
-    "brows": {"sel": "#flames", "raise": -16},
+    "brows": {"sel": "#flames", "raise": -16}, "head_tilt": 0.35,
     "idle": [{"sel": "#" + k, "rot": r, "period": p, "origin": o} for k, (d, o, r, p) in TONGUES.items()],
 }, open(os.path.join(here, "character.json"), "w"), indent=1)
 print("wrote character.svg + character.json")

@@ -34,6 +34,7 @@ inside it bends at the elbow (`translate(upper, 0)`) by `f`; one `#armL-<hand>` 
 arm winds up, swings with a small overshoot and swaps the hand mid-swing (transforms are applied by a timeline hook, so
 nested rotations stay exact). `"brows": {"sel": "#brows", "raise": -9, "end": "#browL"}` lifts the brows on accented
 words and shrugs, and raises one brow with the final smirk. `characters/dev/` is the reference.
+`"head_tilt": 0.35` scales the head tilt on each beat (1 = default; lower keeps the face looking straight).
 
 ### Secondary motion (both options)
 Optional keys in `character.json`, all tied to the timeline:

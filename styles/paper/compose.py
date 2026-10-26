@@ -196,7 +196,7 @@ class Film:
                     A(f'tl.set("#pose-{name}", {{ opacity: 1 }}, {r3(t)});')
                     if k + 1 < len(beats) and beats[k + 1][1] != name: A(f'tl.set("#pose-{name}", {{ opacity: 0 }}, {r3(beats[k + 1][0])});')
                 if k: A(f'tl.fromTo("#pres-body", {{ scaleY: 0.965, y: 16 }}, {{ scaleY: 1, y: 0, duration: 0.35, ease: "back.out(3)", svgOrigin: "600 1000" }}, {r3(t)});')
-                A(f'tl.to("#head", {{ rotation: {[-4, 3, -3, 4, -6, 3][k % 6]}, duration: 0.3, ease: "power2.out", svgOrigin: "{ho}" }}, {r3(t)});')
+                A(f'tl.to("#head", {{ rotation: {round([-4, 3, -3, 4, -6, 3][k % 6] * c.get("head_tilt", 1), 2)}, duration: 0.3, ease: "power2.out", svgOrigin: "{ho}" }}, {r3(t)});')
                 if name == "wave" and not arms: A(f'tl.to("#pose-wave", {{ rotation: 6, svgOrigin: "{wo}", duration: 0.18, yoyo: true, repeat: 5, ease: "sine.inOut" }}, {r3(t + 0.1)});')
             br = c.get("brows")
             if br:
