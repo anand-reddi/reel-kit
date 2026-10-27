@@ -60,6 +60,10 @@ loops. `character.json`: `{"type": "video", "file": "gestures.webm", "avatar": "
 "camera": {"top_y": 22, "box_scale": 1.4, "box_pop": -260, "full_scale": 2.0, "full_top": 540}}`. The head sits at x = 600
 of the canvas. Each beat plays its gesture, looping for as long as the beat lasts; after the voice ends it plays `end`.
 The mouth moves in the footage, so lip sync is approximate. Works with the camera layouts.
+A scene's `"face"` (or list) picks clips too, so expressions and gestures share one vocabulary. `otaku` has 28 clips:
+talk explain calm laugh hi shrug smile think clasp wait ok shh arms_crossed facepalm excited stressed shocked angry sad cry
+panic nervous thumbs_up point_up point_side count wave bored (aliases: up, card, palms, thumb, rest, end, happy, surprised...).
+Keep the hidden colour of transparent pixels black when keying: it cut the WebM from 72 MB to 11 MB.
 
 ## Option B: PNG poses (fastest from an existing avatar app or drawing)
 

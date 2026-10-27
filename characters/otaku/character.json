@@ -16,46 +16,128 @@
   ],
   "explain": [
    2.9167,
-   7.0
+   7.0833
   ],
   "calm": [
-   7.0,
-   11.0833
+   7.0833,
+   11.25
   ],
   "laugh": [
-   11.0833,
-   13.0
+   11.25,
+   13.1667
   ],
   "hi": [
-   13.0,
-   14.1667
+   13.1667,
+   14.4167
   ],
   "shrug": [
-   14.1667,
-   16.8333
+   14.4167,
+   17.0833
   ],
   "smile": [
-   16.8333,
-   20.75
+   17.0833,
+   21.0
   ],
   "think": [
-   20.75,
-   24.5
+   21.0,
+   24.75
   ],
   "clasp": [
-   24.5,
-   27.4167
+   24.75,
+   27.6667
+  ],
+  "wait": [
+   27.6667,
+   28.5
+  ],
+  "ok": [
+   28.5,
+   29.9167
+  ],
+  "shh": [
+   29.9167,
+   32.5833
+  ],
+  "arms_crossed": [
+   32.5833,
+   34.75
+  ],
+  "facepalm": [
+   34.75,
+   37.1667
+  ],
+  "excited": [
+   37.1667,
+   39.0833
+  ],
+  "stressed": [
+   39.0833,
+   39.75
+  ],
+  "shocked": [
+   39.75,
+   41.1667
+  ],
+  "angry": [
+   41.1667,
+   42.5
+  ],
+  "sad": [
+   42.5,
+   45.0833
+  ],
+  "cry": [
+   45.0833,
+   46.25
+  ],
+  "panic": [
+   46.25,
+   48.5833
+  ],
+  "nervous": [
+   48.5833,
+   49.8333
+  ],
+  "thumbs_up": [
+   49.8333,
+   51.4167
+  ],
+  "point_up": [
+   51.4167,
+   53.0833
+  ],
+  "point_side": [
+   53.0833,
+   54.75
+  ],
+  "count": [
+   54.75,
+   56.5833
+  ],
+  "wave": [
+   56.5833,
+   58.0
+  ],
+  "bored": [
+   58.0,
+   59.75
   ]
  },
  "default": "talk",
  "aliases": {
   "rest": "calm",
-  "up": "hi",
-  "wave": "hi",
+  "up": "point_up",
+  "card": "point_side",
   "palms": "explain",
-  "card": "explain",
-  "thumb": "clasp",
-  "end": "smile"
+  "thumb": "thumbs_up",
+  "end": "smile",
+  "happy": "smile",
+  "surprised": "shocked",
+  "content": "calm",
+  "neutral": "talk",
+  "wink": "smile",
+  "yes": "thumbs_up",
+  "no": "wait"
  },
  "poses": [
   "talk",
@@ -67,21 +149,46 @@
   "smile",
   "think",
   "clasp",
+  "wait",
+  "ok",
+  "shh",
+  "arms_crossed",
+  "facepalm",
+  "excited",
+  "stressed",
+  "shocked",
+  "angry",
+  "sad",
+  "cry",
+  "panic",
+  "nervous",
+  "thumbs_up",
+  "point_up",
+  "point_side",
+  "count",
+  "wave",
+  "bored",
   "rest",
   "up",
-  "wave",
-  "palms",
   "card",
+  "palms",
   "thumb",
-  "end"
+  "end",
+  "happy",
+  "surprised",
+  "content",
+  "neutral",
+  "wink",
+  "yes",
+  "no"
  ],
  "pose_cycle": [
   "talk",
   "explain",
+  "point_side",
   "think",
   "shrug",
-  "clasp",
-  "calm"
+  "clasp"
  ],
  "camera": {
   "top_y": 22,

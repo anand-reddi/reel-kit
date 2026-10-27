@@ -231,6 +231,7 @@ class Film:
         beats = []
         for i, sc in enumerate(scenes):
             want = sc.get("pose")
+            if c["type"] == "video" and sc.get("face"): want = sc["face"]   # video characters: a face is a clip too
             per_line = want if isinstance(want, list) else ([want] if want else [cycle[(len(beats)) % len(cycle)] for _ in range(max(1, len(lines_of[i]) // 2))])
             for k, name in enumerate(per_line):
                 ln = lines_of[i][min(k * max(1, len(lines_of[i]) // len(per_line)), len(lines_of[i]) - 1)]
