@@ -3,8 +3,8 @@
  "file": "gestures.webm",
  "avatar": "avatar.png",
  "canvas": [
-  1200,
-  720
+  1800,
+  1080
  ],
  "x": -60,
  "y": 1180,
@@ -192,9 +192,9 @@
  ],
  "camera": {
   "top_y": 22,
-  "box_scale": 1.4,
-  "box_pop": -260,
-  "full_scale": 2.0,
-  "full_top": 540
+  "box_scale": 1.15,
+  "box_pop": -170,
+  "full_scale": 1.65,
+  "full_top": 780
  }
 }

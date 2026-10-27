@@ -36,7 +36,7 @@ def fonts_css(name):
     css += f'@font-face {{ font-family: "{se}"; src: url("assets/{sef}"); font-style: italic; font-weight: {sew}; }}'
     css += f'@font-face {{ font-family: "{mn}"; src: url("assets/{mf}"); font-weight: 500; }}'
     css += (f'#root {{ font-family: "{sn}", sans-serif; }} .cap {{ font-weight: {cap_w}; letter-spacing: {ls}px; }}'
-            f'.acc {{ font-family: "{se}", serif; font-weight: {sew}; letter-spacing: -1px; }} .sv {{ font-family: "{se}", serif; }}'
+            f'.acc {{ font-family: "{se}", serif; font-weight: {sew}; letter-spacing: -1px; }} .sv {{ font-family: "{se}", serif; }} .cap.short .w.it {{ font-family: "{se}", serif; font-weight: {sew}; }}'
             f'.mono, .ptxt, .code, .gl, .gm {{ font-family: "{mn}", monospace; }}')
     return css
 r3 = lambda v: round(float(v), 3)
@@ -90,6 +90,8 @@ class Film:
         th = script.get("theme", {}); th = {"base": th} if isinstance(th, str) else th
         s.th = {**THEMES[th.get("base", "light")], **{k: v for k, v in th.items() if k != "base"}}; s.brand = script.get("brand", {})
         s.js, s.cues, s.stamps, s.extra, s.counters, s.uses_figures, s.stamp_times = [], [], [], {}, 0, False, []
+        s.uses_video, s.vid_track = False, 0
+        s.fx_used, s.fx_html = set(), ""
         s.out = os.path.join(work, "film"); os.makedirs(os.path.join(s.out, "assets"), exist_ok=True)
         s.char = s.load_character(script.get("character", "default"))
         s.avatar = s.asset(s.brand["avatar"]) if s.brand.get("avatar") else s.char_avatar()
@@ -129,6 +131,8 @@ class Film:
     def build(s):
         L, dur, A, th = s.tm["lines"], s.tm["duration"], s.js.append, s.th
         scenes = s.sc["scenes"]; n = len(scenes)
+        short_cap = s.sc.get("captions") == "short"
+        cut_of = lambda k: scenes[k].get("cut", "zoom" if short_cap else "slide")
         lines_of = [[ln for ln in L if ln["scene"] == i] for i in range(n)]
         start = [0.0] + [lines_of[i][0]["start"] - 0.12 for i in range(1, n)]; end = start[1:] + [dur]
         hdr, caps, cards = "", "", ""
@@ -156,22 +160,41 @@ class Film:
             short = s.sc.get("captions") == "short"   # reference-reel captions: one short phrase at a time, centred
             lay_i = sc.get("layout", "box") if any(x.get("layout") for x in scenes) else None
             if short:
-                cy = {"box": 850, "none": 1260, "full": 200, None: 980, **s.sc.get("caption_y", {})}[lay_i]
-                for k, ln in enumerate(lns):
-                    spans = []
+                cy = sc.get("caption_y", {"box": 850, "none": 1260, "full": 200, None: 980, **s.sc.get("caption_y", {})}[lay_i])
+                for k, ln in enumerate([] if sc.get("captions") == "off" else lns):
+                    # words grow into the line one by one (width 0 -> its own width, blur 10px -> 0), so the
+                    # centred line re-centres as it builds; plain words dim, *x* = selection box, _x_ = italic serif
+                    spans = []; sel = s.sc.get("accent_style", "select") == "select"; run = None
                     for j, w in enumerate(ln["words"]):
-                        wid = f"w{i}_{ln['line']}_{j}"; spans.append(f'<span id="{wid}" class="w{" acc" if w["accent"] else ""}">{esc(w["w"])}</span>')
-                        A(f'tl.fromTo("#{wid}", {{ opacity: 0, y: 16 }}, {{ opacity: 1, y: 0, duration: 0.12, ease: "power3.out" }}, {r3(max(st, w["t"] - 0.12))});')
-                        A(f'tl.to("#{wid}", {{ color: "{th["accent"] if w["accent"] else th["ink"]}", duration: 0.05 }}, {r3(w["t"])});')
-                        if w["accent"]:
-                            A(f'tl.fromTo("#{wid}", {{ scale: 1.35 }}, {{ scale: 1, duration: 0.3, ease: "back.out(3)" }}, {r3(w["t"])});')
-                            s.cues.append((round(w["t"], 3), "pro_pop/tink", -15))
+                        wid = f"w{i}_{ln['line']}_{j}"; t_in = max(st, w["t"] - 0.1)
+                        A(f'tl.fromTo("#{wid}", {{ opacity: 0, x: 26, filter: "blur(10px)" }}, {{ opacity: 1, x: 0, filter: "blur(0px)", duration: 0.24, ease: "power3.out" }}, {r3(t_in)});')
+                        # the line slides so the words shown so far stay centred (transform only; measured once fonts are in)
+                        xfn = f'() => capx("cap{i}_{k}", {j})'
+                        if j == 0: A(f'tl.set("#cap{i}_{k}", {{ x: {xfn} }}, {r3(st if k == 0 else ln["start"] - 0.1)});')
+                        else: A(f'tl.to("#cap{i}_{k}", {{ x: {xfn}, duration: 0.24, ease: "power3.out" }}, {r3(t_in)});')
+                        if sel and w["accent"]:
+                            word = f'<span id="{wid}" class="w sw">{esc(w["w"])}</span>'
+                            if run is None:
+                                run = f"sel{i}_{ln['line']}_{j}"; spans.append(f'<span id="{run}" class="sel"><b class="selbg"></b><i class="hd hl"></i><i class="hd hr"></i>{word}')
+                                last = j
+                                while last + 1 < len(ln["words"]) and ln["words"][last + 1]["accent"]: last += 1
+                                t_end = ln["words"][last]["t"] + 0.14   # the box grows with the words, the right handle lands on the last one
+                                A(f'tl.fromTo("#{run} .selbg", {{ scaleX: 0 }}, {{ scaleX: 1, duration: {r3(max(0.3, t_end - t_in))}, ease: "power2.out", immediateRender: false }}, {r3(t_in)});')
+                                A(f'tl.fromTo("#{run} .hl", {{ scaleY: 0 }}, {{ scaleY: 1, duration: 0.22, ease: "back.out(2.5)", immediateRender: false }}, {r3(t_in)});')
+                                A(f'tl.fromTo("#{run} .hr", {{ scaleY: 0 }}, {{ scaleY: 1, duration: 0.22, ease: "back.out(2.5)", immediateRender: false }}, {r3(t_end)});')
+                                A(f'tl.set("#{run} .selbg, #{run} .hd", {{ opacity: 1 }}, {r3(t_in)});')
+                            else: spans[-1] += " " + word
+                            nxt = ln["words"][j + 1] if j + 1 < len(ln["words"]) else None
+                            if not (nxt and nxt["accent"]): spans[-1] += "</span>"; run = None
+                            continue
+                        cls = "w" + (" acc" if w["accent"] else "") + (" it" if w.get("italic") else "") + ("" if (w["accent"] or w.get("italic")) else " dim")
+                        spans.append(f'<span id="{wid}" class="{cls}">{esc(w["w"])}</span>')
                     cid = f"cap{i}_{k}"
                     caps += f'<div id="{cid}" class="cap short" style="top:{cy}px">{" ".join(spans)}</div>'
                     on = st if k == 0 else ln["start"] - 0.1
                     A(f'tl.set("#{cid}", {{ opacity: 1 }}, {r3(on)});')
                     off = lns[k + 1]["start"] - 0.1 if k + 1 < len(lns) else (en if i < n - 1 else None)
-                    if off is not None: A(f'tl.set("#{cid}", {{ opacity: 0 }}, {r3(off)});')
+                    if off is not None: A(f'tl.to("#{cid}", {{ opacity: 0, filter: "blur(12px)", duration: 0.14, ease: "power2.in" }}, {r3(off - 0.14)});')
             hl_ = sc.get("headline")
             if hl_:   # a title at the top: a bold line and a line in an accent block
                 hl_ = [hl_] if isinstance(hl_, str) else hl_
@@ -201,20 +224,27 @@ class Film:
                 if card.get("stamp"):
                     stp = card["stamp"]; stp = {"text": stp} if isinstance(stp, str) else stp
                     ctx.stamp(stp["text"], ctx.at(stp.get("at", "end-0.45")), stp)
-                if short:   # zoom-blur cut in and out, cards sized up when the presenter is off screen
-                    top = card.get("top", {"none": 360}.get(lay_i, 290 + (150 if hl_ else 0)))
-                    k = card.get("scale", 1.14 if lay_i == "none" else 1.0)
-                    cards += (f'<div id="{p}" class="card-wrap" style="top:{top}px"><div style="position:absolute;inset:0;transform:scale({k});transform-origin:50% 0">'
+                if short:   # cards cut in and out with the scene's cut (default: zoom-blur); sized up when the presenter is off screen
+                    full = card["type"] in ("insert", "kinetic")
+                    top = card.get("top", 0 if full else {"none": 360}.get(lay_i, 290 + (150 if hl_ else 0)))
+                    k = card.get("scale", 1.0 if full else (1.14 if lay_i == "none" else 1.0))
+                    cards += (f'<div id="{p}" class="card-wrap{" ins" if full else ""}" style="top:{top}px"><div style="position:absolute;inset:0;transform:scale({k});transform-origin:50% 0">'
                               f'{inner}@@EXTRA_{p}@@</div></div>')
-                    A(f'tl.fromTo("#{p}", {{ opacity: 0, scale: 1.2, filter: "blur(16px)" }}, {{ opacity: 1, scale: 1, filter: "blur(0px)", duration: 0.32, ease: "power3.out" }}, {r3(st + (0.05 if i == 0 else 0))});')
-                    if i < n - 1: A(f'tl.to("#{p}", {{ opacity: 0, scale: 0.9, filter: "blur(12px)", duration: 0.16, ease: "power2.in" }}, {r3(en - 0.16)});')
+                    s.card_in(p, cut_of(i), st + (0.05 if i == 0 else 0))
+                    if i < n - 1: s.card_out(p, cut_of(i + 1), en)
                 else:
                     top = card.get("top", (510 if card["type"] == "figure" else 600) if s.char else 720)
                     cards += f'<div id="{p}" class="card-wrap" style="top:{top}px">{inner}@@EXTRA_{p}@@</div>'
                     rot = [-4, 4, -3, 3][i % 4]
                     A(f'tl.fromTo("#{p}", {{ opacity: 0, y: 80, rotation: {rot}, scale: 0.88 }}, {{ opacity: 1, y: 0, rotation: 0, scale: 1, duration: 0.45, ease: "back.out(1.6)" }}, {r3(st + (0.05 if i == 0 else 0))});')
                     if i < n - 1: A(f'tl.to("#{p}", {{ opacity: 0, y: -70, scale: 0.92, duration: 0.18, ease: "power2.in" }}, {r3(en - 0.18)});')
-            if i: s.cues.append((round(st, 3), "swish/soft", -13) if s.sc.get("captions") == "short" else (round(st, 3), "swipe/glide", -17))
+            if i: s.cut(cut_of(i), st)
+            for fx in sc.get("fx", []): s.fx(fx, ctx, i)
+            if sc.get("punch", s.sc.get("punch")) and lay_i == "full":   # close-ups punch in on accent words
+                for ln in lns:
+                    for w in ln["words"]:
+                        if w["accent"]: A(f'tl.fromTo("#stage", {{ scale: 1.045 }}, {{ scale: 1, duration: 0.35, ease: "power3.out", immediateRender: false }}, {r3(w["t"])});')
+        cards += s.fx_layer()
         for p, h in s.extra.items(): cards = cards.replace(f"@@EXTRA_{p}@@", h)
         cards = re.sub(r"@@EXTRA_k\d+@@", "", cards)
         pres = s.presenter(scenes, lines_of, start, dur)
@@ -223,6 +253,132 @@ class Film:
         s.write(hdr, caps, cards, pres, dur)
         return s.cues
 
+    # ------------------------------------------------------------------ cuts and effects
+    # A scene's "cut" sets how it arrives: zoom (zoom-blur, default) | whip (fast sideways push with motion skew) |
+    # flash (white frame) | impact (anime: a 2-frame ink frame, straight speed lines on ones, a smear-in) |
+    # glitch (slice jitter) | dip (a one-colour dip, from html-anime's cut). Cards leave the way the next scene arrives.
+    CUT_SFX = {"zoom": [("swish/soft", -13, 0)], "whip": [("whoosh_fast/whip", -11, -0.04)],
+               "flash": [("shutter/quick", -13, 0), ("pro_impact/short", -17, 0)],
+               "impact": [("cut_hit/punch", -9, 0), ("whoosh_fast/crisp", -14, -0.06)],
+               "glitch": [("pro_glitch/standard", -13, 0)], "dip": [("swipe/velvet", -13, 0)], "slide": [("swipe/glide", -17, 0)], "hard": []}
+    def card_in(s, p, cut, t):
+        A = s.js.append
+        if cut == "whip":
+            A(f'tl.fromTo("#{p}", {{ x: 1000, skewX: -14, filter: "blur(10px)" }}, {{ x: 0, skewX: 0, filter: "blur(0px)", duration: 0.3, ease: "expo.out", immediateRender: false }}, {r3(t)});')
+            A(f'tl.set("#{p}", {{ opacity: 1 }}, {r3(t)});')
+        elif cut == "impact":   # smear in: stretched along the travel, settling on twos
+            A(f'tl.set("#{p}", {{ opacity: 1, scaleX: 0.7, scaleY: 1.35, y: 120 }}, {r3(t + 0.067)});')
+            A(f'tl.set("#{p}", {{ scaleX: 1.12, scaleY: 0.9, y: -20 }}, {r3(t + 0.133)});')
+            A(f'tl.set("#{p}", {{ scaleX: 0.97, scaleY: 1.03, y: 6 }}, {r3(t + 0.2)});')
+            A(f'tl.set("#{p}", {{ scaleX: 1, scaleY: 1, y: 0 }}, {r3(t + 0.267)});')
+        elif cut == "hard":
+            A(f'tl.set("#{p}", {{ opacity: 1 }}, {r3(t)});')
+        elif cut in ("flash", "dip", "glitch"):
+            A(f'tl.fromTo("#{p}", {{ opacity: 0, scale: 1.06 }}, {{ opacity: 1, scale: 1, duration: 0.2, ease: "power3.out", immediateRender: false }}, {r3(t)});')
+            A(f'tl.set("#{p}", {{ opacity: 1 }}, {r3(t)});')
+        else:
+            A(f'tl.fromTo("#{p}", {{ opacity: 0, scale: 1.2, filter: "blur(16px)" }}, {{ opacity: 1, scale: 1, filter: "blur(0px)", duration: 0.32, ease: "power3.out" }}, {r3(t)});')
+    def card_out(s, p, cut, en):
+        A = s.js.append
+        if cut == "whip":
+            A(f'tl.to("#{p}", {{ x: -1000, skewX: 14, filter: "blur(10px)", duration: 0.16, ease: "power3.in" }}, {r3(en - 0.16)});')
+            A(f'tl.set("#{p}", {{ opacity: 0 }}, {r3(en)});')
+        elif cut in ("impact", "flash", "dip", "hard", "glitch"):
+            A(f'tl.set("#{p}", {{ opacity: 0 }}, {r3(en)});')
+        else:
+            A(f'tl.to("#{p}", {{ opacity: 0, scale: 0.9, filter: "blur(12px)", duration: 0.16, ease: "power2.in" }}, {r3(en - 0.16)});')
+    def cut(s, cut, t):
+        A = s.js.append; s.fx_used.add(cut)
+        for sid, g, off in s.CUT_SFX.get(cut, s.CUT_SFX["zoom"]): s.cues.append((round(t + off, 3), sid, g))
+        if cut == "flash":
+            A(f'tl.fromTo("#fxflash", {{ opacity: 0.95 }}, {{ opacity: 0, duration: 0.22, ease: "power2.out", immediateRender: false }}, {r3(t)});')
+        elif cut == "dip":
+            A(f'tl.fromTo("#fxdip", {{ opacity: 1 }}, {{ opacity: 0, duration: 0.18, ease: "power1.in", immediateRender: false }}, {r3(t + 0.05)});')
+            A(f'tl.set("#fxdip", {{ opacity: 1 }}, {r3(t - 0.05)});')
+        elif cut == "impact":
+            A(f'tl.set("#fxink", {{ opacity: 1 }}, {r3(t)});'); A(f'tl.set("#fxink", {{ opacity: 0 }}, {r3(t + 0.067)});')
+            s.speed(t + 0.067, 0.55)
+            A(f'tl.to("#stage", {{ keyframes: [{{ x: 16, y: -8 }}, {{ x: -12, y: 6 }}, {{ x: 6, y: -2 }}, {{ x: 0, y: 0 }}], duration: 0.2, ease: "none" }}, {r3(t + 0.067)});')
+        elif cut == "glitch":
+            for j, (dx, sk) in enumerate([(-28, 8), (22, -6), (-10, 3), (0, 0)]):
+                A(f'tl.set("#stage", {{ x: {dx}, skewX: {sk} }}, {r3(t + j * 0.04)});')
+            A(f'tl.set("#fxglitch", {{ opacity: 1 }}, {r3(t)});'); A(f'tl.set("#fxglitch", {{ opacity: 0 }}, {r3(t + 0.16)});')
+    def speed(s, t, dur):
+        """Straight focus lines on ones (two drawings swapping every frame), then gone. html-anime: few, straight, one shot."""
+        A = s.js.append; s.fx_used.add("impact")
+        f = 1 / 30; k = 0
+        while k * f < dur:
+            A(f'tl.set("#fxspeedA", {{ opacity: {1 if k % 2 == 0 else 0} }}, {r3(t + k * f)});')
+            A(f'tl.set("#fxspeedB", {{ opacity: {0 if k % 2 == 0 else 1} }}, {r3(t + k * f)});'); k += 1
+        A(f'tl.set("#fxspeedA, #fxspeedB", {{ opacity: 0 }}, {r3(t + dur)});')
+    def fx(s, fx, ctx, i):
+        """Scene "fx": [{"type": "confetti" | "ping" | "shake" | "speed" | "flash" | "riser", "at": time, ...}]."""
+        A = s.js.append; t = ctx.at(fx.get("at", "start")); kind = fx["type"]; s.fx_used.add(kind)
+        if kind == "confetti":
+            import random; rnd = random.Random(7 + i); n = fx.get("count", 42); cx, cy = fx.get("x", 540), fx.get("y", 760)
+            cols = [s.th["accent"], s.th["ink"], "#ffffff", s.th["accent"], s.th["mid"]]
+            html = ""
+            for j in range(n):
+                cid = f"cf{i}_{j}"; w, h = rnd.randint(14, 24), rnd.randint(8, 14)
+                html += f'<i id="{cid}" class="conf" style="left:{cx}px;top:{cy}px;width:{w}px;height:{h}px;background:{cols[j % len(cols)]}"></i>'
+                dx, dy = rnd.uniform(-520, 520), rnd.uniform(-720, -260); r = rnd.uniform(-540, 540); fall = rnd.uniform(700, 1200)
+                A(f'tl.fromTo("#{cid}", {{ opacity: 1, x: 0, y: 0, rotation: 0 }}, {{ x: {dx:.0f}, y: {dy:.0f}, rotation: {r / 2:.0f}, duration: 0.42, ease: "power3.out", immediateRender: false }}, {r3(t)});')
+                A(f'tl.to("#{cid}", {{ x: {dx * 1.25:.0f}, y: {dy + fall:.0f}, rotation: {r:.0f}, opacity: 0, duration: 1.3, ease: "power1.in" }}, {r3(t + 0.42)});')
+            s.fx_html += f'<div class="conflayer">{html}</div>'
+            s.cues += [(round(t, 3), "pro_pop/double", -12), (round(t + 0.05, 3), "pro_shimmer/m2", -17)]
+        elif kind == "ping":
+            x, y = fx.get("x", 540), fx.get("y", 700)
+            for j in range(2):
+                pid = f"pg{i}_{len(s.fx_html)}_{j}"
+                s.fx_html += f'<i id="{pid}" class="ping" style="left:{x - 60}px;top:{y - 60}px"></i>'
+                A(f'tl.fromTo("#{pid}", {{ opacity: 1, scale: 0.3 }}, {{ opacity: 0, scale: 2.6, duration: 0.7, ease: "power2.out", immediateRender: false }}, {r3(t + j * 0.22)});')
+            s.cues.append((round(t, 3), fx.get("sfx", "pro_notify/ding_2045"), -12))
+        elif kind == "shake":
+            ctx.shake(t, fx.get("amt", 14)); s.cues.append((round(t, 3), fx.get("sfx", "cut_hit/punch"), -12))
+        elif kind == "speed":
+            s.speed(t, fx.get("for", 0.6))
+        elif kind == "flash":
+            A(f'tl.fromTo("#fxflash", {{ opacity: 0.9 }}, {{ opacity: 0, duration: 0.22, ease: "power2.out", immediateRender: false }}, {r3(t)});')
+        elif kind == "sfx":     # any earshot sound, its peak on "at"
+            s.cues.append((round(t, 3), fx["id"], fx.get("gain", -14)))
+        elif kind == "riser":   # a riser whose peak lands on "at" (a reveal), plus a hit there
+            s.cues.append((round(t, 3), fx.get("sfx", "riser/build"), fx.get("gain", -18)))
+            if fx.get("hit", True): s.cues.append((round(t, 3), "pro_impact/short", -15))
+    def fx_layer(s):
+        th = s.th; out = s.fx_html
+        if "flash" in s.fx_used: out += '<div id="fxflash" class="fxfull" style="background:#fff"></div>'
+        if "dip" in s.fx_used: out += f'<div id="fxdip" class="fxfull" style="background:{th["accent"]}"></div>'
+        if "impact" in s.fx_used:
+            import random, math
+            def lines(seed):
+                rnd = random.Random(seed); ps = ""
+                for _ in range(26):
+                    a = rnd.uniform(0, 2 * math.pi); w = rnd.uniform(0.012, 0.03); r0 = rnd.uniform(560, 760)
+                    x1, y1 = 540 + math.cos(a) * 1500, 960 + math.sin(a) * 1500
+                    x2, y2 = 540 + math.cos(a - w) * 1500, 960 + math.sin(a - w) * 1500
+                    x3, y3 = 540 + math.cos(a - w / 2) * r0, 960 + math.sin(a - w / 2) * r0 * 1.5
+                    ps += f'<path d="M{x1:.0f} {y1:.0f}L{x2:.0f} {y2:.0f}L{x3:.0f} {y3:.0f}Z"/>'
+                return ps
+            for nm, sd in (("A", 3), ("B", 11)):
+                out += f'<svg id="fxspeed{nm}" class="fxfull speed" viewBox="0 0 1080 1920"><g fill="{th["ink"]}">{lines(sd)}</g></svg>'
+            out += f'<div id="fxink" class="fxfull" style="background:{th["ink"]}"></div>'
+        if "glitch" in s.fx_used:
+            out += '<div id="fxglitch" class="fxfull glitch"></div>'
+        return out
+
+    @staticmethod
+    def beat_at(spec, lns, dflt):
+        """'line:N' or 'word:text' (+/- offset) inside one scene; gestures start a little before the word."""
+        if spec is None: return dflt
+        m = re.match(r"^(.*?)([+-]\d*\.?\d+)?$", str(spec).strip()); base, off = m.group(1), float(m.group(2) or 0)
+        if base.startswith("line:"): return lns[min(int(base[5:]), len(lns) - 1)]["start"] - 0.1 + off
+        if base.startswith("word:"):
+            want = base[5:].lower()
+            for ln in lns:
+                for w in ln["words"]:
+                    if w["w"].lower().strip(",.!?:;\"'") == want: return w["t"] - 0.15 + off
+            raise SystemExit(f"no word '{want}' for a gesture")
+        return dflt
     def presenter(s, scenes, lines_of, start, dur):
         c, A = s.char, s.js.append
         if not c: return ""
@@ -236,6 +392,9 @@ class Film:
             for k, name in enumerate(per_line):
                 ln = lines_of[i][min(k * max(1, len(lines_of[i]) // len(per_line)), len(lines_of[i]) - 1)]
                 t = 0.0 if not beats else ln["start"] - 0.1
+                if isinstance(name, dict):   # {"face": "facepalm", "at": "word:staring"} lands a gesture on a word or line
+                    t = 0.0 if not beats else s.beat_at(name.get("at"), lines_of[i], t)
+                    name = name.get("face") or name.get("pose")
                 beats.append((t, name if name in names else names[0]))
         if c["type"] == "video":
             body = s.video_presenter(c, beats, dur)
@@ -400,10 +559,10 @@ class Film:
         lay = {
             # box: head and hands break out over the top and sides (only the bottom edge clips), and the box sits above all
             "box":  dict(cam=dict(left=bx, top=by, width=bw, height=bh, zIndex=10, autoAlpha=1),
-                         back=dict(borderRadius=28, borderWidth=3), clip=dict(clipPath='"inset(-900px -600px 0px -600px)"'),
+                         back=dict(borderRadius=28, borderWidth=3, opacity=1), clip=dict(clipPath='"inset(-900px -600px 0px -600px)"'),
                          svg=dict(left=bw / 2 - 600 * k_box, top=cv.get("box_pop", -90) - hat * k_box, width=1200 * k_box)),
             "full": dict(cam=dict(left=0, top=0, width=W, height=H, zIndex=1, autoAlpha=1),
-                         back=dict(borderRadius=0, borderWidth=0), clip=dict(clipPath='"inset(0px 0px 0px 0px)"'),
+                         back=dict(borderRadius=0, borderWidth=0, opacity=0), clip=dict(clipPath='"inset(0px 0px 0px 0px)"'),
                          svg=dict(left=W / 2 - 600 * k_full, top=cv.get("full_top", 600) - hat * k_full, width=1200 * k_full)),
         }
         lay["none"] = {**lay["box"], "cam": {**lay["box"]["cam"], "autoAlpha": 0}}   # presenter off screen (visual-only shots)
@@ -441,11 +600,14 @@ class Film:
             t_end = bts[b + 1][0] if b + 1 < len(bts) else dur
             clip = alias.get(name, name); clip = clip if clip in clips else dflt
             a, z = clips[clip]; L = z - a; tt = t
+            # skip the slow wind-up so the gesture peaks on the words, not a second after them
+            lead = 0.0 if (b == 0 or name == "end") else min(L * c.get("lead", 0.3), 0.5)
+            first = True
             while tt < t_end - 0.02:
-                d = min(L, t_end - tt)
+                ms = a + (lead if first else 0); d = min(z - ms, t_end - tt)
                 vids += (f'<video id="pv{k}" class="clip" src="{src}" muted playsinline data-start="{r3(tt)}" data-duration="{r3(d)}" '
-                         f'data-media-start="{r3(a)}" data-track-index="3" style="position:absolute;left:0;top:0;width:100%;height:100%"></video>')
-                tt += L; k += 1
+                         f'data-media-start="{r3(ms)}" data-track-index="3" style="position:absolute;left:0;top:0;width:100%;height:100%"></video>')
+                tt += d; k += 1; first = False
             if b: A(f'tl.fromTo("#presin", {{ scale: 0.985 }}, {{ scale: 1, duration: 0.25, ease: "back.out(3)", immediateRender: false }}, {r3(t)});')
         return (f'<div id="pres" style="position:absolute;left:{c.get("x", -60)}px;top:{c.get("y", 1130)}px;width:{c.get("width", 1200)}px;aspect-ratio:{cw}/{ch}">'
                 f'<div id="presin" style="position:absolute;inset:0;transform-origin:50% 100%">{vids}</div></div>')
@@ -544,7 +706,7 @@ class Film:
             upd = "window.__advance(tl.time() * 1000);"
         js = "\n".join(s.js)
         # a video presenter's clips carry their own timing, so the stage wrapper must not be timed as well
-        wrap = "" if (s.char and s.char["type"] == "video") else f' class="clip" data-start="0" data-duration="{dur}" data-track-index="1"'
+        wrap = "" if (s.uses_video or (s.char and s.char["type"] == "video")) else f' class="clip" data-start="0" data-duration="{dur}" data-track-index="1"'
         html = f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"/><title>{esc(s.sc.get("title", "reel"))}</title><style>{css}</style>{head_extra}<script src="gsap.min.js"></script>{mod}</head>
 <body>
@@ -557,6 +719,10 @@ class Film:
  </div>
 </div>
 <script>
+function capx(id, k) {{ const line = document.getElementById(id); const ws = line.querySelectorAll(".w");
+  const off = (el) => {{ let x = 0; while (el && el !== line) {{ x += el.offsetLeft; el = el.offsetParent; }} return x; }};
+  const all = (off(ws[0]) + off(ws[ws.length - 1]) + ws[ws.length - 1].offsetWidth) / 2, vis = (off(ws[0]) + off(ws[k]) + ws[k].offsetWidth) / 2;
+  return all - vis; }}
 const fmt = (v, d) => Number(v).toLocaleString("en-US", {{ minimumFractionDigits: d, maximumFractionDigits: d }});
 window.__hooks = window.__hooks || [];
 const tl = gsap.timeline({{ paused: true, onUpdate() {{ {upd} window.__hooks.forEach((f) => f()); }} }});

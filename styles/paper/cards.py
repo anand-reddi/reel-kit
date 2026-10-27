@@ -1,3 +1,4 @@
+import os
 """Centre cards. Each card function gets (p, cfg, ctx): p is the unique id prefix, cfg the card's JSON,
 ctx the scene context (timeline helpers, time resolver, sound cues). It returns the card's inner HTML and
 pushes its own animation lines and sound cues. Times in cfg use the `at` grammar (see ctx.at)."""
@@ -261,4 +262,166 @@ def repo(p, c, x):
     return (f'<div class="repo"><div class="repo-n">{icon}<span>{esc(c.get("owner", ""))} / <b>{esc(c.get("name", ""))}</b></span><span class="pub">Public</span></div>'
             f'<div class="repo-d">{desc}</div><div class="repo-t">{topics}</div><div class="repo-s">{stats}</div></div>')
 
-CARDS = dict(prompt=prompt, checklist=checklist, code=code, profile=profile, stat=stat, graph=graph, image=image, figure=figure, post=post, terminal=terminal, repo=repo)
+# ------------------------------------------------------------------ video clips (a product's own short clips) in an app window, one per beat
+def _vidspan(src, t0, t1, L, ms, cls, x, style):
+    out, tt, k = "", t0, 0
+    while tt < t1 - 0.02:
+        d = min(L - ms if k == 0 else L, t1 - tt)
+        a = ms if k == 0 else 0
+        x.f.vid_n = getattr(x.f, "vid_n", 0) + 1
+        out += (f'<video id="cv{x.f.vid_n}" class="clip {cls}" src="{esc(src)}" muted playsinline data-start="{x.r(tt)}" data-duration="{x.r(d)}" '
+                f'data-media-start="{x.r(a)}" data-track-index="{4 + x.f.vid_track}" style="{style}"></video>')
+        x.f.vid_track = (x.f.vid_track + 1) % 6
+        tt += d; k += 1
+    return out
+def _dur(path):
+    import subprocess
+    return float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", path], capture_output=True, text=True).stdout.strip() or 3)
+def clips(p, c, x):
+    """items: [{src, at, label, media_start}] -- each clip plays (looping) from its `at` until the next one."""
+    x.f.uses_video = True
+    its = c["items"]; ts = [x.at(it.get("at", "start" if i == 0 else f"line:{i}")) for i, it in enumerate(its)]
+    h = c.get("height", 640); w = c.get("width", 820); zoom = c.get("zoom", 1.0)
+    vids, pills = "", ""
+    for i, it in enumerate(its):
+        src = x.asset(it["src"]); full = src if os.path.isabs(it["src"]) else os.path.join(x.f.sdir, it["src"])
+        t0 = max(x.start, ts[i] - 0.05); t1 = ts[i + 1] if i + 1 < len(its) else x.end + 0.4
+        st = f"position:absolute;left:50%;top:50%;height:{100 * zoom}%;transform:translate(-50%,-50%)"
+        vids += _vidspan(src, t0, t1, _dur(full), it.get("media_start", 0), "", x, st)
+        if it.get("label"):
+            pills += f'<div id="{p}-pl{i}" class="clipl mono"><i></i>{esc(it["label"])}</div>'
+            x.A(f'tl.fromTo("#{p}-pl{i}", {{ opacity: 0, y: 16 }}, {{ opacity: 1, y: 0, duration: 0.22, ease: "back.out(2)", immediateRender: false }}, {x.r(ts[i])});')
+            if i + 1 < len(its): x.A(f'tl.to("#{p}-pl{i}", {{ opacity: 0, duration: 0.08 }}, {x.r(ts[i + 1] - 0.08)});')
+            if i: x.sfx(ts[i], "pro_pop/round", -12)
+    if c.get("url"):   # a browser bar: the address types in, then gets a red underline
+        u = c["url"]; tu = x.at(c.get("url_at", "start+0.1")); per = 0.055
+        chars = "".join(f'<span id="{p}-u{j}" style="opacity:0">{esc(ch)}</span>' for j, ch in enumerate(u))
+        for j in range(len(u)): x.A(f'tl.set("#{p}-u{j}", {{ opacity: 1 }}, {x.r(tu + j * per)});')
+        x.typing(tu, len(u) * per, -16, "pro_typing_run/tick")
+        hl = x.at(c.get("url_hl", "line:1"))
+        x.A(f'tl.fromTo("#{p}-ul", {{ scaleX: 0 }}, {{ scaleX: 1, duration: 0.3, ease: "power3.out", immediateRender: false }}, {x.r(hl)});')
+        x.A(f'tl.fromTo("#{p}-url", {{ scale: 1 }}, {{ scale: 1.08, duration: 0.25, yoyo: true, repeat: 1, ease: "power2.out", immediateRender: false }}, {x.r(hl)});')
+        x.sfx(hl, "pro_pop/tink", -11)
+        title = (f'<div class="clipbar"><b></b><b></b><b></b><div id="{p}-url" class="urlbar mono"><i class="lk"></i>'
+                 f'<span class="ut">{chars}<em id="{p}-ul" class="ul"></em></span></div></div>')
+    else:
+        title = f'<div class="clipbar"><b></b><b></b><b></b><span class="mono">{esc(c.get("title", ""))}</span></div>'
+    tag = ""
+    if c.get("tagline"):
+        tag = f'<div id="{p}-tg" class="cliptag">{esc(c["tagline"])}{"<small class=mono>" + esc(c["sub"]) + "</small>" if c.get("sub") else ""}</div>'
+        x.A(f'tl.fromTo("#{p}-tg", {{ opacity: 0, y: -20 }}, {{ opacity: 1, y: 0, duration: 0.3, ease: "power3.out", immediateRender: false }}, {x.r(x.at(c.get("tagline_at", "start+0.3")))});')
+    return f'<div class="clipwin" style="width:{w}px;margin-left:{(1080 - w) // 2}px">{title}<div class="clipin" style="height:{h}px">{vids}{tag}{pills}</div></div>'
+
+# ------------------------------------------------------------------ lineup: a row of transparent character clips popping in
+def lineup(p, c, x):
+    x.f.uses_video = True
+    its = c["items"]; n = len(its); h = c.get("height", 520); t0 = x.at(c.get("at", "start+0.15"))
+    out = ""
+    for i, it in enumerate(its):
+        src = x.asset(it["src"]); full = src if os.path.isabs(it["src"]) else os.path.join(x.f.sdir, it["src"])
+        t = t0 + i * c.get("step", 0.16)
+        st = "position:absolute;left:0;bottom:0;width:100%;height:100%;object-fit:contain;object-position:50% 100%"
+        v = _vidspan(src, x.start, x.end + 0.4, _dur(full), 0, "", x, st)
+        tag = f'<div class="lutag mono{" free" if it.get("free") else ""}">{esc(it.get("tag", ""))}</div>' if it.get("tag") else ""
+        out += f'<div id="{p}-c{i}" class="lucell" style="height:{h}px">{v}{tag}</div>'
+        x.A(f'tl.fromTo("#{p}-c{i}", {{ opacity: 0, y: 60, scale: 0.8 }}, {{ opacity: 1, y: 0, scale: 1, duration: 0.35, ease: "back.out(2)", immediateRender: false }}, {x.r(t)});')
+        x.sfx(t, "pro_pop/round", -15)
+    if c.get("highlight") is not None:
+        k = c["highlight"]; t = x.at(c.get("highlight_at", "line:1"))
+        x.A(f'tl.fromTo("#{p}-c{k}", {{ scale: 1 }}, {{ scale: 1.12, duration: 0.3, ease: "back.out(3)", immediateRender: false }}, {x.r(t)});')
+        x.A(f'tl.to("#{p} .lucell:not(#{p}-c{k})", {{ opacity: 0.35, duration: 0.25 }}, {x.r(t)});')
+        x.sfx(t, "pro_pop/tink", -10)
+    return f'<div class="lineup">{out}</div>'
+
+# ------------------------------------------------------------------ insert: a full-frame clip made elsewhere (another skill's render), played once
+def insert(p, c, x):
+    x.f.uses_video = True
+    src = x.asset(c["src"]); full = src if os.path.isabs(c["src"]) else os.path.join(x.f.sdir, c["src"])
+    L = _dur(full); t0 = x.start; t1 = x.end + 0.3
+    # zoom (crop around "origin", in source px) is baked into a copy with ffmpeg, so the clip stays sharp and the
+    # page needs no transforms around the video
+    z = c.get("zoom", 1)
+    if z != 1:
+        import subprocess
+        o = c.get("origin", [540, 960]); w, h = round(1080 / z / 2) * 2, round(1920 / z / 2) * 2
+        cx, cy = min(max(0, o[0] - w // 2), 1080 - w), min(max(0, o[1] - h // 2), 1920 - h)
+        name = os.path.splitext(os.path.basename(src))[0] + f"-z{int(z * 100)}.mp4"; out = os.path.join(x.f.out, "assets", name)
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", full, "-vf", f"crop={w}:{h}:{cx}:{cy},scale=1080:1920:flags=lanczos",
+                        "-c:v", "libx264", "-crf", "14", "-pix_fmt", "yuv420p", "-an", out], check=True)
+        src = "assets/" + name
+    st = "position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover"
+    return f'<div class="insert">{_vidspan(src, t0, t1, L, c.get("media_start", 0), "", x, st)}</div>'
+
+# ------------------------------------------------------------------ kinetic: full-frame type pages in the paper UI (word slams, number pages)
+def kinetic(p, c, x):
+    """pages: [{at, word, sub, label, accent}] or [{at, number, from, suffix, sub, bg: "accent"}]. A word slams in at `at`
+    (1.7x -> 1 with an overshoot), the sub line rises out of a slot, the label types in mono. An accent page wipes
+    up from the bottom 0.25 s before its `at`. Use with "layout": "none" and "captions": "off" (the type IS the caption)."""
+    out = ""; th = x.th; pages = c["pages"]
+    for i, pg in enumerate(pages):
+        t = x.at(pg.get("at", "start+0.1")); q = f"{p}-pg{i}"
+        acc = pg.get("bg") == "accent"; bg, fg = (th["accent"], "#fff") if acc else (th["paper"], th["ink"])
+        if "number" in pg:
+            main = f'<span id="{q}-n">{pg.get("from", 0)}</span><small>{esc(pg.get("suffix", ""))}</small>'
+            x.count(f"#{q}-n", pg.get("from", 0), pg["number"], t - 0.55, 0.55)
+            x.A(f'tl.fromTo("#{q} .kmain", {{ scale: 1.25 }}, {{ scale: 1, duration: 0.4, ease: "back.out(3)", immediateRender: false }}, {x.r(t)});')
+            for k in range(6): x.sfx(t - 0.55 + k * 0.09, "pro_hover_tick/soft", -19)
+            x.sfx(t, "pro_impact/short", -13)
+        else:
+            w = esc(pg["word"]); main = f'<span class="{"acc" if pg.get("accent") else ""}">{w}</span>'
+            x.A(f'tl.fromTo("#{q} .kmain", {{ scale: 1.7, opacity: 0 }}, {{ scale: 1, opacity: 1, duration: 0.42, ease: "elastic.out(1, 0.55)", immediateRender: false }}, {x.r(t)});')
+            x.sfx(t, "cut_hit/kick", -11)
+        lab = f'<div class="klab mono"><i></i>{esc(pg["label"])}</div>' if pg.get("label") else ""
+        sub = f'<div class="ksub"><span>{esc(pg["sub"])}</span></div>' if pg.get("sub") else ""
+        out += f'<div id="{q}" class="kpage" style="background:{bg};color:{fg}">{lab}<div class="kmain">{main}</div>{sub}</div>'
+        if acc:   # wipe up from the bottom, landing just before the beat
+            x.A(f'tl.fromTo("#{q}", {{ clipPath: "inset(100% 0 0 0)" }}, {{ clipPath: "inset(0% 0 0 0)", duration: 0.26, ease: "expo.out", immediateRender: false }}, {x.r(t - 0.6)});')
+            x.A(f'tl.set("#{q}", {{ opacity: 1 }}, {x.r(t - 0.6)});'); x.sfx(t - 0.6, "whoosh_fast/tight", -15)
+        else:
+            x.A(f'tl.set("#{q}", {{ opacity: 1 }}, {x.r(t - 0.1 if i else x.start)});')
+        if pg.get("sub"): x.A(f'tl.fromTo("#{q} .ksub span", {{ yPercent: 110 }}, {{ yPercent: 0, duration: 0.32, ease: "expo.out", immediateRender: false }}, {x.r(t + 0.18)});')
+        if pg.get("label"): x.A(f'tl.fromTo("#{q} .klab", {{ opacity: 0, x: -20 }}, {{ opacity: 1, x: 0, duration: 0.25, ease: "power3.out", immediateRender: false }}, {x.r(t + 0.3)});')
+        if i + 1 < len(pages) and pages[i + 1].get("bg") != "accent":
+            x.A(f'tl.set("#{q}", {{ opacity: 0 }}, {x.r(x.at(pages[i + 1].get("at")) - 0.1)});')
+    return f'<div class="kin">{out}</div>'
+
+# ------------------------------------------------------------------ flow: how something works, as nodes joined by arrows with a signal running along
+def flow(p, c, x):
+    """nodes: [{label, img | glyph, at}] in a row; arrows draw in before each node; `signal_at` sends a red dot along
+    every arrow in turn (a ping on each node); `bubble`: {text, at} pops a speech bubble over the last node."""
+    nodes = c["nodes"]; n = len(nodes); out = ""; th = x.th
+    nw, gap = c.get("node", 250), c.get("gap", 70); W0 = n * nw + (n - 1) * gap; x0 = (1080 - W0) // 2
+    ts = [x.at(nd.get("at", "start+0.1" if i == 0 else f"line:{min(i, len(x.lines) - 1)}")) for i, nd in enumerate(nodes)]
+    for i, nd in enumerate(nodes):
+        left = x0 + i * (nw + gap); q = f"{p}-n{i}"
+        if nd.get("img"): face = f'<img src="{esc(x.asset(nd["img"]))}" style="width:100%;height:100%;object-fit:contain"/>'
+        elif nd.get("svg"): face = nd["svg"]   # inline drawing (trusted: written in the script)
+        else: face = f'<div class="fglyph mono">{esc(nd.get("glyph", "•"))}</div>'
+        out += (f'<div id="{q}" class="fnode{" hot" if nd.get("hot") else ""}" style="left:{left}px;width:{nw}px">'
+                f'<div class="fface" style="height:{nw}px">{face}</div><div class="flab">{esc(nd["label"])}</div></div>')
+        x.A(f'tl.fromTo("#{q}", {{ opacity: 0, scale: 0.6, y: 40 }}, {{ opacity: 1, scale: 1, y: 0, duration: 0.36, ease: "back.out(2.2)", immediateRender: false }}, {x.r(ts[i])});')
+        x.sfx(ts[i], "pro_pop_in/round", -14)
+        if i:
+            ax = left - gap + 8; aw = gap - 16; a = f"{p}-a{i}"
+            out += (f'<svg id="{a}" class="farrow" style="left:{ax}px;top:{nw // 2 - 20}px" width="{aw}" height="40" viewBox="0 0 {aw} 40">'
+                    f'<path d="M2 20 H{aw - 14}" stroke="{th["ink"]}" stroke-width="6" stroke-linecap="round" fill="none" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/>'
+                    f'<path d="M{aw - 20} 9 L{aw - 4} 20 L{aw - 20} 31" stroke="{th["ink"]}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0"/></svg>')
+            x.A(f'tl.to("#{a} path:first-child", {{ strokeDashoffset: 0, duration: 0.22, ease: "power2.out" }}, {x.r(ts[i] - 0.25)});')
+            x.A(f'tl.set("#{a} path:last-child", {{ opacity: 1 }}, {x.r(ts[i] - 0.05)});')
+            x.sfx(ts[i] - 0.25, "swipe/flick", -19)
+    if c.get("signal_at"):
+        t = x.at(c["signal_at"]); dot = f"{p}-sig"; out += f'<i id="{dot}" class="fsig"></i>'
+        for i in range(1, n):
+            xa = x0 + (i - 1) * (nw + gap) + nw - 10; xb = x0 + i * (nw + gap) + 10; tt = t + (i - 1) * 0.42
+            x.A(f'tl.fromTo("#{dot}", {{ opacity: 1, x: {xa}, y: {nw // 2 - 14} }}, {{ x: {xb}, duration: 0.3, ease: "power2.inOut", immediateRender: false }}, {x.r(tt)});')
+            x.A(f'tl.fromTo("#{p}-n{i} .fface", {{ boxShadow: "0 0 0 0px {th["accent"]}" }}, {{ boxShadow: "0 0 0 10px {th["accent"]}", duration: 0.12, yoyo: true, repeat: 1, immediateRender: false }}, {x.r(tt + 0.3)});')
+            x.sfx(tt + 0.3, "pro_hover_tick/ping", -13)
+        x.A(f'tl.set("#{dot}", {{ opacity: 0 }}, {x.r(t + (n - 1) * 0.42)});')
+    if c.get("bubble"):
+        b = c["bubble"]; t = x.at(b.get("at", "line:2")); right = 1080 - (x0 + n * nw + (n - 1) * gap)   # right-aligned to the last node
+        out += f'<div id="{p}-bub" class="fbub mono" style="right:{right}px">{esc(b["text"])}</div>'
+        x.A(f'tl.fromTo("#{p}-bub", {{ opacity: 0, scale: 0.4 }}, {{ opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2.6)", immediateRender: false }}, {x.r(t)});')
+        x.sfx(t, "pro_pop/bloop", -12)
+    return f'<div class="flow" style="height:{nw + 90}px">{out}</div>'
+
+CARDS = dict(prompt=prompt, checklist=checklist, code=code, profile=profile, stat=stat, graph=graph, image=image, figure=figure, post=post, terminal=terminal, repo=repo, clips=clips, lineup=lineup, insert=insert, kinetic=kinetic, flow=flow)

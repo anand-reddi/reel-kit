@@ -70,6 +70,11 @@ line (the source's colour subsampling smears backdrop red into the real outline)
 neutral dark; green may never exceed red and blue. A plain colour-distance key leaves reddish skin shadows half
 transparent and its spill removal turns them green. `characters/otaku/scan.py <seq dir | webm> clips.json <out>` checks
 every frame for green casts and red smear and saves crops of the worst frames.
+Close-ups enlarge the presenter about 2x, so a 720p source goes soft. `characters/otaku/upscale.py <seq> <out> 1.5`
+rebuilds the keyed frames at 1.5x (premultiplied Lanczos, light line sharpening, a firmer alpha edge, the same
+red/green colour guards as the keyer); encode with `-c:v libvpx-vp9 -pix_fmt yuva420p -crf 20 -b:v 0` and set
+`"canvas"` to the new size (same aspect, so layouts are unchanged). otaku is 1800x1080 (34 MB). Sharper sources
+(1080p, or upscaled with an anime upscaler before keying) beat any of this.
 
 ## Option B: PNG poses (fastest from an existing avatar app or drawing)
 

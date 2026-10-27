@@ -109,3 +109,19 @@ New cards: `post` (a quoted social post, `[[phrase]]` highlights at `highlight_a
 a `progress` list that strikes items off with a counter and badge, a `done` check overlay) and `repo` (owner/name,
 description with `[[highlight]]`, topics, stats row). Example: `examples/cleanyourtv.json`, a 40 s tool reel in this
 format with no music, voice + SFX only (screenshots from the MIT-licensed cleanyourtv repo, credited in the file).
+
+## Captions, cuts and cards added for tool reels
+- **Captions** (`"captions": "short"`): words blur in one at a time and the line re-centres as it grows (transform
+  only); plain words are dimmed; `*word*` = a red text-selection box (Poppins bold, bar grows with the words,
+  handles with knobs, no sound); `_word_` = italic serif; lines blur out. `"accent_style": "italic"` keeps the old
+  red italic accent. Per scene: `"caption_y"`, `"captions": "off"`.
+- **Cuts** (`"cut"` per scene, the card leaves the way the next scene arrives): `zoom` (default), `whip`, `flash`,
+  `impact` (2-frame ink frame, speed lines on ones, smear-in; use once), `glitch`, `dip`, `hard`; each has its own sound.
+- **Scene fx** (`"fx": [{"type", "at"}]`): `confetti`, `ping` (alert ring + ding at x,y), `shake`, `speed`, `flash`,
+  `riser` (peak on "at"), `sfx` (any earshot id). `"punch": true` jumps the frame in on accent words in `full` shots.
+- **Cards**: `clips` (a product's own clips in an app window, one per line, label pills, optional `url` bar that
+  types in), `lineup` (transparent character clips popping in), `kinetic` (full-frame type pages: word slam, number
+  page on an accent wipe), `flow` (nodes + arrows + a signal dot + a speech bubble), `insert` (a full-frame clip).
+- **Presenter**: gestures can land on a word (`"face": [{"face": "facepalm", "at": "word:staring"}]`); clips skip their
+  wind-up so the gesture peaks on the word. Full-screen shots sit on the plain page background.
+- **Voice**: each sentence is read in one go (default voice `am_puck`, speed 1.0); lines are found inside it.
