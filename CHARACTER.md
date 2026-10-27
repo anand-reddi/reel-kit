@@ -51,6 +51,16 @@ Optional keys in `character.json`, all tied to the timeline:
 `"blink2": [{"open": "#cat-eyes-open", "shut": "#cat-eyes-shut", "every": 3.3}]` a second set of eyes (a pet);
 `"react": {"sel": "#cat", "y": -34, "rot": -6, "origin": "880 610"}` a hop whenever a stamp lands.
 
+## Option C: video gestures (an animated or filmed character)
+`characters/otaku/` is the reference. Make (or generate) one video of the character on a flat colour backdrop doing several
+gestures, key it to a transparent WebM (alpha from colour distance to the backdrop; only the big connected shapes kept,
+so sparkles or stars on the backdrop drop out; red edge spill removed), and cut each gesture forward-then-backward so it
+loops. `character.json`: `{"type": "video", "file": "gestures.webm", "avatar": "avatar.png", "canvas": [1200, 720],
+"clips": {"talk": [0, 2.9], "think": [21.3, 25.1], ...}, "aliases": {"palms": "explain", "end": "smile"}, "pose_cycle": [...],
+"camera": {"top_y": 22, "box_scale": 1.4, "box_pop": -260, "full_scale": 2.0, "full_top": 540}}`. The head sits at x = 600
+of the canvas. Each beat plays its gesture, looping for as long as the beat lasts; after the voice ends it plays `end`.
+The mouth moves in the footage, so lip sync is approximate. Works with the camera layouts.
+
 ## Option B: PNG poses (fastest from an existing avatar app or drawing)
 
 ```json

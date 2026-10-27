@@ -1,0 +1,93 @@
+{
+ "type": "video",
+ "file": "gestures.webm",
+ "avatar": "avatar.png",
+ "canvas": [
+  1200,
+  720
+ ],
+ "x": -60,
+ "y": 1180,
+ "width": 1200,
+ "clips": {
+  "talk": [
+   0.0,
+   2.9167
+  ],
+  "explain": [
+   2.9167,
+   7.0
+  ],
+  "calm": [
+   7.0,
+   11.0833
+  ],
+  "laugh": [
+   11.0833,
+   13.0
+  ],
+  "hi": [
+   13.0,
+   14.1667
+  ],
+  "shrug": [
+   14.1667,
+   16.8333
+  ],
+  "smile": [
+   16.8333,
+   20.75
+  ],
+  "think": [
+   20.75,
+   24.5
+  ],
+  "clasp": [
+   24.5,
+   27.4167
+  ]
+ },
+ "default": "talk",
+ "aliases": {
+  "rest": "calm",
+  "up": "hi",
+  "wave": "hi",
+  "palms": "explain",
+  "card": "explain",
+  "thumb": "clasp",
+  "end": "smile"
+ },
+ "poses": [
+  "talk",
+  "explain",
+  "calm",
+  "laugh",
+  "hi",
+  "shrug",
+  "smile",
+  "think",
+  "clasp",
+  "rest",
+  "up",
+  "wave",
+  "palms",
+  "card",
+  "thumb",
+  "end"
+ ],
+ "pose_cycle": [
+  "talk",
+  "explain",
+  "think",
+  "shrug",
+  "clasp",
+  "calm"
+ ],
+ "camera": {
+  "top_y": 22,
+  "box_scale": 1.4,
+  "box_pop": -260,
+  "full_scale": 2.0,
+  "full_top": 540
+ }
+}

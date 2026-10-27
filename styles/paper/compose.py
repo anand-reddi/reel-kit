@@ -106,6 +106,9 @@ class Film:
                 if part.get("src"): shutil.copy(os.path.join(d, part["src"]), os.path.join(s.out, "assets", part["src"]))
             if cfg.get("avatar"): shutil.copy(os.path.join(d, cfg["avatar"]), os.path.join(s.out, "assets", cfg["avatar"]))
             return cfg
+        if cfg["type"] == "video":
+            for f in {cfg["file"], cfg.get("avatar")} - {None}: shutil.copy(os.path.join(d, f), os.path.join(s.out, "assets", f))
+            return cfg
         if cfg["type"] == "svg":
             svg = open(os.path.join(d, cfg["file"])).read()
             shutil.copy(os.path.join(d, cfg["file"]), os.path.join(s.out, "assets", "character.svg")); cfg["svg"] = svg
@@ -119,6 +122,7 @@ class Film:
         if not c: return ""
         if c["type"] == "rig": return "assets/" + c["avatar"] if c.get("avatar") else ""
         if c["type"] == "svg": return f'assets/character.svg#svgView(viewBox({c.get("avatar_view", "395 70 410 410").replace(" ", ",")}))'
+        if c["type"] == "video": return "assets/" + c["avatar"] if c.get("avatar") else ""
         return "assets/" + c.get("avatar", list(c["poses"].values())[0])
 
     # -------------------------------------------------------------------------------------------
@@ -223,7 +227,7 @@ class Film:
         c, A = s.char, s.js.append
         if not c: return ""
         names = c["poses"] if isinstance(c["poses"], list) else list(c["poses"])
-        cycle = s.sc.get("pose_cycle", ["up", "palms", "card", "thumb", "shrug", "wave"])
+        cycle = s.sc.get("pose_cycle", c.get("pose_cycle", ["up", "palms", "card", "thumb", "shrug", "wave"]))
         beats = []
         for i, sc in enumerate(scenes):
             want = sc.get("pose")
@@ -232,7 +236,9 @@ class Film:
                 ln = lines_of[i][min(k * max(1, len(lines_of[i]) // len(per_line)), len(lines_of[i]) - 1)]
                 t = 0.0 if not beats else ln["start"] - 0.1
                 beats.append((t, name if name in names else names[0]))
-        if c["type"] == "rig":
+        if c["type"] == "video":
+            body = s.video_presenter(c, beats, dur)
+        elif c["type"] == "rig":
             body = s.rig_presenter(c, beats, dur)
         elif c["type"] == "svg":
             ho, wo = c.get("head_origin", "600 480"), c.get("wave_origin", "800 560")
@@ -339,7 +345,7 @@ class Film:
                     f'<div id="presin" style="position:absolute;inset:0;transform-origin:50% 100%">{imgs}</div></div>')
         s.rigs(c, dur)
         A(f'tl.fromTo("#pres", {{ y: 260 }}, {{ y: 0, duration: 0.5, ease: "back.out(1.4)" }}, 0);')
-        if c["type"] == "svg" and any(sc.get("layout") for sc in scenes):
+        if c["type"] in ("svg", "video") and any(sc.get("layout") for sc in scenes):
             body = s.camera(body, c, scenes, start)
         return body
 
@@ -419,6 +425,29 @@ class Film:
                 f'<div id="camback" style="position:absolute;inset:0;overflow:hidden;background:{wall};border:0 solid {th["edge"]};'
                 f'box-shadow:0 18px 50px rgba(0,0,0,0.35)">{lights}</div>'
                 f'<div id="camclip" style="position:absolute;inset:0">{body}</div></div>')
+
+    def video_presenter(s, c, beats, dur):
+        """A filmed/animated character: one transparent video holding gesture loops ("clips": name -> [start, end] s,
+        each cut forward-then-backward so it loops cleanly). Every beat plays its gesture (pose names map through
+        "aliases"), looping for as long as the beat lasts; after the voice ends it plays "end". Canvas: "canvas" [w, h]
+        with the head centred at x = w/2, like the SVG characters, so the camera layouts work unchanged."""
+        A = s.js.append; clips, alias = c["clips"], c.get("aliases", {}); dflt = c.get("default", next(iter(clips)))
+        cw, ch = c.get("canvas", [1200, 720]); src = "assets/" + c["file"]
+        last = s.tm["lines"][-1]["end"] + 0.1
+        bts = [(t, n) for t, n in beats if t < last] + ([(last, "end")] if last < dur - 0.3 else [])
+        vids, k = "", 0
+        for b, (t, name) in enumerate(bts):
+            t_end = bts[b + 1][0] if b + 1 < len(bts) else dur
+            clip = alias.get(name, name); clip = clip if clip in clips else dflt
+            a, z = clips[clip]; L = z - a; tt = t
+            while tt < t_end - 0.02:
+                d = min(L, t_end - tt)
+                vids += (f'<video id="pv{k}" class="clip" src="{src}" muted playsinline data-start="{r3(tt)}" data-duration="{r3(d)}" '
+                         f'data-media-start="{r3(a)}" data-track-index="3" style="position:absolute;left:0;top:0;width:100%;height:100%"></video>')
+                tt += L; k += 1
+            if b: A(f'tl.fromTo("#presin", {{ scale: 0.985 }}, {{ scale: 1, duration: 0.25, ease: "back.out(3)", immediateRender: false }}, {r3(t)});')
+        return (f'<div id="pres" style="position:absolute;left:{c.get("x", -60)}px;top:{c.get("y", 1130)}px;width:{c.get("width", 1200)}px;aspect-ratio:{cw}/{ch}">'
+                f'<div id="presin" style="position:absolute;inset:0;transform-origin:50% 100%">{vids}</div></div>')
 
     def rig_presenter(s, c, beats, dur):
         """A cut-out rig: nested full-canvas parts with pivots (character.json "parts"), a pose library ("poses": part ->
@@ -513,11 +542,13 @@ class Film:
             mod = '<script type="module">import * as H from "./assets/hairline.js"; window.__hairline = H;</script>'
             upd = "window.__advance(tl.time() * 1000);"
         js = "\n".join(s.js)
+        # a video presenter's clips carry their own timing, so the stage wrapper must not be timed as well
+        wrap = "" if (s.char and s.char["type"] == "video") else f' class="clip" data-start="0" data-duration="{dur}" data-track-index="1"'
         html = f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"/><title>{esc(s.sc.get("title", "reel"))}</title><style>{css}</style>{head_extra}<script src="gsap.min.js"></script>{mod}</head>
 <body>
 <div id="root" data-composition-id="reel" data-start="0" data-duration="{dur}" data-width="{W}" data-height="{H}" data-fps="{s.sc.get("fps", 30)}">
- <div id="stagewrap" class="clip" data-start="0" data-duration="{dur}" data-track-index="1">
+ <div id="stagewrap"{wrap}>
   <div id="stage">
    <div id="paperdots"></div><div id="vig"></div>
    {hdr}{caps}{cards}{pres}
