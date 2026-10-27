@@ -64,9 +64,12 @@ A scene's `"face"` (or list) picks clips too, so expressions and gestures share 
 talk explain calm laugh hi shrug smile think clasp wait ok shh arms_crossed facepalm excited stressed shocked angry sad cry
 panic nervous thumbs_up point_up point_side count wave bored (aliases: up, card, palms, thumb, rest, end, happy, surprised...).
 Keep the hidden colour of transparent pixels black when keying: it cut the WebM from 72 MB to 11 MB.
-Key with `characters/otaku/key.py`: everything 2 px inside the silhouette is fully opaque with its original colour, and
-small enclosed gaps that are not backdrop-coloured (nostrils, creases, chin shadow) are filled. A plain colour-distance
-key leaves those reddish skin shadows half transparent and its spill removal turns them green.
+Key with `characters/otaku/key.py`: the interior keeps the source colours exactly; enclosed gaps that hold no
+backdrop colour (open mouth, nostrils, creases, chin shadow) are filled; the silhouette edge is rebuilt as a smooth dark
+line (the source's colour subsampling smears backdrop red into the real outline); dark red-cast pixels become warm
+neutral dark; green may never exceed red and blue. A plain colour-distance key leaves reddish skin shadows half
+transparent and its spill removal turns them green. `characters/otaku/scan.py <seq dir | webm> clips.json <out>` checks
+every frame for green casts and red smear and saves crops of the worst frames.
 
 ## Option B: PNG poses (fastest from an existing avatar app or drawing)
 
