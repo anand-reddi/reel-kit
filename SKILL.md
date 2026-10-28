@@ -26,7 +26,9 @@ cd ~/reel-kit && python3 reel.py styles
    ```bash
    python3 reel.py make my-reel.json -o out/my-reel.mp4 --stills    # --quality draft while iterating
    ```
-4. Look at `out/my-reel-frames.png` before sending. Send the MP4 with a one-line summary.
+4. Icons: always from the icon library (`python3 reel.py icons <word>`), never emoji. Presenter only where a clip matches
+   the line (clip table in the style's STYLE.md), else visuals only.
+5. Look at `out/my-reel-frames.png` before sending. Send the MP4 with a one-line summary.
 
 Styles: `paper` — off-white dotted paper, black/white UI cards with a red accent, live hairline line figures,
 word-synced captions, presenter

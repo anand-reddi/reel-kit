@@ -65,7 +65,12 @@ if __name__ == "__main__":
     m.add_argument("--quality", default="looks", choices=["draft", "looks", "delivery"])
     c = sp.add_parser("cards"); c.add_argument("style", nargs="?", default="paper")
     sp.add_parser("styles")
+    ic = sp.add_parser("icons", help="search the icon library: reel.py icons openai"); ic.add_argument("query"); ic.add_argument("-n", type=int, default=40)
     a = ap.parse_args()
+    if a.cmd == "icons":
+        from core import icons
+        for name in icons.search(a.query, a.n): print(name)
+        sys.exit(0)
     if a.cmd == "make": make(a)
     elif a.cmd == "styles": print("styles:", ", ".join(styles()))
     else: print(f"{a.style} cards:", ", ".join(style(a.style).CARDS))

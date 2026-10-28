@@ -1,5 +1,5 @@
 """Writes <work>/film/index.html (HyperFrames + GSAP) from the script and the voice timing."""
-import json, os, re, shutil
+import json, os, re, shutil, sys
 from .cards import CARDS, esc
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -388,13 +388,22 @@ class Film:
         for i, sc in enumerate(scenes):
             want = sc.get("pose")
             if c["type"] == "video" and sc.get("face"): want = sc["face"]   # video characters: a face is a clip too
+            if c["type"] == "video" and not want and sc.get("layout", "box") != "none":
+                print(f'    WARN scene {i} "{sc.get("label", "")}": presenter on screen with no chosen gesture. Pick a "face" '
+                      f'that matches the line, or use "layout": "none" (visuals only).', file=sys.stderr)
+            if c["type"] == "video" and not want and sc.get("layout", "box") == "none" and any(x.get("layout") for x in scenes):
+                want = ["rest"]   # off screen: hold a neutral clip (no random gestures carried into the next shot)
             per_line = want if isinstance(want, list) else ([want] if want else [cycle[(len(beats)) % len(cycle)] for _ in range(max(1, len(lines_of[i]) // 2))])
+            if c["type"] == "video" and isinstance(per_line[0], dict) and per_line[0].get("at") and "rest" in names:
+                per_line = ["rest"] + per_line   # neutral until the first gesture lands on its word
             for k, name in enumerate(per_line):
                 ln = lines_of[i][min(k * max(1, len(lines_of[i]) // len(per_line)), len(lines_of[i]) - 1)]
                 t = 0.0 if not beats else ln["start"] - 0.1
                 if isinstance(name, dict):   # {"face": "facepalm", "at": "word:staring"} lands a gesture on a word or line
                     t = 0.0 if not beats else s.beat_at(name.get("at"), lines_of[i], t)
                     name = name.get("face") or name.get("pose")
+                if name not in names and name not in c.get("aliases", {}):
+                    print(f'    WARN scene {i}: no gesture "{name}" (has: {", ".join(names)})', file=sys.stderr)
                 beats.append((t, name if name in names else names[0]))
         if c["type"] == "video":
             body = s.video_presenter(c, beats, dur)

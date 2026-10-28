@@ -131,3 +131,40 @@ Dark theme puts a soft accent (red) glow behind the presenter, like the profile 
 behind the head on the plain page. Box shots (`box_style`, default `glow` in dark, `studio` in light): `glow` = a dark
 box with the glow clipped inside it (the head still breaks out over the top), `studio` = the lit studio wall,
 `open` = no box, glow on the page. Override with `"camera": {"glow": false | "#hex", "box_style": "..."}`.
+
+### Icons: always from the icon library
+Every icon comes from `core/icons.py` (Iconify sets, about 17,000 icons, free licences). Never use emoji or text glyphs as
+icons. Name them `"set:name"` and find names with `python3 reel.py icons <word>`:
+- **Companies, AI tools, apps:** `logos:` (full colour, e.g. `logos:openai-icon`, `logos:claude-icon`, `logos:cursor`) or
+  `simple-icons:` (one colour, 3,700 brands, e.g. `simple-icons:github`; best on dark cards).
+- **Languages and dev tools:** `devicon:` (full colour, e.g. `devicon:python`, `devicon:docker`).
+- **UI ideas (key, server, lock, user, file):** `lucide:` first, `tabler:` when lucide lacks it.
+- **Friendly colour objects (key, rocket, money):** `fluent-emoji-flat:`.
+Where: flow nodes `"icon"`, checklist items `"icon"`, kinetic pages `"icon"`; add `"color": "#hex"` for one-colour sets.
+A logo of a dark brand (GitHub, Vercel) disappears on black: use its `simple-icons:` version, which takes the text colour.
+
+### Intro slides (kinetic)
+The opening pages use the video's own look: theme background with the dot grid (and the red glow in dark), the caption
+font, and the accent as the same red selection box the captions use (`"accent": true`). Words blur in like captions; no
+full-colour slabs, no sound on the red box.
+
+### Presenter: only when the gesture matches the line
+Show him (`layout` box or full) only when a clip fits what is being said; otherwise `"layout": "none"` (visuals only).
+Every visible scene names its clips in `"face"`, timed onto the word they belong to (`{"face": "shh", "at": "word:password"}`);
+he holds `calm` until the first one lands. `reel.py make` warns about a visible scene with no gesture.
+
+| the line is... | clip |
+|---|---|
+| a definition, plain explanation | `talk` (open hand), `explain` (serious, both hands) |
+| a tip, the key point, "remember" | `point_up` |
+| about the card / "look at this" | `point_side` |
+| a list, steps, "two things" | `count` |
+| "don't", "never", "stop" | `wait` (palms out) |
+| a secret, password, private | `shh` |
+| a question, "how does it..." | `think` |
+| a problem, pain, "we've all done this" | `facepalm`, `stressed`, `nervous`, `bored` |
+| a surprise, a big number | `shocked` |
+| good news, "it works", "free" | `thumbs_up`, `ok`, `excited` |
+| a shrug, "who knows", "it depends" | `shrug` |
+| skeptical, "not convinced" | `arms_crossed` |
+| hello / follow / end | `hi`, `wave`, `point_up` on "follow", `smile` |

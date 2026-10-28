@@ -5,36 +5,160 @@
   "header": "none",
   "captions": "short",
   "title": "What an API key is",
-  "brand": { "handle": "@techinsixty", "bio": "dev tools · AI · security\nexplained in 60 seconds" },
-  "voice": { "name": "am_puck", "speed": 1.0 },
-  "music": { "style": "none" },
-  "levels": { "sfx": -21 },
+  "brand": {
+    "handle": "@techinsixty",
+    "bio": "dev tools · AI · security\nexplained in 60 seconds"
+  },
+  "voice": {
+    "name": "am_puck",
+    "speed": 1.0
+  },
+  "music": {
+    "style": "none"
+  },
+  "levels": {
+    "sfx": -21
+  },
   "character": "otaku",
-  "camera": { "box": [80, 1330, 920, 640] },
+  "camera": {
+    "box": [
+      80,
+      1330,
+      920,
+      640
+    ]
+  },
   "scenes": [
-    { "label": "hook", "layout": "none", "captions": "off", "cut": "hard",
-      "lines": ["Your API key leaked.", "Now *someone else* pays."],
-      "card": { "type": "kinetic", "pages": [
-        { "at": "line:0", "word": "Leaked.", "label": "github · public repo", "sub": "Your API key" },
-        { "at": "line:1", "word": "Billed.", "sub": "to you.", "bg": "accent" } ] } },
-    { "label": "face", "layout": "full", "cut": "flash", "punch": true,
-      "face": ["bored", { "face": "shocked", "at": "word:password" }],
-      "lines": ["An API key is just a *password*", "for your app."] },
-    { "label": "how", "layout": "none", "cut": "whip",
-      "lines": ["Your app sends the key,", "the service checks it,", "and *lets you in.*"],
-      "card": { "type": "flow", "signal_at": "line:1", "bubble": { "text": "key accepted", "at": "line:2" },
-        "nodes": [ { "label": "your app", "glyph": ">_", "at": "start+0.05" },
-                   { "label": "API key", "glyph": "🔑", "at": "line:1" },
-                   { "label": "service", "glyph": "{ }", "hot": true, "at": "line:2" } ],
-        "node": 260, "gap": 60, "top": 420 } },
-    { "label": "rule", "layout": "box", "cut": "impact",
-      "face": ["explain", { "face": "point_up", "at": "word:env" }],
-      "lines": ["Keep it in an *env file.*", "Never in *your code.*"],
-      "card": { "type": "terminal", "title": "terminal", "line_step": 0.5,
-        "lines": ["$ echo \"API_KEY=...\" >> .env", "$ echo \".env\" >> .gitignore", "✓ key stays out of git"] } },
-    { "label": "cta", "layout": "box", "cut": "zoom",
-      "face": [{ "face": "point_up", "at": "word:follow" }],
-      "lines": ["Follow for more."],
-      "card": { "type": "profile", "tap_at": "word:follow+0.3" } }
+    {
+      "label": "hook",
+      "layout": "none",
+      "captions": "off",
+      "cut": "hard",
+      "lines": [
+        "Your API key leaked.",
+        "Now *someone else* pays."
+      ],
+      "card": {
+        "type": "kinetic",
+        "pages": [
+          {
+            "at": "line:0",
+            "word": "Leaked.",
+            "icon": "simple-icons:github",
+            "label": "public repo",
+            "sub": "Your API key"
+          },
+          {
+            "at": "line:1",
+            "word": "Billed.",
+            "accent": true,
+            "sub": "to you."
+          }
+        ]
+      }
+    },
+    {
+      "label": "face",
+      "layout": "full",
+      "cut": "flash",
+      "face": [
+        "talk",
+        {
+          "face": "shh",
+          "at": "word:password"
+        }
+      ],
+      "lines": [
+        "An API key is just a *password*",
+        "for your app."
+      ],
+      "punch": true
+    },
+    {
+      "label": "how",
+      "layout": "none",
+      "cut": "whip",
+      "lines": [
+        "Your app sends the key,",
+        "the service checks it,",
+        "and *lets you in.*"
+      ],
+      "card": {
+        "type": "flow",
+        "signal_at": "line:1",
+        "bubble": {
+          "text": "key accepted",
+          "at": "line:2"
+        },
+        "nodes": [
+          {
+            "label": "your app",
+            "icon": "lucide:app-window",
+            "at": "start+0.05"
+          },
+          {
+            "label": "API key",
+            "icon": "fluent-emoji-flat:key",
+            "at": "line:1"
+          },
+          {
+            "label": "service",
+            "icon": "lucide:server",
+            "hot": true,
+            "at": "line:2"
+          }
+        ],
+        "node": 260,
+        "gap": 60,
+        "top": 420
+      }
+    },
+    {
+      "label": "rule",
+      "layout": "box",
+      "cut": "impact",
+      "face": [
+        {
+          "face": "point_up",
+          "at": "word:env"
+        },
+        {
+          "face": "wait",
+          "at": "word:never"
+        }
+      ],
+      "lines": [
+        "Keep it in an *env file.*",
+        "Never in *your code.*"
+      ],
+      "card": {
+        "type": "terminal",
+        "title": "terminal",
+        "line_step": 0.5,
+        "lines": [
+          "$ echo \"API_KEY=...\" >> .env",
+          "$ echo \".env\" >> .gitignore",
+          "✓ key stays out of git"
+        ]
+      }
+    },
+    {
+      "label": "cta",
+      "layout": "box",
+      "cut": "zoom",
+      "face": [
+        {
+          "face": "point_up",
+          "at": "word:follow"
+        }
+      ],
+      "lines": [
+        "Follow for more."
+      ],
+      "card": {
+        "type": "profile",
+        "tap_at": "word:follow+0.3"
+      }
+    }
   ]
 }

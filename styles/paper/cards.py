@@ -2,9 +2,20 @@ import os
 """Centre cards. Each card function gets (p, cfg, ctx): p is the unique id prefix, cfg the card's JSON,
 ctx the scene context (timeline helpers, time resolver, sound cues). It returns the card's inner HTML and
 pushes its own animation lines and sound cues. Times in cfg use the `at` grammar (see ctx.at)."""
-import html as _h, re
+import html as _h, re, sys
+from core import icons as _icons
 
 esc = lambda s: _h.escape(str(s))
+_EMOJI = re.compile("[\U0001F000-\U0001FAFF\u2600-\u27BF]")
+
+def ico(spec, size, color=None):
+    """An icon from the library ("set:name", see core/icons.py) or a built-in line icon (ICONS key)."""
+    if spec and ":" in spec: return _icons.svg(spec, size, color)
+    return f'<svg viewBox="0 0 48 48" width="{size}" height="{size}">{ICONS.get(spec or "dot", ICONS["dot"])}</svg>'
+
+def no_emoji(text, where):
+    if _EMOJI.search(str(text)):
+        print(f"    WARN {where}: emoji '{text}' used as an icon; use an icon from the library (python3 reel.py icons <word>)", file=sys.stderr)
 
 # ------------------------------------------------------------------ prompt bar that types, then sends
 def prompt(p, c, x):
@@ -51,7 +62,8 @@ def checklist(p, c, x):
     rows = ""
     for i, (it, t) in enumerate(zip(items, times)):
         label = it["label"] if isinstance(it, dict) else it; icon = it.get("icon", "dot") if isinstance(it, dict) else "dot"
-        rows += f'''<div id="{p}-r{i}" class="row"><div class="ico"><svg viewBox="0 0 48 48" width="56" height="56">{ICONS.get(icon, ICONS["dot"])}</svg></div>
+        col = it.get("color") if isinstance(it, dict) else None
+        rows += f'''<div id="{p}-r{i}" class="row"><div class="ico">{ico(icon, 50 if ":" in icon else 56, col)}</div>
       <div class="rlabel">{esc(label)}</div><div class="rbar"><div id="{p}-f{i}" class="rfill"></div></div>
       <div id="{p}-c{i}" class="chk"><svg viewBox="0 0 40 40" width="40" height="40"><path d="M10,21 L17,28 L31,13" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>'''
         x.A(f'tl.fromTo("#{p}-r{i}", {{ opacity: 0, x: -60 }}, {{ opacity: 1, x: 0, duration: 0.25, ease: "power3.out" }}, {x.r(t - 0.2)});')
@@ -354,36 +366,46 @@ def insert(p, c, x):
 
 # ------------------------------------------------------------------ kinetic: full-frame type pages in the paper UI (word slams, number pages)
 def kinetic(p, c, x):
-    """pages: [{at, word, sub, label, accent}] or [{at, number, from, suffix, sub, bg: "accent"}]. A word slams in at `at`
-    (1.7x -> 1 with an overshoot), the sub line rises out of a slot, the label types in mono. An accent page wipes
-    up from the bottom 0.25 s before its `at`. Use with "layout": "none" and "captions": "off" (the type IS the caption)."""
-    out = ""; th = x.th; pages = c["pages"]
+    """pages: [{at, word, sub, label, icon, accent}] or [{at, number, from, suffix, sub, accent}]. Intro slides in the
+    video's own look: the theme background (paper + dots, and the red glow in dark), the caption font, and the accent
+    as the same red selection box the captions use (`"accent": true`, or the old `"bg": "accent"`). Words blur-build in
+    like captions; each page blurs out as the next arrives. No sound on the accent box (the house rule for red words).
+    `icon`: "set:name" from the icon library, shown above the word. Use with "layout": "none" and "captions": "off"."""
+    out = ""; th = x.th; pages = c["pages"]; dark = th["paper"].lower() in ("#0b0b0b", "#000000")
+    glow = (f'<div class="kglow" style="background:radial-gradient(circle, {th["accent"]}59 0%, {th["accent"]}26 32%, transparent 68%)"></div>'
+            if dark and c.get("glow", True) else "")
+    ts = [x.at(pg.get("at", "start+0.1")) for pg in pages]
     for i, pg in enumerate(pages):
-        t = x.at(pg.get("at", "start+0.1")); q = f"{p}-pg{i}"
-        acc = pg.get("bg") == "accent"; bg, fg = (th["accent"], "#fff") if acc else (th["paper"], th["ink"])
+        t = ts[i]; q = f"{p}-pg{i}"; acc = pg.get("accent") or pg.get("bg") == "accent"
         if "number" in pg:
-            main = f'<span id="{q}-n">{pg.get("from", 0)}</span><small>{esc(pg.get("suffix", ""))}</small>'
-            x.count(f"#{q}-n", pg.get("from", 0), pg["number"], t - 0.55, 0.55)
-            x.A(f'tl.fromTo("#{q} .kmain", {{ scale: 1.25 }}, {{ scale: 1, duration: 0.4, ease: "back.out(3)", immediateRender: false }}, {x.r(t)});')
-            for k in range(6): x.sfx(t - 0.55 + k * 0.09, "pro_hover_tick/soft", -19)
-            x.sfx(t, "pro_impact/short", -13)
+            txt = f'{pg["number"]}{pg.get("suffix", "")}'
+            inner = f'<span id="{q}-n">{pg.get("from", 0)}</span><small>{esc(pg.get("suffix", ""))}</small>'
+            x.count(f"#{q}-n", pg.get("from", 0), pg["number"], t - 0.5, 0.5)
+            for k in range(5): x.sfx(t - 0.5 + k * 0.1, "pro_hover_tick/soft", -21)
         else:
-            w = esc(pg["word"]); main = f'<span class="{"acc" if pg.get("accent") else ""}">{w}</span>'
-            x.A(f'tl.fromTo("#{q} .kmain", {{ scale: 1.7, opacity: 0 }}, {{ scale: 1, opacity: 1, duration: 0.42, ease: "elastic.out(1, 0.55)", immediateRender: false }}, {x.r(t)});')
-            x.sfx(t, "cut_hit/kick", -11)
+            txt = pg["word"]; inner = esc(txt)
+        n = max(3, len(txt)); fs = min(250 if acc else 270, round((860 if acc else 960) / (n * 0.56)))
+        if acc:   # the caption selection box: translucent red bar with a red border, handles with round knobs
+            main = (f'<span class="ksel"><b class="kselbg"></b><i class="khd khl"></i><i class="khd khr"></i>'
+                    f'<span class="ksw">{inner}</span></span>')
+            x.A(f'tl.fromTo("#{q} .kselbg", {{ scaleX: 0, opacity: 1 }}, {{ scaleX: 1, duration: 0.3, ease: "power3.out", immediateRender: false }}, {x.r(t)});')
+            x.A(f'tl.fromTo("#{q} .khl", {{ scaleY: 0, opacity: 1 }}, {{ scaleY: 1, duration: 0.22, ease: "back.out(2.5)", immediateRender: false }}, {x.r(t)});')
+            x.A(f'tl.fromTo("#{q} .khr", {{ scaleY: 0, opacity: 1 }}, {{ scaleY: 1, duration: 0.22, ease: "back.out(2.5)", immediateRender: false }}, {x.r(t + 0.24)});')
+        else:
+            main = inner; x.sfx(t, "cut_hit/kick", -14)
+        x.A(f'tl.fromTo("#{q} .kmain", {{ opacity: 0, y: 34, scale: 1.08, filter: "blur(14px)" }}, {{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)", duration: 0.34, ease: "power3.out", immediateRender: false }}, {x.r(t)});')
         lab = f'<div class="klab mono"><i></i>{esc(pg["label"])}</div>' if pg.get("label") else ""
+        icn = f'<div class="kicon">{ico(pg["icon"], 170, pg.get("color", th["ink"]))}</div>' if pg.get("icon") else ""
         sub = f'<div class="ksub"><span>{esc(pg["sub"])}</span></div>' if pg.get("sub") else ""
-        out += f'<div id="{q}" class="kpage" style="background:{bg};color:{fg}">{lab}<div class="kmain">{main}</div>{sub}</div>'
-        if acc:   # wipe up from the bottom, landing just before the beat
-            x.A(f'tl.fromTo("#{q}", {{ clipPath: "inset(100% 0 0 0)" }}, {{ clipPath: "inset(0% 0 0 0)", duration: 0.26, ease: "expo.out", immediateRender: false }}, {x.r(t - 0.6)});')
-            x.A(f'tl.set("#{q}", {{ opacity: 1 }}, {x.r(t - 0.6)});'); x.sfx(t - 0.6, "whoosh_fast/tight", -15)
-        else:
-            x.A(f'tl.set("#{q}", {{ opacity: 1 }}, {x.r(t - 0.1 if i else x.start)});')
-        if pg.get("sub"): x.A(f'tl.fromTo("#{q} .ksub span", {{ yPercent: 110 }}, {{ yPercent: 0, duration: 0.32, ease: "expo.out", immediateRender: false }}, {x.r(t + 0.18)});')
+        out += (f'<div id="{q}" class="kpage">{icn}{lab}<div class="kmain{" kacc" if acc else ""}" style="font-size:{fs}px">{main}</div>{sub}</div>')
+        x.A(f'tl.set("#{q}", {{ opacity: 1 }}, {x.r(t - 0.02 if i else x.start)});')
+        if pg.get("icon"):
+            x.A(f'tl.fromTo("#{q} .kicon", {{ opacity: 0, scale: 0.5, y: 30 }}, {{ opacity: 1, scale: 1, y: 0, duration: 0.36, ease: "back.out(2.2)", immediateRender: false }}, {x.r(t - 0.12)});')
+        if pg.get("sub"): x.A(f'tl.fromTo("#{q} .ksub span", {{ opacity: 0, y: 26, filter: "blur(8px)" }}, {{ opacity: 1, y: 0, filter: "blur(0px)", duration: 0.3, ease: "power3.out", immediateRender: false }}, {x.r(t + 0.2)});')
         if pg.get("label"): x.A(f'tl.fromTo("#{q} .klab", {{ opacity: 0, x: -20 }}, {{ opacity: 1, x: 0, duration: 0.25, ease: "power3.out", immediateRender: false }}, {x.r(t + 0.3)});')
-        if i + 1 < len(pages) and pages[i + 1].get("bg") != "accent":
-            x.A(f'tl.set("#{q}", {{ opacity: 0 }}, {x.r(x.at(pages[i + 1].get("at")) - 0.1)});')
-    return f'<div class="kin">{out}</div>'
+        if i + 1 < len(pages):   # blur out just before the next page
+            x.A(f'tl.to("#{q}", {{ opacity: 0, filter: "blur(12px)", scale: 0.96, duration: 0.14, ease: "power2.in" }}, {x.r(ts[i + 1] - 0.16)});')
+    return f'<div class="kin">{glow}{out}</div>'
 
 # ------------------------------------------------------------------ flow: how something works, as nodes joined by arrows with a signal running along
 def flow(p, c, x):
@@ -396,7 +418,9 @@ def flow(p, c, x):
         left = x0 + i * (nw + gap); q = f"{p}-n{i}"
         if nd.get("img"): face = f'<img src="{esc(x.asset(nd["img"]))}" style="width:100%;height:100%;object-fit:contain"/>'
         elif nd.get("svg"): face = nd["svg"]   # inline drawing (trusted: written in the script)
-        else: face = f'<div class="fglyph mono">{esc(nd.get("glyph", "•"))}</div>'
+        elif nd.get("icon"): face = f'<div class="ficon">{ico(nd["icon"], round(nw * 0.5), nd.get("color"))}</div>'
+        else:
+            no_emoji(nd.get("glyph", ""), "flow node"); face = f'<div class="fglyph mono">{esc(nd.get("glyph", "•"))}</div>'
         out += (f'<div id="{q}" class="fnode{" hot" if nd.get("hot") else ""}" style="left:{left}px;width:{nw}px">'
                 f'<div class="fface" style="height:{nw}px">{face}</div><div class="flab">{esc(nd["label"])}</div></div>')
         x.A(f'tl.fromTo("#{q}", {{ opacity: 0, scale: 0.6, y: 40 }}, {{ opacity: 1, scale: 1, y: 0, duration: 0.36, ease: "back.out(2.2)", immediateRender: false }}, {x.r(ts[i])});')

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # reel-kit setup. Idempotent. usage: bash setup.sh [dest]   (default ~/reel-kit)
 # Installs: the kit (your fork first), Python deps, the Kokoro voice model (GitHub release, ~350 MB, cached),
-# earshot (sound effects), and checks for ffmpeg, node/npx and a headless Chrome for HyperFrames.
+# earshot (sound effects), the icon library (Iconify sets, ~30 MB), and checks for ffmpeg, node/npx and a headless Chrome for HyperFrames.
 set -euo pipefail
 DEST="${1:-$HOME/reel-kit}"
 REPO="https://github.com/anand-reddi/reel-kit.git"; BRANCH="techinsixty"
@@ -22,6 +22,10 @@ if ! command -v earshot >/dev/null && [ ! -x "$HOME/earshot/.venv/bin/earshot" ]
     && .venv/bin/pip install -q numpy scipy soundfile soxr librosa pyloudnorm scikit-learn pillow matplotlib "mcp>=2" requests && .venv/bin/pip install -q --no-deps -e . ) \
     || echo "WARN: earshot install failed; reels will render without sound effects" >&2
 fi
+ICONS="${REELKIT_ICONS:-$HOME/.cache/reelkit/icons}"; mkdir -p "$ICONS"
+[ -d "$ICONS/node_modules/@iconify-json/logos" ] || npm i -s --no-audit --no-fund --prefix "$ICONS" \
+  @iconify-json/logos @iconify-json/simple-icons @iconify-json/devicon @iconify-json/lucide @iconify-json/tabler @iconify-json/fluent-emoji-flat \
+  || echo "WARN: icon library install failed (npm); cards with icons will retry on first use" >&2
 command -v ffmpeg >/dev/null || echo "WARN: ffmpeg missing (apt-get install -y ffmpeg)" >&2
 command -v npx >/dev/null || echo "WARN: node/npx missing (HyperFrames renders through npx)" >&2
 found=""; for c in /opt/pw-browsers/chromium_headless_shell-*/chrome-headless-shell-*/chrome-headless-shell "$HOME"/.cache/ms-playwright/chromium_headless_shell-*/chrome-headless-shell-*/chrome-headless-shell; do [ -x "$c" ] && found="$c"; done
