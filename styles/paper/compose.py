@@ -581,7 +581,7 @@ class Film:
             lay["full"]["glowclip"] = dict(clipPath='"inset(-2000px -2000px -2000px -2000px)"')
             R = bw * 0.6   # centred in the box, so the whole glow reads inside it
             lay["box"]["glow"] = dict(left=bw / 2 - R, top=bh * 0.42 - R, width=2 * R, height=2 * R, opacity=1)
-        lay["none"] = {**lay["box"], "cam": {**lay["box"]["cam"], "autoAlpha": 0}}   # presenter off screen (visual-only shots)
+        lay["none"] = {**lay["box"], "cam": {**lay["box"]["cam"], "autoAlpha": 0}, "back": {**lay["box"]["back"], "opacity": 0}}   # presenter off screen (visual-only shots)
         js = lambda d: ", ".join(f"{k}: {round(v, 1) if isinstance(v, float) else v}" for k, v in d.items())
         cur = None
         for i, sc in enumerate(scenes):
@@ -598,10 +598,12 @@ class Film:
                                       else "radial-gradient(120% 80% at 50% 30%, #f4efe6 0%, #e2dacb 60%, #cfc6b5 100%)")
         lights = "" if bstyle == "glow" else "".join(f'<div style="position:absolute;left:{x}%;top:{y}%;width:{r}px;height:{r}px;border-radius:50%;background:{col};filter:blur({r // 3}px);opacity:{o}"></div>'
                          for x, y, r, col, o in ((8, 18, 160, "#ffb46b", 0.35), (78, 12, 200, "#6b8cff", 0.25), (86, 52, 120, "#ffd59a", 0.25)))
+        L0 = scenes[0].get("layout", "box") if scenes else "box"
+        first_back = lay[L0 if L0 in lay else "box"]["back"]["opacity"]
         glow = (f'<div id="camglow" style="position:absolute;border-radius:50%;pointer-events:none;'
                 f'background:radial-gradient(circle, {gcol}8c 0%, {gcol}4d 28%, {gcol}1a 52%, transparent 70%)"></div>') if gcol else ""
         return (f'<div id="cam" style="position:absolute;transform-origin:50% 50%">'
-                f'<div id="camback" style="position:absolute;inset:0;overflow:hidden;background:{wall};border:0 solid {th["edge"]};'
+                f'<div id="camback" style="position:absolute;inset:0;overflow:hidden;opacity:{first_back};background:{wall};border:0 solid {th["edge"]};'
                 f'box-shadow:0 18px 50px rgba(0,0,0,0.35)">{lights}</div>'
                 f'<div id="camclip" style="position:absolute;inset:0"><div id="glowclip" style="position:absolute;inset:0">{glow}</div>{body}</div></div>')
 
