@@ -125,3 +125,9 @@ format with no music, voice + SFX only (screenshots from the MIT-licensed cleany
 - **Presenter**: gestures can land on a word (`"face": [{"face": "facepalm", "at": "word:staring"}]`); clips skip their
   wind-up so the gesture peaks on the word. Full-screen shots sit on the plain page background.
 - **Voice**: each sentence is read in one go (default voice `am_puck`, speed 1.0); lines are found inside it.
+
+### Presenter glow and box style
+Dark theme puts a soft accent (red) glow behind the presenter, like the profile picture. Full shots: the glow sits
+behind the head on the plain page. Box shots (`box_style`, default `glow` in dark, `studio` in light): `glow` = a dark
+box with the glow clipped inside it (the head still breaks out over the top), `studio` = the lit studio wall,
+`open` = no box, glow on the page. Override with `"camera": {"glow": false | "#hex", "box_style": "..."}`.

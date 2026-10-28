@@ -565,6 +565,22 @@ class Film:
                          back=dict(borderRadius=0, borderWidth=0, opacity=0), clip=dict(clipPath='"inset(0px 0px 0px 0px)"'),
                          svg=dict(left=W / 2 - 600 * k_full, top=cv.get("full_top", 600) - hat * k_full, width=1200 * k_full)),
         }
+        # a soft accent glow behind the head (dark theme by default; "camera": {"glow": false | "#hex", "glow_y": svg y of the head})
+        dark = s.sc.get("theme") == "dark"
+        gcol = cv.get("glow", th["accent"] if dark else False)
+        gy, gr = cv.get("glow_y", 250), cv.get("glow_r", 560)
+        if gcol:
+            bstyle = cv.get("box_style", "glow" if dark else "studio")   # studio | glow (dark box, glow inside) | open (no box)
+            for L, k, ox, oy, op in (("box", k_box, bw / 2, lay["box"]["svg"]["top"], 0 if bstyle == "studio" else 1), ("full", k_full, W / 2, lay["full"]["svg"]["top"], 1)):
+                R = gr * k / k_full * (1 if L == "full" else 1.3)
+                lay[L]["glow"] = dict(left=ox - R, top=oy + gy * k - R, width=2 * R, height=2 * R, opacity=op)
+        else: bstyle = cv.get("box_style", "studio")
+        if bstyle == "open": lay["box"]["back"] = {**lay["box"]["back"], "opacity": 0}
+        if bstyle == "glow":   # the glow lives inside the box: clip it to the box (head still breaks out over the top)
+            lay["box"]["glowclip"] = dict(clipPath='"inset(0px 0px 0px 0px round 28px)"')
+            lay["full"]["glowclip"] = dict(clipPath='"inset(-2000px -2000px -2000px -2000px)"')
+            R = bw * 0.6   # centred in the box, so the whole glow reads inside it
+            lay["box"]["glow"] = dict(left=bw / 2 - R, top=bh * 0.42 - R, width=2 * R, height=2 * R, opacity=1)
         lay["none"] = {**lay["box"], "cam": {**lay["box"]["cam"], "autoAlpha": 0}}   # presenter off screen (visual-only shots)
         js = lambda d: ", ".join(f"{k}: {round(v, 1) if isinstance(v, float) else v}" for k, v in d.items())
         cur = None
@@ -572,19 +588,22 @@ class Film:
             L = sc.get("layout", "box"); L = L if L in lay else "box"
             if L == cur: continue
             t = 0 if i == 0 else start[i]
-            for sel, key in (("#cam", "cam"), ("#camback", "back"), ("#camclip", "clip"), ("#pres", "svg")):
+            for sel, key in (("#cam", "cam"), ("#camback", "back"), ("#camclip", "clip"), ("#pres", "svg"), ("#camglow", "glow"), ("#glowclip", "glowclip")):
+                if key not in lay[L]: continue
                 A(f'tl.set("{sel}", {{ {js(lay[L][key])} }}, {r3(t)});')
             if i: A(f'tl.fromTo("#cam", {{ scale: 1.04 }}, {{ scale: 1, duration: 0.3, ease: "power2.out" }}, {r3(t)});')
             cur = L
-        dark = s.sc.get("theme") == "dark"
-        wall = cv.get("backdrop") or ("radial-gradient(120% 80% at 50% 30%, #4b5260 0%, #2c3039 55%, #1a1c22 100%)" if dark
+        if bstyle == "glow": wall = cv.get("backdrop") or "#0d0d0d"
+        else: wall = cv.get("backdrop") or ("radial-gradient(120% 80% at 50% 30%, #4b5260 0%, #2c3039 55%, #1a1c22 100%)" if dark
                                       else "radial-gradient(120% 80% at 50% 30%, #f4efe6 0%, #e2dacb 60%, #cfc6b5 100%)")
-        lights = "".join(f'<div style="position:absolute;left:{x}%;top:{y}%;width:{r}px;height:{r}px;border-radius:50%;background:{col};filter:blur({r // 3}px);opacity:{o}"></div>'
+        lights = "" if bstyle == "glow" else "".join(f'<div style="position:absolute;left:{x}%;top:{y}%;width:{r}px;height:{r}px;border-radius:50%;background:{col};filter:blur({r // 3}px);opacity:{o}"></div>'
                          for x, y, r, col, o in ((8, 18, 160, "#ffb46b", 0.35), (78, 12, 200, "#6b8cff", 0.25), (86, 52, 120, "#ffd59a", 0.25)))
+        glow = (f'<div id="camglow" style="position:absolute;border-radius:50%;pointer-events:none;'
+                f'background:radial-gradient(circle, {gcol}8c 0%, {gcol}4d 28%, {gcol}1a 52%, transparent 70%)"></div>') if gcol else ""
         return (f'<div id="cam" style="position:absolute;transform-origin:50% 50%">'
                 f'<div id="camback" style="position:absolute;inset:0;overflow:hidden;background:{wall};border:0 solid {th["edge"]};'
                 f'box-shadow:0 18px 50px rgba(0,0,0,0.35)">{lights}</div>'
-                f'<div id="camclip" style="position:absolute;inset:0">{body}</div></div>')
+                f'<div id="camclip" style="position:absolute;inset:0"><div id="glowclip" style="position:absolute;inset:0">{glow}</div>{body}</div></div>')
 
     def video_presenter(s, c, beats, dur):
         """A filmed/animated character: one transparent video holding gesture loops ("clips": name -> [start, end] s,
