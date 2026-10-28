@@ -393,7 +393,7 @@ def kinetic(p, c, x):
             x.A(f'tl.fromTo("#{q} .khr", {{ scaleY: 0, opacity: 1 }}, {{ scaleY: 1, duration: 0.22, ease: "back.out(2.5)", immediateRender: false }}, {x.r(t + 0.24)});')
         else:
             main = inner; x.sfx(t, "cut_hit/kick", -14)
-        x.A(f'tl.fromTo("#{q} .kmain", {{ opacity: 0, y: 34, scale: 1.08, filter: "blur(14px)" }}, {{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)", duration: 0.34, ease: "power3.out", immediateRender: false }}, {x.r(t)});')
+        x.A(f'tl.fromTo("#{q} .kmain", {{ opacity: 0, y: 34, scale: () => 1.08 * kfit("#{q} .kmain"), filter: "blur(14px)" }}, {{ opacity: 1, y: 0, scale: () => kfit("#{q} .kmain"), filter: "blur(0px)", duration: 0.34, ease: "power3.out", immediateRender: false }}, {x.r(t)});')
         lab = f'<div class="klab mono"><i></i>{esc(pg["label"])}</div>' if pg.get("label") else ""
         icn = f'<div class="kicon">{ico(pg["icon"], 170, pg.get("color", th["ink"]))}</div>' if pg.get("icon") else ""
         sub = f'<div class="ksub"><span>{esc(pg["sub"])}</span></div>' if pg.get("sub") else ""

@@ -161,21 +161,40 @@ class Film:
             lay_i = sc.get("layout", "box") if any(x.get("layout") for x in scenes) else None
             if short:
                 cy = sc.get("caption_y", {"box": 850, "none": 1260, "full": 200, None: 980, **s.sc.get("caption_y", {})}[lay_i])
-                for k, ln in enumerate([] if sc.get("captions") == "off" else lns):
+                # a spoken line too wide for the frame becomes two (or more) caption chunks, split between words on the
+                # voice timing (never inside a red selection run), so captions stay big; capfit() shrinks any remainder
+                est = lambda w: len(w["w"]) * (53 if w["accent"] else 43) + 24
+                cw = s.sc.get("caption_width", 1040); chunks = []   # up to ~12% over is shrunk by capfit; wider lines split
+                for ln in ([] if sc.get("captions") == "off" else lns):
+                    ws_ = ln["words"]; units = []   # a red selection run is one unit (never split)
+                    for j, w in enumerate(ws_):
+                        if units and w["accent"] and ws_[j - 1]["accent"]: units[-1].append(j)
+                        else: units.append([j])
+                    parts, width = [[]], 0
+                    for u in units:
+                        uw = sum(est(ws_[j]) for j in u)
+                        if parts[-1] and width + uw > cw: parts.append([]); width = 0
+                        parts[-1] += u; width += uw
+                    if len(parts) > 1 and sum(est(ws_[j]) for j in parts[-1]) + sum(est(ws_[j]) for j in parts[-2]) <= cw * 1.08:
+                        last_ = parts.pop(); parts[-1] += last_   # no orphan word at the end
+                    for c_, js in enumerate(parts):
+                        chunks.append(dict(line=ln["line"], js=js, words=[ws_[j] for j in js],
+                                           start=ln["start"] if c_ == 0 else ws_[js[0]]["t"] - 0.12))
+                for k, ln in enumerate(chunks):
                     # words grow into the line one by one (width 0 -> its own width, blur 10px -> 0), so the
                     # centred line re-centres as it builds; plain words dim, *x* = selection box, _x_ = italic serif
                     spans = []; sel = s.sc.get("accent_style", "select") == "select"; run = None
                     for j, w in enumerate(ln["words"]):
-                        wid = f"w{i}_{ln['line']}_{j}"; t_in = max(st, w["t"] - 0.1)
+                        wid = f"w{i}_{ln['line']}_{ln['js'][j]}"; t_in = max(st, w["t"] - 0.1)
                         A(f'tl.fromTo("#{wid}", {{ opacity: 0, x: 26, filter: "blur(10px)" }}, {{ opacity: 1, x: 0, filter: "blur(0px)", duration: 0.24, ease: "power3.out" }}, {r3(t_in)});')
                         # the line slides so the words shown so far stay centred (transform only; measured once fonts are in)
                         xfn = f'() => capx("cap{i}_{k}", {j})'
-                        if j == 0: A(f'tl.set("#cap{i}_{k}", {{ x: {xfn} }}, {r3(st if k == 0 else ln["start"] - 0.1)});')
+                        if j == 0: A(f'tl.set("#cap{i}_{k}", {{ x: {xfn}, scale: () => capfit("cap{i}_{k}") }}, {r3(st if k == 0 else ln["start"] - 0.1)});')
                         else: A(f'tl.to("#cap{i}_{k}", {{ x: {xfn}, duration: 0.24, ease: "power3.out" }}, {r3(t_in)});')
                         if sel and w["accent"]:
                             word = f'<span id="{wid}" class="w sw">{esc(w["w"])}</span>'
                             if run is None:
-                                run = f"sel{i}_{ln['line']}_{j}"; spans.append(f'<span id="{run}" class="sel"><b class="selbg"></b><i class="hd hl"></i><i class="hd hr"></i>{word}')
+                                run = f"sel{i}_{ln['line']}_{ln['js'][j]}"; spans.append(f'<span id="{run}" class="sel"><b class="selbg"></b><i class="hd hl"></i><i class="hd hr"></i>{word}')
                                 last = j
                                 while last + 1 < len(ln["words"]) and ln["words"][last + 1]["accent"]: last += 1
                                 t_end = ln["words"][last]["t"] + 0.14   # the box grows with the words, the right handle lands on the last one
@@ -193,7 +212,7 @@ class Film:
                     caps += f'<div id="{cid}" class="cap short" style="top:{cy}px">{" ".join(spans)}</div>'
                     on = st if k == 0 else ln["start"] - 0.1
                     A(f'tl.set("#{cid}", {{ opacity: 1 }}, {r3(on)});')
-                    off = lns[k + 1]["start"] - 0.1 if k + 1 < len(lns) else (en if i < n - 1 else None)
+                    off = chunks[k + 1]["start"] - 0.1 if k + 1 < len(chunks) else (en if i < n - 1 else None)
                     if off is not None: A(f'tl.to("#{cid}", {{ opacity: 0, filter: "blur(12px)", duration: 0.14, ease: "power2.in" }}, {r3(off - 0.14)});')
             hl_ = sc.get("headline")
             if hl_:   # a title at the top: a bold line and a line in an accent block
@@ -749,10 +768,18 @@ class Film:
  </div>
 </div>
 <script>
+// captions: a line that would run past the safe margins is scaled down to fit (measured with the real fonts, once)
+function capoff(line, el) {{ let x = 0; while (el && el !== line) {{ x += el.offsetLeft; el = el.offsetParent; }} return x; }}
+function capfit(id) {{ const line = document.getElementById(id); if (line.dataset.fit) return +line.dataset.fit;
+  const ws = line.querySelectorAll(".w"), a = ws[0], b = ws[ws.length - 1];
+  const w = capoff(line, b) + b.offsetWidth - capoff(line, a) + (line.querySelector(".sel") ? 70 : 20);
+  const f = Math.min(1, (line.clientWidth - 30) / w); line.dataset.fit = f; return f; }}
+// the line slides so the words shown so far stay centred on the frame (x is applied before the fit scale)
 function capx(id, k) {{ const line = document.getElementById(id); const ws = line.querySelectorAll(".w");
-  const off = (el) => {{ let x = 0; while (el && el !== line) {{ x += el.offsetLeft; el = el.offsetParent; }} return x; }};
-  const all = (off(ws[0]) + off(ws[ws.length - 1]) + ws[ws.length - 1].offsetWidth) / 2, vis = (off(ws[0]) + off(ws[k]) + ws[k].offsetWidth) / 2;
-  return all - vis; }}
+  const vis = (capoff(line, ws[0]) + capoff(line, ws[k]) + ws[k].offsetWidth) / 2;
+  return capfit(id) * (line.clientWidth / 2 - vis); }}
+// kinetic words: scale down a word wider than the frame's safe width
+function kfit(el) {{ el = typeof el === "string" ? document.querySelector(el) : el; return Math.min(1, 940 / Math.max(1, el.offsetWidth)); }}
 const fmt = (v, d) => Number(v).toLocaleString("en-US", {{ minimumFractionDigits: d, maximumFractionDigits: d }});
 window.__hooks = window.__hooks || [];
 const tl = gsap.timeline({{ paused: true, onUpdate() {{ {upd} window.__hooks.forEach((f) => f()); }} }});

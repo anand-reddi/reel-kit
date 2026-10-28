@@ -168,3 +168,9 @@ he holds `calm` until the first one lands. `reel.py make` warns about a visible 
 | a shrug, "who knows", "it depends" | `shrug` |
 | skeptical, "not convinced" | `arms_crossed` |
 | hello / follow / end | `hi`, `wave`, `point_up` on "follow", `smile` |
+
+### Captions always fit the frame
+A spoken line wider than the frame is split into caption chunks between words, on the voice timing (a red selection run
+is never split; no orphan last word). A chunk that is still slightly too wide is scaled down to the safe width, measured
+in the browser with the real fonts (`capfit`); kinetic words do the same (`kfit`). Keep red runs to 1-2 short words.
+`"caption_width"` (default 1040, estimated px) sets when a line splits.

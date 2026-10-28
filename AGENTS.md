@@ -14,6 +14,7 @@ Always look at the `--stills` contact sheet before sending a video.
 - **Style:** paper style only (dark theme by default for new videos). Do not mix in other video styles or skills
   unless asked.
 - **Captions:** blur-build words, accent words in the red selection box. **No sound effect on the red words.**
+  Text must never be cut by the frame: long lines split automatically; still check every caption in the stills.
 - **Presenter:** use the character only where the gesture/expression matches the line (see the clip table in
   `styles/paper/STYLE.md`); if no clip fits, show visuals only (`"layout": "none"`). Time each gesture onto its word.
   Fix every "WARN ... no chosen gesture" from `reel.py make`. Keep him smaller in full and bottom shots.
