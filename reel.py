@@ -65,11 +65,22 @@ if __name__ == "__main__":
     m.add_argument("--quality", default="looks", choices=["draft", "looks", "delivery"])
     c = sp.add_parser("cards"); c.add_argument("style", nargs="?", default="paper")
     sp.add_parser("styles")
+    sy = sp.add_parser("say", help='check pronunciation: reel.py say "Claude Code on macOS"'); sy.add_argument("text"); sy.add_argument("--wav")
     ic = sp.add_parser("icons", help="search the icon library: reel.py icons openai"); ic.add_argument("query"); ic.add_argument("-n", type=int, default=40)
     a = ap.parse_args()
     if a.cmd == "icons":
         from core import icons
         for name in icons.search(a.query, a.n): print(name)
+        sys.exit(0)
+    if a.cmd == "say":
+        from core import pronounce
+        ps, rows, norm = pronounce.phonemes(a.text)
+        print("read as: ", norm); print("phonemes:", ps)
+        for r in rows: print(f"  {r['word']:18s} /{r['ph']}/  {r['why']}")
+        if a.wav:
+            from core.voice import _model
+            import soundfile as sf
+            aud, sr = _model().create(ps, voice="am_puck", speed=1.0, lang="en-us", is_phonemes=True); sf.write(a.wav, aud, sr)
         sys.exit(0)
     if a.cmd == "make": make(a)
     elif a.cmd == "styles": print("styles:", ", ".join(styles()))

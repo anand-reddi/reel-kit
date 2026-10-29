@@ -2,7 +2,8 @@
 through the lines instead of dropping at the end of every fragment; then each line's place inside the sentence is
 found (the lines' solo lengths give the split, snapped to the quietest moment nearby, which is the gap between two
 words). Per-word times are a character-weighted split of each line. Writes <work>/vo.wav and <work>/timing.json.
-"voice": {"natural": false} goes back to one clip per line."""
+"voice": {"natural": false} goes back to one clip per line. Text becomes phonemes through core/pronounce.py (misaki
+dictionaries + core/lexicon.json, espeak only as fallback) and every guessed word is reported; "g2p": "espeak" goes back."""
 import json, math, os, re
 import numpy as np, soundfile as sf
 from scipy.signal import resample_poly
@@ -46,13 +47,24 @@ def _snap(a, i, win):
 def speak(script, work):
     k = _model(); v_cfg = script.get("voice", {})
     voice, speed, lang = v_cfg.get("name", "am_puck"), v_cfg.get("speed", 1.0), v_cfg.get("lang", "en-us")
-    say_map = v_cfg.get("say", {})          # pronunciation fixes: {"SQL": "sequel"}
+    say_map = v_cfg.get("say", {})          # pronunciation fixes, whole words: {"SQL": "sequel"} or {"Cindy": "/sˈɪndi/"}
     natural = v_cfg.get("natural", True)
-    def said(text):
-        for a, b in say_map.items(): text = text.replace(a, b)
-        return text
+    use_misaki = v_cfg.get("g2p", "misaki") == "misaki" and lang == "en-us"
+    if use_misaki:
+        from . import pronounce
+        all_lines = [plain(l) for sc in script["scenes"] for l in sc["lines"]]
+        report, guessed = pronounce.audit(all_lines, say_map)
+        open(os.path.join(work, "pronounce.txt"), "w").write(report + "\n")
+        print(f"    pronunciation: {len(all_lines)} lines checked, report in {os.path.join(work, 'pronounce.txt')}")
+        if guessed:
+            print(f"    WARN guessed pronunciations (check, then fix in voice.say or core/lexicon.json): {', '.join(guessed)}")
     def synth(text):
-        a, sr = k.create(said(text), voice=voice, speed=speed, lang=lang)
+        if use_misaki:
+            ps = pronounce.phonemes(text, say_map)[0]
+            a, sr = k.create(ps, voice=voice, speed=speed, lang=lang, is_phonemes=True)
+        else:
+            for x, y in say_map.items(): text = re.sub(rf"(?<![\w]){re.escape(x)}(?![\w])", y, text)
+            a, sr = k.create(text, voice=voice, speed=speed, lang=lang)
         return _trim(resample_poly(a, SR, sr))
     lines, clips, t = [], [], 0.0
     for si, sc in enumerate(script["scenes"]):

@@ -28,7 +28,9 @@ cd ~/reel-kit && python3 reel.py styles
    ```
 4. Icons: always from the icon library (`python3 reel.py icons <word>`), never emoji. Presenter only where a clip matches
    the line (clip table in the style's STYLE.md), else visuals only.
-5. Look at `out/my-reel-frames.png` before sending. Send the MP4 with a one-line summary.
+5. Read the pronunciation report (`pronounce.txt` in the work folder; guessed words are also printed) and fix wrong
+   words in `core/lexicon.json` or `voice.say` (`python3 reel.py say "text"` to check).
+6. Look at `out/my-reel-frames.png` before sending. Send the MP4 with a one-line summary.
 
 Styles: `paper` — off-white dotted paper, black/white UI cards with a red accent, live hairline line figures,
 word-synced captions, presenter

@@ -56,7 +56,7 @@ def checklist(p, c, x):
     n = len(items)
     if n == len(x.lines): times = [ln["start"] for ln in x.lines]
     else:
-        lo, hi = x.lines[0]["start"], x.lines[-1]["end"] - 0.3
+        lo = x.lines[0]["start"]; hi = lo + (x.lines[-1]["end"] - 0.3 - lo) * 0.75   # all items in before the line ends
         times = [lo + (hi - lo) * i / max(1, n - 1) for i in range(n)]
     times = [x.at(it["at"]) if isinstance(it, dict) and "at" in it else t for it, t in zip(items, times)]
     rows = ""
@@ -64,7 +64,7 @@ def checklist(p, c, x):
         label = it["label"] if isinstance(it, dict) else it; icon = it.get("icon", "dot") if isinstance(it, dict) else "dot"
         col = it.get("color") if isinstance(it, dict) else None
         rows += f'''<div id="{p}-r{i}" class="row"><div class="ico">{ico(icon, 50 if ":" in icon else 56, col)}</div>
-      <div class="rlabel">{esc(label)}</div><div class="rbar"><div id="{p}-f{i}" class="rfill"></div></div>
+      <div class="rlabel" style="font-size:{min(50, round(440 / (max(1, len(label)) * 0.56)))}px">{esc(label)}</div><div class="rbar"><div id="{p}-f{i}" class="rfill"></div></div>
       <div id="{p}-c{i}" class="chk"><svg viewBox="0 0 40 40" width="40" height="40"><path d="M10,21 L17,28 L31,13" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>'''
         x.A(f'tl.fromTo("#{p}-r{i}", {{ opacity: 0, x: -60 }}, {{ opacity: 1, x: 0, duration: 0.25, ease: "power3.out" }}, {x.r(t - 0.2)});')
         x.A(f'tl.fromTo("#{p}-f{i}", {{ scaleX: 0 }}, {{ scaleX: 1, duration: 0.4, ease: "power2.out" }}, {x.r(t - 0.05)});')

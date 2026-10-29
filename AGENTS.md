@@ -22,7 +22,10 @@ Always look at the `--stills` contact sheet before sending a video.
   fluent-emoji-flat). Never emoji or text glyphs as icons. Company and tool logos use their real logo.
 - **Intro slides:** the opening kinetic pages match the rest of the video: theme background, caption font, red
   selection box for the accent word (`"accent": true`). No full red slabs.
-- **Voice:** Kokoro `am_puck`, speed 1.0 (natural). Say hard names via `voice.say`.
+- **Voice:** Kokoro `am_puck`, speed 1.0 (natural). Words go through `core/pronounce.py` (misaki dictionaries, the
+  phonemes Kokoro was trained on; tech words in `core/lexicon.json`). Every render writes `pronounce.txt` and warns
+  about guessed words: read it, and fix any wrong one in `core/lexicon.json` (permanent) or `voice.say` (this video).
+  Check text any time with `python3 reel.py say "..."`. Prices, 10x, 8.1k, %, domains (cindy.app) are read out properly.
 - **Dark mode:** red glow behind the presenter; bottom box is a dark box with the glow inside (`box_style: glow`).
 - **Brand:** handle `@techinsixty`; red accent `#e5372d`; profile pictures in `brand/` (square, edge to edge).
 - **Known gap:** lip-sync and expressions come from the footage, so they are approximate.
