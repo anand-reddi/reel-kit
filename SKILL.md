@@ -20,18 +20,20 @@ cd ~/reel-kit && python3 reel.py styles
 
 ## 1. Making a video
 1. Pick the style (ask if the user didn't say and more than one fits) and read `styles/<style>/STYLE.md` in full.
-2. Settle the story: hook in the first 2 s, 3–6 beats, a closing line. Write for shares, not likes: build it around
+2. Options first: read `PLAYBOOK.md` and present its pre-video options (2–3 hooks, share angle, save/follow angle,
+   format and length). Wait for the owner to choose; do not script or render before that.
+3. Settle the story: hook in the first 2 s, 3–6 beats, a closing line. Write for shares, not likes: build it around
    one takeaway that makes the viewer feel smart enough to send it to a friend; end on that, not on "comment below". Fact-check every claim, number and name with a
    search first; never invent figures. About 2.6 spoken words per second (10 s ≈ 22 words, 60 s ≈ 140).
-3. Write the script JSON (format in the style's STYLE.md), then:
+4. Write the script JSON (format in the style's STYLE.md), then:
    ```bash
    python3 reel.py make my-reel.json -o out/my-reel.mp4 --stills    # --quality draft while iterating
    ```
-4. Icons: always from the icon library (`python3 reel.py icons <word>`), never emoji. Presenter only where a clip matches
+5. Icons: always from the icon library (`python3 reel.py icons <word>`), never emoji. Presenter only where a clip matches
    the line (clip table in the style's STYLE.md), else visuals only.
-5. Read the pronunciation report (`pronounce.txt` in the work folder; guessed words are also printed) and fix wrong
+6. Read the pronunciation report (`pronounce.txt` in the work folder; guessed words are also printed) and fix wrong
    words in `core/lexicon.json` or `voice.say` (`python3 reel.py say "text"` to check).
-6. Look at `out/my-reel-frames.png` before sending. Send the MP4 with a one-line summary.
+7. Look at `out/my-reel-frames.png` before sending. Send the MP4 with a one-line summary.
 
 Styles: `paper` — off-white dotted paper, black/white UI cards with a red accent, live hairline line figures,
 word-synced captions, presenter
