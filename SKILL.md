@@ -20,7 +20,8 @@ cd ~/reel-kit && python3 reel.py styles
 
 ## 1. Making a video
 1. Pick the style (ask if the user didn't say and more than one fits) and read `styles/<style>/STYLE.md` in full.
-2. Settle the story: hook in the first 2 s, 3–6 beats, a closing line. Fact-check every claim, number and name with a
+2. Settle the story: hook in the first 2 s, 3–6 beats, a closing line. Write for shares, not likes: build it around
+   one takeaway that makes the viewer feel smart enough to send it to a friend; end on that, not on "comment below". Fact-check every claim, number and name with a
    search first; never invent figures. About 2.6 spoken words per second (10 s ≈ 22 words, 60 s ≈ 140).
 3. Write the script JSON (format in the style's STYLE.md), then:
    ```bash

@@ -7,6 +7,10 @@ Always look at the `--stills` contact sheet before sending a video.
 ## Standing rules (from the channel owner)
 - **Git:** push only to the `techinsixty` branch, never to `main`. Ask before every push.
 - **Language:** English by default.
+- **Write for shares, not likes or comments:** the reel's job is to make the viewer feel smart, so they forward it
+  to a friend ("bro, how did you not know this?"). Every script needs one surprising, useful takeaway someone would
+  send on. Prefer a "send this to someone who…" or "save this" ending over "comment below". Judge a script by:
+  would someone share this?
 - **Facts:** fact-check every claim, number and name with a search before writing the script. Never invent figures.
   If a site or its media is blocked from the workspace, say so and ask the owner to send the clips.
 - **Characters:** original characters only (the `otaku` presenter is the channel face). Third-party art/clips are used
