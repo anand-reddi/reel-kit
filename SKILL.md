@@ -33,7 +33,19 @@ cd ~/reel-kit && python3 reel.py styles
    the line (clip table in the style's STYLE.md), else visuals only.
 6. Read the pronunciation report (`pronounce.txt` in the work folder; guessed words are also printed) and fix wrong
    words in `core/lexicon.json` or `voice.say` (`python3 reel.py say "text"` to check).
-7. Look at `out/my-reel-frames.png` before sending. Send the MP4 with a one-line summary.
+7. Check before sending:
+   - `python3 reel.py check out/my-reel.mp4`: freezes, black/white frames, hard cut to black. A freeze in the first
+     2 s (`HOOK`) is always a blocker: the hook needs motion in frame 1. Open every strip it writes.
+   - Look at `out/my-reel-frames.png`.
+   - Fresh review: hand the frames sheet, the check strips and the script to a reviewer that did not build the video
+     (a new subagent, no build context; if none is available, review as a stranger: script aside, frames only). It
+     answers per line: hook in 2 s? captions fully inside the frame? presenter gesture matches the line? icons from the
+     library? every claim backed? Each issue is `blocker` (visible at normal speed on a phone) or `polish` (only when
+     zoomed). Only blockers send work back; polish is fixed along the way. Pass = no blockers.
+   - Every fix carries evidence: a before and after crop of the same second and region
+     (`ffmpeg -ss <t> -i <mp4> -frames:v 1 -vf crop=w:h:x:y`), listed in `build/<name>/check/fixes.json` as
+     `{issue, time, change, before, after}`. The next review checks those first. At most 3 rounds, then tell the owner what is left.
+8. Send the MP4 with a one-line summary.
 
 Styles: `paper` — off-white dotted paper, black/white UI cards with a red accent, live hairline line figures,
 word-synced captions, presenter
@@ -43,8 +55,11 @@ pill; each video brings its own scene module (see `styles/studio3d/STYLE.md`). `
 
 ## 2. Adding a new style from a reference video
 When the user shares a reference video and wants "videos like this":
-1. Analyse it: duration, aspect, fps (`ffprobe`); a tiled contact sheet (`ffmpeg -vf "fps=0.5,scale=180:-1,tile=11x3"`)
-   and a 10 fps strip of the first 12 s; 2–3 full-res frames; `earshot measure` for loudness and band balance.
+1. Analyse it: `python3 reel.py analyze ref.mp4 --out refs/<name>` (crops phone-recording UI and letterbox, then
+   measures shots and pacing in seconds and beats, the camera move and pace per shot, brightness, dominant colours,
+   bpm and beats, peak candidates where the music builds and hits, and flash frames). Look at `sheet_1fps.jpg` and
+   `sheet_scenes.jpg` first, then read `report.json`. Add a 10 fps strip of the first 12 s, 2–3 full-res frames and
+   `earshot measure` for loudness and band balance.
    Write down: palette (hex), type (families, sizes, accent treatment), layout zones, caption mechanics, the
    recurring visual devices, cut rhythm, presenter, sound (voice / music / SFX roles).
 2. Tell the user the breakdown and the plan for a 10 s test before building.
@@ -54,7 +69,8 @@ When the user shares a reference video and wants "videos like this":
    `core/voice.py`, `core/sound.py` and `core/clock.js` as they are; put new shared helpers in `core/`, never copy them into a style.
    Fonts go in `assets/fonts/` (vendored from npm `@fontsource/*`, jsDelivr is blocked in the browser).
 4. Draw only original characters and artwork; never copy the reference creator's avatar, logo or branding.
-5. Render the example, check the frames, send it. After the user approves, add the style to the list in section 1,
+5. Render the example, run `reel.py analyze` on our render too and compare its pacing, camera kinds and colours with
+   the reference's report (the numbers flag, the frames decide), run step 7 of section 1, send it. After the user approves, add the style to the list in section 1,
    commit on branch `techinsixty` and ask before pushing (never push to `main`).
 
 ## 3. Characters

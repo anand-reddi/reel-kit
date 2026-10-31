@@ -4,6 +4,8 @@
   python3 reel.py make styles/paper/examples/one-prompt.json -o out.mp4   # full pipeline
   python3 reel.py make script.json --stills                      # also writes a contact sheet of key frames
   python3 reel.py styles | cards [style]                         # list styles / a style's cards
+  python3 reel.py analyze ref.mp4 --out refs/name                # take a reference video apart (shots, camera, colours, beats)
+  python3 reel.py check out.mp4                                  # motion QA: freezes, black/white frames, hard cut to black
 """
 import argparse, glob, json, os, shutil, subprocess, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -66,8 +68,15 @@ if __name__ == "__main__":
     c = sp.add_parser("cards"); c.add_argument("style", nargs="?", default="paper")
     sp.add_parser("styles")
     sy = sp.add_parser("say", help='check pronunciation: reel.py say "Claude Code on macOS"'); sy.add_argument("text"); sy.add_argument("--wav")
+    an = sp.add_parser("analyze", help="take a reference video apart: reel.py analyze ref.mp4 --out refs/name"); an.add_argument("src"); an.add_argument("--out", required=True)
+    ck = sp.add_parser("check", help="motion QA of a render: freezes, black/white frames, hard cut to black"); ck.add_argument("video"); ck.add_argument("--out")
+    ck.add_argument("--from", dest="a", default="0"); ck.add_argument("--to", dest="b", default="0"); ck.add_argument("--freeze", default="1.0")
     ic = sp.add_parser("icons", help="search the icon library: reel.py icons openai"); ic.add_argument("query"); ic.add_argument("-n", type=int, default=40)
     a = ap.parse_args()
+    if a.cmd == "analyze":
+        from core import analyze; analyze.main([a.src, "--out", a.out]); sys.exit(0)
+    if a.cmd == "check":
+        from core import check; check.main([a.video, "--from", a.a, "--to", a.b, "--freeze", a.freeze] + (["--out", a.out] if a.out else [])); sys.exit(0)
     if a.cmd == "icons":
         from core import icons
         for name in icons.search(a.query, a.n): print(name)

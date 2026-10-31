@@ -8,8 +8,8 @@ REPO="https://github.com/anand-reddi/reel-kit.git"; BRANCH="techinsixty"
 if [ ! -f "$DEST/reel.py" ]; then
   git clone -q --depth 1 -b "$BRANCH" "$REPO" "$DEST" 2>/dev/null || git clone -q --depth 1 "$REPO" "$DEST"
 fi
-python3 -m pip install -q --break-system-packages kokoro-onnx soundfile pyloudnorm scipy numpy misaki spacy num2words regex 2>/dev/null \
-  || python3 -m pip install -q kokoro-onnx soundfile pyloudnorm scipy numpy misaki spacy num2words regex
+python3 -m pip install -q --break-system-packages kokoro-onnx soundfile pyloudnorm scipy numpy misaki spacy num2words regex opencv-python-headless librosa scenedetect 2>/dev/null \
+  || python3 -m pip install -q kokoro-onnx soundfile pyloudnorm scipy numpy misaki spacy num2words regex opencv-python-headless librosa scenedetect
 TTS="${REELKIT_TTS:-$HOME/.cache/reelkit/tts}"; mkdir -p "$TTS"
 for f in kokoro-v1.0.onnx voices-v1.0.bin; do
   if [ -f "/root/tts/$f" ] && [ ! -f "$TTS/$f" ]; then ln -s "/root/tts/$f" "$TTS/$f"; fi
