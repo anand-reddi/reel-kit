@@ -94,6 +94,18 @@ class Film:
         s.fx_used, s.fx_html = set(), ""
         s.out = os.path.join(work, "film"); os.makedirs(os.path.join(s.out, "assets"), exist_ok=True)
         s.char = s.load_character(script.get("character", "default"))
+        # "aspect": "16:9" -> 1920x1080: the 9:16 column (header, captions, cards) keeps its own 1080-wide coordinates on
+        # the left, scaled by "column.scale"; the presenter stands on the right ("presenter": {x, y, width} overrides)
+        s.wide = script.get("aspect") == "16:9"
+        s.W, s.H = (1920, 1080) if s.wide else (W, H)
+        if s.wide and s.char:
+            c = s.char
+            if c["type"] == "svg":
+                pw = 1150; pos = {"x": 1510 - pw / 2, "y": 1080 - (1920 - 1290) * pw / 960 + 40, "width": pw}
+            else:   # video / rig: full canvas, head at canvas centre, bottom on the frame's bottom edge
+                cw, ch = c.get("canvas", [1200, 720]); pw = 1500 if c["type"] == "video" else 1000
+                pos = {"x": 1510 - pw / 2, "y": 1080 - pw * ch / cw + 20, "width": pw, "height": pw * ch / cw}
+            c.update(pos); c.update(script.get("presenter", {}))
         s.avatar = s.asset(s.brand["avatar"]) if s.brand.get("avatar") else s.char_avatar()
     def asset(s, path):
         src = path if os.path.isabs(path) else os.path.join(s.sdir, path)
@@ -589,9 +601,9 @@ class Film:
             "box":  dict(cam=dict(left=bx, top=by, width=bw, height=bh, zIndex=10, autoAlpha=1),
                          back=dict(borderRadius=28, borderWidth=3, opacity=1), clip=dict(clipPath='"inset(-900px -600px 0px -600px)"'),
                          svg=dict(left=bw / 2 - 600 * k_box, top=cv.get("box_pop", -90) - hat * k_box, width=1200 * k_box)),
-            "full": dict(cam=dict(left=0, top=0, width=W, height=H, zIndex=1, autoAlpha=1),
+            "full": dict(cam=dict(left=0, top=0, width=s.W, height=s.H, zIndex=1, autoAlpha=1),
                          back=dict(borderRadius=0, borderWidth=0, opacity=0), clip=dict(clipPath='"inset(0px 0px 0px 0px)"'),
-                         svg=dict(left=W / 2 - 600 * k_full, top=cv.get("full_top", 600) - hat * k_full, width=1200 * k_full)),
+                         svg=dict(left=s.W / 2 - 600 * k_full, top=cv.get("full_top", 600) - hat * k_full, width=1200 * k_full)),
         }
         # a soft accent glow behind the head (dark theme by default; "camera": {"glow": false | "#hex", "glow_y": svg y of the head})
         dark = s.sc.get("theme") == "dark"
@@ -599,7 +611,7 @@ class Film:
         gy, gr = cv.get("glow_y", 250), cv.get("glow_r", 560)
         if gcol:
             bstyle = cv.get("box_style", "glow" if dark else "studio")   # studio | glow (dark box, glow inside) | open (no box)
-            for L, k, ox, oy, op in (("box", k_box, bw / 2, lay["box"]["svg"]["top"], 0 if bstyle == "studio" else 1), ("full", k_full, W / 2, lay["full"]["svg"]["top"], 1)):
+            for L, k, ox, oy, op in (("box", k_box, bw / 2, lay["box"]["svg"]["top"], 0 if bstyle == "studio" else 1), ("full", k_full, s.W / 2, lay["full"]["svg"]["top"], 1)):
                 R = gr * k / k_full * (1 if L == "full" else 1.3)
                 lay[L]["glow"] = dict(left=ox - R, top=oy + gy * k - R, width=2 * R, height=2 * R, opacity=op)
         else: bstyle = cv.get("box_style", "studio")
@@ -745,6 +757,7 @@ class Film:
     def write(s, hdr, caps, cards, pres, dur):
         th = s.th; css = open(os.path.join(HERE, "style.css")).read() + fonts_css(s.sc.get("fonts", "grotesk"))
         for k, v in th.items(): css = css.replace("{" + k + "}", v)
+        if s.wide: css = css.replace("#root { position: relative; width: 1080px; height: 1920px;", "#root { position: relative; width: 1920px; height: 1080px;")
         for f in os.listdir(os.path.join(KIT, "assets", "fonts")): shutil.copy(os.path.join(KIT, "assets", "fonts", f), os.path.join(s.out, "assets", f))
         shutil.copy(os.path.join(KIT, "assets", "gsap.min.js"), os.path.join(s.out, "gsap.min.js"))
         head_extra, mod, upd = "", "", ""
@@ -756,14 +769,19 @@ class Film:
         js = "\n".join(s.js)
         # a video presenter's clips carry their own timing, so the stage wrapper must not be timed as well
         wrap = "" if (s.uses_video or (s.char and s.char["type"] == "video")) else f' class="clip" data-start="0" data-duration="{dur}" data-track-index="1"'
+        col = hdr + caps + cards + pres
+        if s.wide:
+            cc = s.sc.get("column", {}); k = cc.get("scale", 1.0)
+            col = (f'<div id="col" style="position:absolute;left:{cc.get("x", 60)}px;top:{cc.get("y", -70)}px;width:1080px;height:1920px;'
+                   f'transform:scale({k});transform-origin:0 0">{hdr}{caps}{cards}</div>{pres}')
         html = f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"/><title>{esc(s.sc.get("title", "reel"))}</title><style>{css}</style>{head_extra}<script src="gsap.min.js"></script>{mod}</head>
 <body>
-<div id="root" data-composition-id="reel" data-start="0" data-duration="{dur}" data-width="{W}" data-height="{H}" data-fps="{s.sc.get("fps", 30)}">
+<div id="root" data-composition-id="reel" data-start="0" data-duration="{dur}" data-width="{s.W}" data-height="{s.H}" data-fps="{s.sc.get("fps", 30)}">
  <div id="stagewrap"{wrap}>
   <div id="stage">
    <div id="paperdots"></div><div id="vig"></div>
-   {hdr}{caps}{cards}{pres}
+   {col}
   </div>
  </div>
 </div>

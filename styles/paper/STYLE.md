@@ -2,7 +2,7 @@
 
 Off-white dotted paper, black/white UI cards with one red accent, a mono header (`// 01 · label`) with a live
 counter, captions that land word by word with the voice (accent words in red italic serif), and a presenter at the
-bottom who changes gesture on every beat. 1080×1920, 30 fps. Reference: a 66 s "AI reels system" explainer reel.
+bottom who changes gesture on every beat. 1080×1920, 30 fps; `"aspect": "16:9"` gives 1920×1080 (below). Reference: a 66 s "AI reels system" explainer reel.
 Examples: `examples/one-prompt.json` (10 s, every core card), `examples/card-tour.json` (stat, graph, image),
 `examples/cleanyourtv.json` (40 s tool reel: camera layouts, short captions, expressions).
 
@@ -174,3 +174,11 @@ A spoken line wider than the frame is split into caption chunks between words, o
 is never split; no orphan last word). A chunk that is still slightly too wide is scaled down to the safe width, measured
 in the browser with the real fonts (`capfit`); kinetic words do the same (`kfit`). Keep red runs to 1-2 short words.
 `"caption_width"` (default 1040, estimated px) sets when a line splits.
+
+
+## 16:9 (`"aspect": "16:9"`)
+1920×1080. The 9:16 column (header, captions, cards) keeps its 1080-wide coordinates on the left
+(`"column": {"x": 60, "y": -70, "scale": 1.0}`), the presenter stands on the right, bottom on the frame edge
+(`"presenter": {"x", "y", "width"}` overrides). Use the default caption style and normal cards; camera layouts
+(`box`/`full`), `kinetic` and full-frame inserts are still 9:16-only. Keep a scene to 3 caption lines so the card is not
+pushed to the bottom edge. Example: a 25 s five-step how-to (checklist per step, profile card at the end).
