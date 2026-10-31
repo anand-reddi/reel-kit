@@ -206,3 +206,50 @@ html, body { margin: 0; background: {paper}; }
 .cap.short .hl::after { width: 22px; height: 22px; margin-left: -11px; }
 .cap.short .hr::after { width: 14px; height: 14px; margin-left: -7px; bottom: -8px; }
 .cap.short .hd { transform: scaleY(0); } .cap.short .selbg { transform: scaleX(0); }
+
+/* visual cards: reels, phone, gallery, voice, timeline, upload */
+.vstring { position: absolute; left: 90px; right: 90px; top: 30px; height: 4px; background: {accent}; border-radius: 2px; transform-origin: 0 50%; }
+.vreel { position: absolute; top: 18px; border-radius: 18px; overflow: visible; box-shadow: 14px 16px 0 {shadow}; background: {card}; border: 4px solid {edge}; transform-origin: 50% 0; }
+.vreel img { width: 100%; height: 100%; object-fit: cover; border-radius: 14px; display: block; }
+.vpin { position: absolute; top: -12px; width: 22px; height: 22px; border-radius: 50%; background: {accent}; box-shadow: 0 3px 0 #0006; }
+.vplay { position: absolute; right: 12px; bottom: 12px; width: 52px; height: 52px; border-radius: 50%; background: #0009; display: flex; align-items: center; justify-content: center; }
+.vphone { position: absolute; left: 150px; top: 0; width: 360px; height: 470px; border-radius: 48px; background: {card}; border: 6px solid {edge}; box-shadow: 16px 18px 0 {shadow}; padding: 22px 16px; box-sizing: border-box; }
+.vphd { display: flex; align-items: center; gap: 12px; font-size: 28px; font-weight: 700; color: {ink}; padding: 6px 10px 18px; }
+.vgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.vtile { height: 148px; border-radius: 8px; overflow: hidden; position: relative; } .vtile img { width: 100%; height: 100%; object-fit: cover; }
+.vring { position: absolute; z-index: 4; pointer-events: none; }
+.vnote { position: absolute; left: 560px; top: 150px; font-family: "Instrument Serif", serif; font-style: italic; font-size: 78px; color: {accent}; transform: rotate(-6deg); opacity: 0; }
+.vsave { position: absolute; left: 560px; top: 330px; display: flex; align-items: center; gap: 18px; background: {surface}; border: 4px solid {edge}; border-radius: 22px; padding: 18px 30px; font-size: 44px; font-weight: 700; box-shadow: 12px 14px 0 {shadow}; opacity: 0; }
+.vpanel { position: absolute; left: 110px; width: 860px; top: 0; background: {surface}; border: 4px solid {edge}; border-radius: 30px; padding: 22px 30px 30px; box-sizing: border-box; box-shadow: 16px 18px 0 {shadow}; }
+.vhd { display: flex; align-items: center; gap: 14px; font-size: 32px; font-weight: 700; padding-bottom: 18px; border-bottom: 3px dashed {grey}; margin-bottom: 22px; }
+.vdots { margin-left: auto; display: flex; gap: 8px; } .vdots i { width: 14px; height: 14px; border-radius: 50%; background: {grey}; }
+.vprompt { background: {paper}; border: 3px solid {edge}; border-radius: 18px; padding: 18px 22px; font-size: 32px; white-space: nowrap; overflow: hidden; }
+.vtx { display: inline-block; overflow: hidden; vertical-align: bottom; white-space: nowrap; }
+.vposes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 22px; }
+.vpose { height: 150px; border-radius: 16px; background: radial-gradient(circle at 50% 40%, {accent}44, {paper} 70%); border: 3px solid {edge}; overflow: hidden; opacity: 0; }
+.vpose img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 0; }
+.vdoc { display: flex; align-items: center; gap: 14px; font-size: 28px; color: {mid}; } .vdoc b { margin-left: auto; color: {ink}; font-weight: 500; }
+.vwavebox { position: relative; height: 300px; margin-top: 26px; border-radius: 18px; background: {paper}; border: 3px solid {edge}; overflow: hidden; }
+.vwave { position: absolute; left: 20px; right: 20px; top: 50px; bottom: 50px; display: flex; align-items: center; gap: 4px; }
+.vwave i { flex: 1; background: {accent}; border-radius: 4px; transform-origin: 50% 50%; }
+.vph { position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: {ink}; box-shadow: 0 0 12px {ink}; }
+.vtag { position: absolute; font-family: "IBM Plex Mono", monospace; font-size: 30px; background: {surface}; color: {accent}; border: 3px solid {accent}; border-radius: 14px; padding: 6px 16px; opacity: 0; }
+.vask { margin-left: auto; width: fit-content; max-width: 640px; background: {accent}; color: #fff; font-size: 32px; font-weight: 700; border-radius: 26px 26px 6px 26px; padding: 18px 26px; opacity: 0; }
+.vtrack { margin-top: 30px; }
+.vticks { position: relative; height: 36px; font-size: 22px; color: {mid}; } .vticks span { position: absolute; transform: translateX(-50%); }
+.vblks { position: relative; height: 150px; border-radius: 16px; background: {paper}; border: 3px solid {edge}; }
+.vblk { position: absolute; top: 18px; bottom: 18px; margin-left: 3px; border-radius: 12px; background: {grey}; color: {ink}; font-size: 24px; font-weight: 700; display: flex; align-items: center; justify-content: center; opacity: 0; }
+.vblk.on { background: {accent}; color: #fff; }
+.vslots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+.vslot { text-align: center; font-size: 28px; font-weight: 700; opacity: 0; }
+.vth { height: 230px; border-radius: 18px; border: 3px dashed {grey}; background: {paper}; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 12px; }
+.vth img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 0; }
+.vbtnrow { position: relative; margin-top: 26px; display: flex; justify-content: center; }
+.vbtn { display: flex; align-items: center; gap: 16px; background: {accent}; color: #fff; font-size: 44px; font-weight: 700; padding: 20px 56px; border-radius: 24px; }
+.vcur { position: absolute; left: 520px; top: 40px; opacity: 0; z-index: 5; }
+.igrow { display: flex; align-items: center; gap: 40px; margin-top: 18px; }
+.igav img { border-radius: 50%; border: 4px solid #3a3a3a; }
+.igstats { display: flex; gap: 40px; } .igstats div { display: flex; flex-direction: column; }
+.igstats b { font-size: 46px; font-weight: 700; color: #f4f1ea; } .igstats span { font-size: 28px; color: #bdb8ae; }
+.igname { margin-top: 22px; font-size: 38px; font-weight: 700; color: #f4f1ea; } .igcat { font-size: 28px; color: #8f8a81; margin-top: 4px; }
+.igbio { font-size: 30px; line-height: 1.32; color: #e4e0d8; margin-top: 6px; }

@@ -104,7 +104,7 @@ class Film:
                 pw = 1150; pos = {"x": 1510 - pw / 2, "y": 1080 - (1920 - 1290) * pw / 960 + 40, "width": pw}
             else:   # video / rig: full canvas, head at canvas centre, bottom on the frame's bottom edge
                 cw, ch = c.get("canvas", [1200, 720]); pw = 1500 if c["type"] == "video" else 1000
-                pos = {"x": 1510 - pw / 2, "y": 1080 - pw * ch / cw + 20, "width": pw, "height": pw * ch / cw}
+                pos = {"x": 1590 - pw / 2, "y": 1080 - pw * ch / cw + 20, "width": pw, "height": pw * ch / cw}
             c.update(pos); c.update(script.get("presenter", {}))
         s.avatar = s.asset(s.brand["avatar"]) if s.brand.get("avatar") else s.char_avatar()
     def asset(s, path):
@@ -771,9 +771,15 @@ class Film:
         wrap = "" if (s.uses_video or (s.char and s.char["type"] == "video")) else f' class="clip" data-start="0" data-duration="{dur}" data-track-index="1"'
         col = hdr + caps + cards + pres
         if s.wide:
-            cc = s.sc.get("column", {}); k = cc.get("scale", 1.0)
-            col = (f'<div id="col" style="position:absolute;left:{cc.get("x", 60)}px;top:{cc.get("y", -70)}px;width:1080px;height:1920px;'
+            cc = s.sc.get("column", {}); k = cc.get("scale", 0.94)
+            col = (f'<div id="col" style="position:absolute;left:{cc.get("x", 50)}px;top:{cc.get("y", -60)}px;width:1080px;height:1920px;'
                    f'transform:scale({k});transform-origin:0 0">{hdr}{caps}{cards}</div>{pres}')
+            # dark theme: an accent glow behind the presenter's head ("camera": {"glow": false | "#hex"} to change)
+            gcol = s.sc.get("camera", {}).get("glow", th["accent"] if s.sc.get("theme") == "dark" else False)
+            if gcol and s.char:
+                c = s.char; cx = c["x"] + c["width"] / 2; cy = c["y"] + c.get("height", c["width"] * 0.6) * 0.42; R = 520
+                col = (f'<div id="presglow" style="position:absolute;left:{cx - R:.0f}px;top:{cy - R:.0f}px;width:{2 * R}px;height:{2 * R}px;border-radius:50%;'
+                       f'background:radial-gradient(circle, {gcol}80 0%, {gcol}40 30%, {gcol}14 55%, transparent 70%)"></div>') + col
         html = f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"/><title>{esc(s.sc.get("title", "reel"))}</title><style>{css}</style>{head_extra}<script src="gsap.min.js"></script>{mod}</head>
 <body>

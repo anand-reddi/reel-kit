@@ -45,7 +45,13 @@ Write "AI", "SBI", "API" plainly (no spaces); add `voice.say` only for words Kok
 | `stat` | a big number counting up + bars | `value`, `from`, `prefix`, `suffix`, `decimals`, `label`, `title`, `tag`, `bars[]` |
 | `graph` | growth / "you are here" | `marker` (0–1), `marker_at`, `marker_label`, `x_label`, `y_label` |
 | `image` | a real screenshot, with a highlight box | `src` (next to the script), `caption`, `height`, `fit` cover/contain, `highlight: {x,y,w,h,at}` (%) |
-| `profile` | the follow CTA (uses `brand`) | `tap_at`, `button`, `done` |
+| `profile` | the follow CTA (uses `brand`; with `brand.followers` it is an Instagram header: `posts`, `followers`, `following`, `name`, `category`, `bio`, `avatar`) | `tap_at`, `button`, `done`, `top` |
+| `reels` | a row of reel thumbnails on a string (hooks) | `images` (3–4, 9:16), `at`, `until` |
+| `phone` | an Instagram-style grid on a phone; one reel circled, then saved | `images` (6), `pick`, `pick_at`, `save_at`, `note`, `saved`, `title` |
+| `gallery` | a tool panel: prompt types in, results pop in (poses, generations) | `tool`, `icon`, `prompt`, `type_at`, `images` (≤8), `at`, `until` |
+| `voice` | a voice track: waveform draws in, emotion tags pop on | `tool`, `icon`, `file`, `line`, `tags`, `at`, `tags_at` |
+| `timeline` | a chat ask, then scene blocks land on a time ruler, playhead sweeps | `tool`, `icon`, `ask`, `blocks`, `widths`, `seconds`, `at` |
+| `upload` | upload slots fill, then a big button is pressed | `tool`, `icon`, `items: [{label, src|icon, at}]`, `button`, `press_at` |
 | `figure` | a live isometric line drawing (hairline, 33 objects) that reacts on cue | `name`, `path: [{at, x, y}]` (pointer 0–1 in the figure box; no path = it plays its own tour), `intensity` (0–1), `caption`, `readout` (red live readout, default on), `leave`, `mount_at`, `width`, `colors` |
 
 Any card also takes `"sfx": [{"at", "id", "gain"}]` for extra sound hits, and `"stamp": "TEXT"` or `{"text","at","x","y","rot"}` — a red rubber stamp with a shake and impact sound,
@@ -178,7 +184,7 @@ in the browser with the real fonts (`capfit`); kinetic words do the same (`kfit`
 
 ## 16:9 (`"aspect": "16:9"`)
 1920×1080. The 9:16 column (header, captions, cards) keeps its 1080-wide coordinates on the left
-(`"column": {"x": 60, "y": -70, "scale": 1.0}`), the presenter stands on the right, bottom on the frame edge
+(`"column": {"x": 50, "y": -60, "scale": 0.94}`); dark theme adds an accent glow behind the presenter, the presenter stands on the right, bottom on the frame edge
 (`"presenter": {"x", "y", "width"}` overrides). Use the default caption style and normal cards; camera layouts
 (`box`/`full`), `kinetic` and full-frame inserts are still 9:16-only. Keep a scene to 3 caption lines so the card is not
 pushed to the bottom edge. Example: a 25 s five-step how-to (checklist per step, profile card at the end).

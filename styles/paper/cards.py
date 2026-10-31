@@ -126,10 +126,18 @@ def profile(p, c, x):
     hearts = "".join(f'<b style="left:{a}px;top:{bb}px;transform:scale({s})">♥</b>' for a, bb, s in [(0, 0, 1), (-70, 40, .7), (80, 30, .8), (-30, -60, .6), (50, -50, .9), (110, -10, .55)])
     ver = '<span class="ver"><svg viewBox="0 0 24 24" width="34" height="34"><circle cx="12" cy="12" r="11" fill="#2f7bf6"/><path d="M7,12.5 L10.5,16 L17,9" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round"/></svg></span>' if b.get("verified", True) else ""
     bio = "<br>".join(esc(l) for l in b.get("bio", "").split("\n"))
+    if b.get("followers"):   # Instagram-style header: avatar, posts / followers / following, name, category, bio
+        stats = "".join(f'<div><b>{esc(str(b.get(k, "0")))}</b><span>{k}</span></div>' for k in ("posts", "followers", "following"))
+        cat = f'<div class="igcat">{esc(b["category"])}</div>' if b.get("category") else ""
+        head = (f'<div class="ph mono"><span>{esc(b.get("handle", "@you").lstrip("@"))}</span><span>≡</span></div>'
+                f'<div class="igrow"><div class="pav igav">{av}</div><div class="igstats">{stats}</div></div>'
+                f'<div class="igname">{esc(b.get("name", b.get("handle", "")))}</div>{cat}<div class="igbio">{bio}</div>')
+    else:
+        head = (f'<div class="ph mono"><span>{esc(b.get("handle", "@you").lstrip("@"))}</span><span>≡</span></div>'
+                f'<div class="prow"><div class="pav">{av}</div><div class="pname">{esc(b.get("handle", "@you"))} {ver}<div class="pbio">{bio}</div></div></div>')
     return f'''<div id="{p}-rays" class="rays">{"".join(f'<i style="transform:rotate({i * 22.5}deg)"></i>' for i in range(16))}</div>
   <div id="{p}-prof" class="prof">
-    <div class="ph mono"><span>{esc(b.get("handle", "@you").lstrip("@"))}</span><span>≡</span></div>
-    <div class="prow"><div class="pav">{av}</div><div class="pname">{esc(b.get("handle", "@you"))} {ver}<div class="pbio">{bio}</div></div></div>
+    {head}
     <div id="{p}-btn" class="fbtn"><span id="{p}-fa">{esc(c.get("button", "Follow"))}</span><span id="{p}-fb" class="fb">{esc(c.get("done", "Following ✓"))}</span></div>
   </div>
   <div id="{p}-tap" class="tap"><svg viewBox="0 0 80 100" width="110" height="138"><path d="M30,8 c0,-8 14,-8 14,0 v40 l4,-2 c6,-3 12,0 12,6 l2,0 c6,-2 11,2 11,8 c6,-1 9,3 9,9 v14 c0,14 -10,22 -24,22 h-12 c-10,0 -16,-6 -22,-14 l-14,-22 c-4,-6 4,-12 10,-6 l10,10 z" fill="#fff" stroke="#141414" stroke-width="5" stroke-linejoin="round"/></svg></div>
@@ -449,3 +457,122 @@ def flow(p, c, x):
     return f'<div class="flow" style="height:{nw + 90}px">{out}</div>'
 
 CARDS = dict(prompt=prompt, checklist=checklist, code=code, profile=profile, stat=stat, graph=graph, image=image, figure=figure, post=post, terminal=terminal, repo=repo, clips=clips, lineup=lineup, insert=insert, kinetic=kinetic, flow=flow)
+
+
+# ------------------------------------------------------------------ visual cards for "how it's made" / tool walkthroughs
+def _tool(x, c, default=""):
+    """Header chip for a tool panel: icon (library id) + name."""
+    icon, name = c.get("icon"), c.get("tool", default)
+    return f'<div class="vhd">{ico(icon, 40) if icon else ""}<span>{esc(name)}</span><span class="vdots"><i></i><i></i><i></i></span></div>'
+
+def _spread(x, n, a="line:0", b=None):
+    t0 = x.at(a); t1 = x.at(b) if b else x.lines[-1]["end"] - 0.3
+    return [t0 + (t1 - t0) * i / max(1, n - 1) for i in range(n)]
+
+def reels(p, c, x):
+    """A row of reel thumbnails pinned on a string (the hook: "everyone's making these"). images: 3-4 files (9:16)."""
+    ims = c["images"][:4]; n = len(ims); w = 215 if n == 4 else 260; gap = (900 - n * w) / (n + 1)
+    ts = _spread(x, n, c.get("at", "start+0.1"), c.get("until", "line:0:end"))
+    out = '<div class="vstring"></div>'
+    for i, (im, t) in enumerate(zip(ims, ts)):
+        rot = [-5, 3, -2, 5][i % 4]; left = 90 + gap + i * (w + gap)
+        out += (f'<div id="{p}-r{i}" class="vreel" style="left:{left:.0f}px;width:{w}px;height:{w * 16 / 9:.0f}px;transform:rotate({rot}deg)">'
+                f'<img src="{esc(x.asset(im))}"/><b class="vpin" style="left:{w / 2 - 11:.0f}px"></b><span class="vplay">{ico("lucide:play", 30, "#fff")}</span></div>')
+        x.A(f'tl.fromTo("#{p}-r{i}", {{ opacity: 0, y: -260 }}, {{ opacity: 1, y: 0, duration: 0.45, ease: "back.out(1.6)" }}, {x.r(t)});')
+        x.sfx(t + 0.3, ["pro_pop_in/knock", "pro_pop_in/double"][i % 2], -12)
+    x.A(f'tl.fromTo("#{p} .vstring", {{ scaleX: 0 }}, {{ scaleX: 1, duration: 0.4, ease: "power2.out" }}, {x.r(x.start)});')
+    return out
+
+def phone(p, c, x):
+    """A phone with an Instagram-style grid: one reel gets circled ("love this"), then saved. images: 6 thumbnails."""
+    ims = c["images"][:6]; pick = c.get("pick", 1)
+    t_pick, t_save = x.at(c.get("pick_at", "line:0:end-0.4")), x.at(c.get("save_at", "line:2"))
+    tiles = "".join(f'<div id="{p}-t{i}" class="vtile"><img src="{esc(x.asset(im))}"/></div>' for i, im in enumerate(ims))
+    x.A(f'tl.fromTo("#{p}-ph", {{ opacity: 0, y: 120, rotation: -6 }}, {{ opacity: 1, y: 0, rotation: -3, duration: 0.5, ease: "back.out(1.5)" }}, {x.r(x.start)});')
+    x.A(f'tl.fromTo("#{p} .vtile", {{ opacity: 0, scale: 0.6 }}, {{ opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)", stagger: 0.06 }}, {x.r(x.start + 0.25)});')
+    x.A(f'tl.to("#{p}-t{pick}", {{ scale: 1.12, zIndex: 3, duration: 0.3, ease: "back.out(2)" }}, {x.r(t_pick)});')
+    x.A(f'tl.fromTo("#{p}-ring path", {{ strokeDashoffset: 900 }}, {{ strokeDashoffset: 0, duration: 0.45, ease: "power2.out" }}, {x.r(t_pick)});')
+    x.A(f'tl.fromTo("#{p}-note", {{ opacity: 0, x: -30 }}, {{ opacity: 1, x: 0, duration: 0.3 }}, {x.r(t_pick + 0.3)});')
+    x.A(f'tl.fromTo("#{p}-save", {{ opacity: 0, y: 40, scale: 0.8 }}, {{ opacity: 1, y: 0, scale: 1, duration: 0.35, ease: "back.out(2)" }}, {x.r(t_save)});')
+    x.A(f'tl.fromTo("#{p}-bm", {{ scale: 0.4 }}, {{ scale: 1, duration: 0.35, ease: "back.out(3)" }}, {x.r(t_save + 0.1)});')
+    x.sfx(t_pick, "swish/flick", -15); x.sfx(t_save + 0.1, "pro_pop/thup", -8)
+    col = (pick % 3) * 106 + 26; row = (pick // 3) * 154 + 120
+    return f'''<div id="{p}-ph" class="vphone"><div class="vphd">{ico("simple-icons:instagram", 30, x.th["ink"])}<span>{esc(c.get("title", "your niche"))}</span></div>
+      <div class="vgrid">{tiles}</div>
+      <svg id="{p}-ring" class="vring" style="left:{col - 22}px;top:{row - 22}px" viewBox="0 0 150 200" width="150" height="200"><path d="M75,8 C130,6 146,60 140,110 C134,170 100,194 66,190 C20,186 6,140 10,92 C14,40 40,10 90,14" fill="none" stroke="{x.th["accent"]}" stroke-width="6" stroke-linecap="round" stroke-dasharray="900"/></svg></div>
+    <div id="{p}-note" class="vnote">{esc(c.get("note", "love this"))}</div>
+    <div id="{p}-save" class="vsave"><span id="{p}-bm">{ico("lucide:bookmark", 44, x.th["accent"])}</span>{esc(c.get("saved", "Saved"))}</div>'''
+
+def gallery(p, c, x):
+    """A tool panel: a prompt types in, then a grid of results pops in (e.g. a character in every pose). images: up to 8."""
+    ims = c["images"][:8]; t_type = x.at(c.get("type_at", "line:0+0.2")); txt = c.get("prompt", "")
+    td = min(1.4, 0.045 * len(txt))
+    ts = _spread(x, len(ims), c.get("at", "line:1"), c.get("until"))
+    tiles = "".join(f'<div id="{p}-g{i}" class="vpose"><img src="{esc(x.asset(im))}"/></div>' for i, im in enumerate(ims))
+    x.A(f'tl.fromTo("#{p} .vpanel", {{ opacity: 0, y: 80 }}, {{ opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }}, {x.r(x.start)});')
+    x.A(f'tl.fromTo("#{p}-tx", {{ width: 0 }}, {{ width: "{len(txt) + 1}ch", duration: {x.r(td)}, ease: "steps({max(1, len(txt))})" }}, {x.r(t_type)});')
+    x.typing(t_type, td)
+    for i, t in enumerate(ts):
+        x.A(f'tl.fromTo("#{p}-g{i}", {{ opacity: 0, scale: 0.3, rotation: {(-8, 6)[i % 2]} }}, {{ opacity: 1, scale: 1, rotation: 0, duration: 0.3, ease: "back.out(2.2)" }}, {x.r(t)});')
+        x.sfx(t, ["pro_pop/thup", "pro_pop/boop"][i % 2], -14)
+    return f'''<div class="vpanel">{_tool(x, c)}<div class="vprompt mono"><span class="redt">&gt;</span> <span id="{p}-tx" class="vtx">{esc(txt)}</span></div>
+      <div class="vposes">{tiles}</div></div>'''
+
+def voice(p, c, x):
+    """A voice track: the waveform draws in left to right, emotion tags pop onto it. tags: ["excited", ...]."""
+    import random; rnd = random.Random(7); n = 64
+    bars = "".join(f'<i style="height:{int(18 + 82 * abs(rnd.gauss(0.45, 0.25)) % 100)}%"></i>' for _ in range(n))
+    t0 = x.at(c.get("at", "line:1")); t1 = x.lines[-1]["end"] - 0.1
+    tags = c.get("tags", ["excited", "curious", "calm"])
+    tt = _spread(x, len(tags), c.get("tags_at", "line:1+0.3"), None)
+    tg = "".join(f'<span id="{p}-tg{i}" class="vtag" style="left:{6 + i * 58 / max(1, len(tags) - 1) if len(tags) > 1 else 40:.0f}%;top:{(10, 62, 24, 70)[i % 4]}%">[{esc(t)}]</span>' for i, t in enumerate(tags))
+    x.A(f'tl.fromTo("#{p} .vpanel", {{ opacity: 0, y: 80 }}, {{ opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }}, {x.r(x.start)});')
+    x.A(f'tl.fromTo("#{p}-doc", {{ opacity: 0, x: -40 }}, {{ opacity: 1, x: 0, duration: 0.35 }}, {x.r(x.start + 0.15)});')
+    x.A(f'tl.fromTo("#{p} .vwave i", {{ scaleY: 0 }}, {{ scaleY: 1, duration: 0.25, ease: "back.out(2)", stagger: {x.r(min(0.03, (t1 - t0) / n))} }}, {x.r(t0)});')
+    x.A(f'tl.fromTo("#{p}-ph", {{ x: 0 }}, {{ x: 790, duration: {x.r(max(0.5, t1 - t0))}, ease: "none" }}, {x.r(t0)});')
+    for i, t in enumerate(tt):
+        x.A(f'tl.fromTo("#{p}-tg{i}", {{ opacity: 0, scale: 1.8 }}, {{ opacity: 1, scale: 1, duration: 0.25, ease: "back.out(2)" }}, {x.r(t)});')
+        x.sfx(t, "pro_pop/tink", -12)
+    return f'''<div class="vpanel">{_tool(x, c)}<div id="{p}-doc" class="vdoc mono">{ico("lucide:file-text", 30, x.th["mid"])}<span>{esc(c.get("file", "script.txt"))}</span><b>{esc(c.get("line", ""))}</b></div>
+      <div class="vwavebox"><div class="vwave">{bars}</div><div id="{p}-ph" class="vph"></div>{tg}</div></div>'''
+
+def timeline(p, c, x):
+    """A chat ask, then the plan: scene blocks land on a time ruler and a playhead sweeps it. blocks: ["hook", ...]."""
+    blocks = c.get("blocks", ["hook", "step 1", "step 2", "step 3", "step 4", "step 5"]); n = len(blocks)
+    secs = c.get("seconds", 30); t_ask = x.at(c.get("ask_at", "start+0.1"))
+    ts = _spread(x, n, c.get("at", "line:0:end-0.6"), c.get("until"))
+    ws = c.get("widths") or [1] * n; tot = sum(ws); acc = 0; bl = ""
+    for i, (b, w) in enumerate(zip(blocks, ws)):
+        bl += f'<div id="{p}-b{i}" class="vblk{" on" if i % 2 == 0 else ""}" style="left:{acc / tot * 100:.2f}%;width:calc({w / tot * 100:.2f}% - 6px)">{esc(b)}</div>'; acc += w
+    ticks = "".join(f'<span style="left:{k / secs * 100:.2f}%">{k}s</span>' for k in range(0, secs + 1, max(1, secs // 6)))
+    x.A(f'tl.fromTo("#{p} .vpanel", {{ opacity: 0, y: 80 }}, {{ opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }}, {x.r(x.start)});')
+    x.A(f'tl.fromTo("#{p}-ask", {{ opacity: 0, x: 60 }}, {{ opacity: 1, x: 0, duration: 0.3, ease: "power3.out" }}, {x.r(t_ask)});')
+    x.sfx(t_ask, "pro_notify/ding_2045", -16)
+    for i, t in enumerate(ts):
+        x.A(f'tl.fromTo("#{p}-b{i}", {{ opacity: 0, y: -30 }}, {{ opacity: 1, y: 0, duration: 0.22, ease: "back.out(2)" }}, {x.r(t)});')
+        x.sfx(t, "pro_hover_tick/detent" if i % 2 else "pro_hover_tick/glass", -13)
+    x.A(f'tl.fromTo("#{p}-ph", {{ x: 0 }}, {{ x: 790, duration: {x.r(max(0.6, x.end - ts[-1] - 0.1))}, ease: "none" }}, {x.r(ts[-1] + 0.1)});')
+    return f'''<div class="vpanel">{_tool(x, c)}<div id="{p}-ask" class="vask">{esc(c.get("ask", "here's my script. plan every second."))}</div>
+      <div class="vtrack"><div class="vticks mono">{ticks}</div><div class="vblks">{bl}<div id="{p}-ph" class="vph"></div></div></div></div>'''
+
+def upload(p, c, x):
+    """A tool panel with upload slots that fill one per line, then a big button is pressed. items: [{label, src|icon}]."""
+    its = c.get("items", []); ts = [x.at(i["at"]) if "at" in i else t for i, t in zip(its, _spread(x, len(its), "line:0+0.3", "line:1:end"))]
+    t_btn = x.at(c.get("press_at", "line:2"))
+    slots = ""
+    for i, (it, t) in enumerate(zip(its, ts)):
+        thumb = f'<img src="{esc(x.asset(it["src"]))}"/>' if it.get("src") else ico(it.get("icon", "lucide:file"), 52, x.th["ink"])
+        slots += f'<div id="{p}-s{i}" class="vslot"><div class="vth">{thumb}</div><span>{esc(it["label"])}</span></div>'
+        x.A(f'tl.fromTo("#{p}-s{i}", {{ opacity: 0, y: -60, scale: 0.8 }}, {{ opacity: 1, y: 0, scale: 1, duration: 0.35, ease: "back.out(1.8)" }}, {x.r(t)});')
+        x.sfx(t + 0.25, "pro_pop_in/round", -12)
+    x.A(f'tl.fromTo("#{p} .vpanel", {{ opacity: 0, y: 80 }}, {{ opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }}, {x.r(x.start)});')
+    x.A(f'tl.fromTo("#{p}-cur", {{ opacity: 0, x: 140, y: 120 }}, {{ opacity: 1, x: 0, y: 0, duration: 0.35, ease: "power3.out" }}, {x.r(t_btn - 0.45)});')
+    x.A(f'tl.to("#{p}-btn", {{ scale: 0.9, duration: 0.08, yoyo: true, repeat: 1 }}, {x.r(t_btn)});')
+    x.A(f'tl.fromTo("#{p}-btn", {{ boxShadow: "0 0 0 0px {x.th["accent"]}aa" }}, {{ boxShadow: "0 0 0 36px {x.th["accent"]}00", duration: 0.6, ease: "power2.out", immediateRender: false }}, {x.r(t_btn)});')
+    x.A(f'tl.to("#{p}-cur", {{ opacity: 0, duration: 0.25 }}, {x.r(t_btn + 0.4)});')
+    x.sfx(t_btn, "pro_click/soft", -6); x.sfx(t_btn + 0.08, "pro_logo_sting/zap_bloom", -12)
+    return f'''<div class="vpanel">{_tool(x, c)}<div class="vslots">{slots}</div>
+      <div class="vbtnrow"><div id="{p}-btn" class="vbtn">{ico("lucide:sparkles", 40, "#fff")}<span>{esc(c.get("button", "Animate"))}</span></div>
+      <div id="{p}-cur" class="vcur"><svg viewBox="0 0 80 100" width="90" height="112"><path d="M30,8 c0,-8 14,-8 14,0 v40 l4,-2 c6,-3 12,0 12,6 l2,0 c6,-2 11,2 11,8 c6,-1 9,3 9,9 v14 c0,14 -10,22 -24,22 h-12 c-10,0 -16,-6 -22,-14 l-14,-22 c-4,-6 4,-12 10,-6 l10,10 z" fill="#fff" stroke="#141414" stroke-width="5" stroke-linejoin="round"/></svg></div></div></div>'''
+
+CARDS.update(reels=reels, phone=phone, gallery=gallery, voice=voice, timeline=timeline, upload=upload)
