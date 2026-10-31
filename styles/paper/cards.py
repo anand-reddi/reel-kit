@@ -471,9 +471,9 @@ def _spread(x, n, a="line:0", b=None):
 
 def reels(p, c, x):
     """A row of reel thumbnails pinned on a string (the hook: "everyone's making these"). images: 3-4 files (9:16)."""
-    ims = c["images"][:4]; n = len(ims); w = 215 if n == 4 else 260; gap = (900 - n * w) / (n + 1)
+    ims = c["images"][:4]; n = len(ims); span = c.get("width", 900); w = c.get("thumb", 215 if n == 4 else 260); gap = (span - n * w) / (n + 1)
     ts = _spread(x, n, c.get("at", "start+0.1"), c.get("until", "line:0:end"))
-    out = '<div class="vstring"></div>'
+    out = f'<div class="vstring" style="right:auto;width:{span}px"></div>'
     for i, (im, t) in enumerate(zip(ims, ts)):
         rot = [-5, 3, -2, 5][i % 4]; left = 90 + gap + i * (w + gap)
         out += (f'<div id="{p}-r{i}" class="vreel" style="left:{left:.0f}px;width:{w}px;height:{w * 16 / 9:.0f}px;transform:rotate({rot}deg)">'
@@ -561,7 +561,15 @@ def upload(p, c, x):
     t_btn = x.at(c.get("press_at", "line:2"))
     slots = ""
     for i, (it, t) in enumerate(zip(its, ts)):
-        thumb = f'<img src="{esc(x.asset(it["src"]))}"/>' if it.get("src") else ico(it.get("icon", "lucide:file"), 52, x.th["ink"])
+        kind = it.get("kind")
+        if kind == "palette":   # a style board: colour swatches + type sample
+            sw = "".join(f'<i style="background:{col}"></i>' for col in it.get("colors", [x.th["accent"], x.th["ink"], "#2f7bf6", x.th["grey"]]))
+            thumb = f'<div class="vpal"><div class="vsw">{sw}</div><div class="vaa">Aa<em>Aa</em></div></div>'
+        elif kind == "plan":    # a mini plan: numbered beats with time bars
+            rows_ = "".join(f'<div><b>{esc(str(k + 1))}</b><i style="width:{w}%"></i></div>' for k, w in enumerate(it.get("bars", [55, 80, 40, 70, 60])))
+            thumb = f'<div class="vplan">{rows_}</div>'
+        else:
+            thumb = f'<img src="{esc(x.asset(it["src"]))}"/>' if it.get("src") else ico(it.get("icon", "lucide:file"), 52, x.th["ink"])
         slots += f'<div id="{p}-s{i}" class="vslot"><div class="vth">{thumb}</div><span>{esc(it["label"])}</span></div>'
         x.A(f'tl.fromTo("#{p}-s{i}", {{ opacity: 0, y: -60, scale: 0.8 }}, {{ opacity: 1, y: 0, scale: 1, duration: 0.35, ease: "back.out(1.8)" }}, {x.r(t)});')
         x.sfx(t + 0.25, "pro_pop_in/round", -12)
@@ -575,4 +583,61 @@ def upload(p, c, x):
       <div class="vbtnrow"><div id="{p}-btn" class="vbtn">{ico("lucide:sparkles", 40, "#fff")}<span>{esc(c.get("button", "Animate"))}</span></div>
       <div id="{p}-cur" class="vcur"><svg viewBox="0 0 80 100" width="90" height="112"><path d="M30,8 c0,-8 14,-8 14,0 v40 l4,-2 c6,-3 12,0 12,6 l2,0 c6,-2 11,2 11,8 c6,-1 9,3 9,9 v14 c0,14 -10,22 -24,22 h-12 c-10,0 -16,-6 -22,-14 l-14,-22 c-4,-6 4,-12 10,-6 l10,10 z" fill="#fff" stroke="#141414" stroke-width="5" stroke-linejoin="round"/></svg></div></div></div>'''
 
-CARDS.update(reels=reels, phone=phone, gallery=gallery, voice=voice, timeline=timeline, upload=upload)
+
+def share(p, c, x):
+    """Share to a friend: a reel preview, a share sheet of contacts; one is picked, Send is pressed, the reel flies over
+    and lands as a DM. contacts: ["A·bro", ...] (initial·name), pick, pick_at, send_at, message."""
+    cs = c.get("contacts", ["A·bro", "R·roommate", "K·best friend", "S·team"]); pick = c.get("pick", 2)
+    t_pick, t_send = x.at(c.get("pick_at", "line:0+0.4")), x.at(c.get("send_at", "line:1"))
+    cols = ["#e5372d", "#2f7bf6", "#f5a524", "#22a06b", "#a855f7"]
+    av = ""
+    for i, cc in enumerate(cs):
+        ini, _, nm = cc.partition("·")
+        av += (f'<div class="vct"><div id="{p}-a{i}" class="vav" style="background:{cols[i % len(cols)]}">{esc(ini)}'
+               f'<span id="{p}-k{i}" class="vck">{ico("lucide:check", 26, "#fff")}</span></div><span>{esc(nm or ini)}</span></div>')
+    th = f'<img src="{esc(x.asset(c["image"]))}"/>' if c.get("image") else ""
+    x.A(f'tl.fromTo("#{p}-rv", {{ opacity: 0, x: -80, rotation: -8 }}, {{ opacity: 1, x: 0, rotation: -4, duration: 0.45, ease: "back.out(1.6)" }}, {x.r(x.start)});')
+    x.A(f'tl.fromTo("#{p}-sh", {{ opacity: 0, y: 160 }}, {{ opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }}, {x.r(x.start + 0.15)});')
+    x.A(f'tl.fromTo("#{p} .vct", {{ opacity: 0, scale: 0.4 }}, {{ opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)", stagger: 0.07 }}, {x.r(x.start + 0.4)});')
+    x.A(f'tl.to("#{p}-a{pick}", {{ scale: 1.15, boxShadow: "0 0 0 8px {x.th["accent"]}", duration: 0.25, ease: "back.out(2)" }}, {x.r(t_pick)});')
+    x.A(f'tl.fromTo("#{p}-k{pick}", {{ scale: 0 }}, {{ scale: 1, duration: 0.25, ease: "back.out(3)" }}, {x.r(t_pick + 0.1)});')
+    x.A(f'tl.to("#{p}-send", {{ backgroundColor: "{x.th["accent"]}", color: "#fff", duration: 0.2 }}, {x.r(t_pick + 0.15)});')
+    x.A(f'tl.to("#{p}-send", {{ scale: 0.9, duration: 0.08, yoyo: true, repeat: 1 }}, {x.r(t_send)});')
+    x.A(f'tl.to("#{p}-rv", {{ x: 520, y: -40, scale: 0.25, rotation: 20, opacity: 0, duration: 0.5, ease: "power2.in" }}, {x.r(t_send + 0.05)});')
+    x.A(f'tl.fromTo("#{p}-dm", {{ opacity: 0, y: 40, scale: 0.8 }}, {{ opacity: 1, y: 0, scale: 1, duration: 0.35, ease: "back.out(2)" }}, {x.r(t_send + 0.5)});')
+    x.sfx(t_pick + 0.1, "pro_pop/tink", -11); x.sfx(t_send, "pro_click/soft", -7); x.sfx(t_send + 0.05, "swish/soft", -12); x.sfx(t_send + 0.55, "pro_notify/ding_2045", -12)
+    return f'''<div id="{p}-rv" class="vrv">{th}<span class="vplay">{ico("lucide:play", 30, "#fff")}</span></div>
+    <div id="{p}-sh" class="vpanel vsheet"><div class="vhd">{ico("lucide:send", 36, x.th["ink"])}<span>{esc(c.get("title", "Share to"))}</span></div>
+      <div class="vcts">{av}</div><div id="{p}-send" class="vsend">{esc(c.get("button", "Send"))}</div></div>
+    <div id="{p}-dm" class="vdm"><div class="vdmr">{th}</div><span>{esc(c.get("message", "you need this"))}</span></div>'''
+
+def follow(p, c, x):
+    """The follow ending without a profile: big avatar with a story ring, the handle, a Follow button that a cursor taps;
+    it turns into Following, the ring bursts, particles fly, a bell pops. Uses brand.avatar / brand.handle."""
+    b = x.brand; tap = x.at(c.get("tap_at", "line:0+0.5"))
+    av = f'<img src="{esc(x.avatar)}"/>' if x.avatar else ""
+    import random; rnd = random.Random(3)
+    parts = "".join(f'<i class="vpt" style="background:{rnd.choice([x.th["accent"], "#ffffff", "#2f7bf6", "#f5a524"])}" data-dx="{rnd.uniform(-420, 420):.0f}" data-dy="{rnd.uniform(-380, 160):.0f}"></i>' for _ in range(28))
+    x.A(f'tl.fromTo("#{p}-av", {{ opacity: 0, scale: 0.3 }}, {{ opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.8)" }}, {x.r(x.start)});')
+    x.A(f'tl.fromTo("#{p}-ring", {{ rotation: 0 }}, {{ rotation: 360, duration: {x.r(max(1, x.end - x.start))}, ease: "none" }}, {x.r(x.start)});')
+    x.A(f'tl.fromTo("#{p}-hn", {{ opacity: 0, y: 30 }}, {{ opacity: 1, y: 0, duration: 0.35, ease: "power3.out" }}, {x.r(x.start + 0.2)});')
+    x.A(f'tl.fromTo("#{p}-btn", {{ opacity: 0, y: 40, scale: 0.8 }}, {{ opacity: 1, y: 0, scale: 1, duration: 0.35, ease: "back.out(2)" }}, {x.r(x.start + 0.3)});')
+    x.A(f'tl.fromTo("#{p}-cur", {{ opacity: 0, x: 220, y: 200 }}, {{ opacity: 1, x: 0, y: 0, duration: 0.4, ease: "power3.out" }}, {x.r(max(x.start + 0.35, tap - 0.5))});')
+    x.A(f'tl.to("#{p}-cur", {{ scale: 0.86, duration: 0.07, yoyo: true, repeat: 1 }}, {x.r(tap)});')
+    x.A(f'tl.to("#{p}-btn", {{ scale: 0.9, duration: 0.07, yoyo: true, repeat: 1 }}, {x.r(tap)});')
+    x.A(f'tl.set("#{p}-fa", {{ display: "none" }}, {x.r(tap + 0.07)}); tl.set("#{p}-fb", {{ display: "inline-flex" }}, {x.r(tap + 0.07)});')
+    x.A(f'tl.set("#{p}-btn", {{ backgroundColor: "{x.th["surface"]}", borderColor: "{x.th["edge"]}" }}, {x.r(tap + 0.07)});')
+    x.A(f'tl.fromTo("#{p}-burst", {{ opacity: 1, scale: 0.6 }}, {{ opacity: 0, scale: 1.9, duration: 0.6, ease: "power2.out", immediateRender: false }}, {x.r(tap + 0.05)});')
+    x.A(f'tl.fromTo("#{p} .vpt", {{ opacity: 1, x: 0, y: 0, scale: 1 }}, {{ opacity: 0, x: (i, t) => +t.dataset.dx, y: (i, t) => +t.dataset.dy, scale: 0.3, duration: 0.9, ease: "power3.out", stagger: 0.005, immediateRender: false }}, {x.r(tap + 0.05)});')
+    x.A(f'tl.fromTo("#{p}-bell", {{ opacity: 0, scale: 0, rotation: -30 }}, {{ opacity: 1, scale: 1, rotation: 0, duration: 0.35, ease: "back.out(3)" }}, {x.r(tap + 0.35)});')
+    x.A(f'tl.to("#{p}-bell", {{ rotation: 14, duration: 0.08, yoyo: true, repeat: 5, ease: "sine.inOut" }}, {x.r(tap + 0.7)});')
+    x.A(f'tl.to("#{p}-cur", {{ opacity: 0, x: 160, y: 160, duration: 0.3, ease: "power2.in" }}, {x.r(tap + 0.45)});')
+    x.sfx(tap, "pro_click/soft", -6); x.sfx(tap + 0.05, "pro_logo_sting/zap_bloom", -11); x.sfx(tap + 0.4, "pro_notify/ding_2045", -13)
+    return f'''<div class="vfol"><div class="vfav"><div id="{p}-ring" class="vfring"></div><div id="{p}-burst" class="vfburst"></div>
+      <div id="{p}-av" class="vfimg">{av}</div><div class="vpts">{parts}</div>
+      <div id="{p}-bell" class="vbell">{ico("lucide:bell-ring", 46, "#fff")}</div></div>
+      <div id="{p}-hn" class="vfhn">{esc(b.get("handle", "@you"))}</div>
+      <div id="{p}-btn" class="vfbtn"><span id="{p}-fa">{esc(c.get("button", "Follow"))}</span><span id="{p}-fb" class="vfdone">{ico("lucide:check", 40, x.th["ink"])}{esc(c.get("done", "Following"))}</span></div>
+      <div id="{p}-cur" class="vcur vfcur"><svg viewBox="0 0 80 100" width="110" height="138"><path d="M30,8 c0,-8 14,-8 14,0 v40 l4,-2 c6,-3 12,0 12,6 l2,0 c6,-2 11,2 11,8 c6,-1 9,3 9,9 v14 c0,14 -10,22 -24,22 h-12 c-10,0 -16,-6 -22,-14 l-14,-22 c-4,-6 4,-12 10,-6 l10,10 z" fill="#fff" stroke="#141414" stroke-width="5" stroke-linejoin="round"/></svg></div></div>'''
+
+CARDS.update(reels=reels, phone=phone, gallery=gallery, voice=voice, timeline=timeline, upload=upload, share=share, follow=follow)

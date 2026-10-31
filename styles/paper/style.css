@@ -253,3 +253,32 @@ html, body { margin: 0; background: {paper}; }
 .igstats b { font-size: 46px; font-weight: 700; color: #f4f1ea; } .igstats span { font-size: 28px; color: #bdb8ae; }
 .igname { margin-top: 22px; font-size: 38px; font-weight: 700; color: #f4f1ea; } .igcat { font-size: 28px; color: #8f8a81; margin-top: 4px; }
 .igbio { font-size: 30px; line-height: 1.32; color: #e4e0d8; margin-top: 6px; }
+
+.vpal { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 16px; padding: 18px; box-sizing: border-box; }
+.vsw { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; } .vsw i { height: 52px; border-radius: 12px; border: 2px solid {edge}; }
+.vaa { font-size: 52px; font-weight: 700; color: {ink}; line-height: 1; } .vaa em { font-family: "Instrument Serif", serif; color: {accent}; margin-left: 10px; font-weight: 400; }
+.vplan { width: 100%; padding: 18px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px; }
+.vplan div { display: flex; align-items: center; gap: 12px; } .vplan b { font-family: "IBM Plex Mono", monospace; font-size: 22px; color: {mid}; width: 18px; }
+.vplan i { height: 18px; border-radius: 9px; background: {accent}; } .vplan div:nth-child(even) i { background: {grey}; }
+.vrv { position: absolute; left: 110px; top: 20px; width: 230px; height: 409px; border-radius: 22px; overflow: hidden; border: 4px solid {edge}; box-shadow: 14px 16px 0 {shadow}; z-index: 4; }
+.vrv img { width: 100%; height: 100%; object-fit: cover; }
+.vsheet { left: 380px; width: 600px; top: 40px; }
+.vcts { display: flex; justify-content: space-between; padding: 10px 6px 0; }
+.vct { display: flex; flex-direction: column; align-items: center; gap: 10px; font-size: 24px; color: {mid}; }
+.vav { position: relative; width: 104px; height: 104px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 46px; font-weight: 700; color: #fff; }
+.vck { position: absolute; right: -6px; bottom: -6px; width: 40px; height: 40px; border-radius: 50%; background: {accent}; border: 3px solid {surface}; display: flex; align-items: center; justify-content: center; transform: scale(0); }
+.vsend { margin-top: 28px; text-align: center; font-size: 38px; font-weight: 700; padding: 18px; border-radius: 18px; background: {grey}; color: {mid}; }
+.vdm { position: absolute; left: 90px; top: 120px; width: 280px; display: flex; flex-direction: column; align-items: center; gap: 16px; opacity: 0; }
+.vdm span { background: {accent}; color: #fff; font-size: 32px; font-weight: 700; padding: 14px 24px; border-radius: 24px 24px 6px 24px; }
+.vdmr { width: 120px; height: 213px; border-radius: 12px; overflow: hidden; border: 3px solid {edge}; } .vdmr img { width: 100%; height: 100%; object-fit: cover; }
+.vfol { position: absolute; left: 0; right: 0; top: 0; display: flex; flex-direction: column; align-items: center; }
+.vfav { position: relative; width: 300px; height: 300px; }
+.vfring { position: absolute; inset: 0; border-radius: 50%; background: conic-gradient({accent}, #f5a524, #a855f7, {accent}); }
+.vfburst { position: absolute; inset: -30px; border-radius: 50%; border: 10px solid {accent}; opacity: 0; }
+.vfimg { position: absolute; inset: 12px; border-radius: 50%; overflow: hidden; border: 8px solid {paper}; background: #000; } .vfimg img { width: 100%; height: 100%; object-fit: cover; }
+.vpts { position: absolute; left: 50%; top: 50%; } .vpt { position: absolute; width: 16px; height: 16px; border-radius: 4px; opacity: 0; }
+.vbell { position: absolute; right: -14px; bottom: 6px; width: 86px; height: 86px; border-radius: 50%; background: {accent}; display: flex; align-items: center; justify-content: center; border: 6px solid {paper}; opacity: 0; }
+.vfhn { margin-top: 26px; font-size: 56px; font-weight: 700; letter-spacing: -1px; }
+.vfbtn { position: relative; margin-top: 26px; width: 520px; height: 110px; border-radius: 26px; background: #2f7bf6; color: #fff; border: 4px solid transparent; font-size: 50px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.vfdone { display: none; align-items: center; gap: 14px; color: {ink}; }
+.vfcur { left: 600px; top: 420px; }

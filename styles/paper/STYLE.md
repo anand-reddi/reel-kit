@@ -46,12 +46,14 @@ Write "AI", "SBI", "API" plainly (no spaces); add `voice.say` only for words Kok
 | `graph` | growth / "you are here" | `marker` (0–1), `marker_at`, `marker_label`, `x_label`, `y_label` |
 | `image` | a real screenshot, with a highlight box | `src` (next to the script), `caption`, `height`, `fit` cover/contain, `highlight: {x,y,w,h,at}` (%) |
 | `profile` | the follow CTA (uses `brand`; with `brand.followers` it is an Instagram header: `posts`, `followers`, `following`, `name`, `category`, `bio`, `avatar`) | `tap_at`, `button`, `done`, `top` |
-| `reels` | a row of reel thumbnails on a string (hooks) | `images` (3–4, 9:16), `at`, `until` |
+| `reels` | a row of reel thumbnails on a string (hooks) | `images` (3–4, 9:16), `at`, `until`, `width` (row px), `thumb` (px) |
 | `phone` | an Instagram-style grid on a phone; one reel circled, then saved | `images` (6), `pick`, `pick_at`, `save_at`, `note`, `saved`, `title` |
 | `gallery` | a tool panel: prompt types in, results pop in (poses, generations) | `tool`, `icon`, `prompt`, `type_at`, `images` (≤8), `at`, `until` |
 | `voice` | a voice track: waveform draws in, emotion tags pop on | `tool`, `icon`, `file`, `line`, `tags`, `at`, `tags_at` |
 | `timeline` | a chat ask, then scene blocks land on a time ruler, playhead sweeps | `tool`, `icon`, `ask`, `blocks`, `widths`, `seconds`, `at` |
-| `upload` | upload slots fill, then a big button is pressed | `tool`, `icon`, `items: [{label, src|icon, at}]`, `button`, `press_at` |
+| `upload` | upload slots fill, then a big button is pressed | `tool`, `icon`, `items: [{label, src|icon|kind: palette (colors)|plan (bars), at}]`, `button`, `press_at` |
+| `share` | send to a friend: reel preview, share sheet, contact picked, Send, DM lands | `image`, `contacts` ("A·bro"), `pick`, `pick_at`, `send_at`, `message` |
+| `follow` | follow ending without a profile: avatar with ring, handle, Follow → Following, burst, bell | `tap_at`, `button`, `done` (uses `brand.avatar`, `brand.handle`) |
 | `figure` | a live isometric line drawing (hairline, 33 objects) that reacts on cue | `name`, `path: [{at, x, y}]` (pointer 0–1 in the figure box; no path = it plays its own tour), `intensity` (0–1), `caption`, `readout` (red live readout, default on), `leave`, `mount_at`, `width`, `colors` |
 
 Any card also takes `"sfx": [{"at", "id", "gain"}]` for extra sound hits, and `"stamp": "TEXT"` or `{"text","at","x","y","rot"}` — a red rubber stamp with a shake and impact sound,
