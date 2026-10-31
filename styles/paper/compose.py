@@ -264,8 +264,11 @@ class Film:
                     s.card_in(p, cut_of(i), st + (0.05 if i == 0 else 0))
                     if i < n - 1: s.card_out(p, cut_of(i + 1), en)
                 else:
-                    top = card.get("top", (510 if card["type"] == "figure" else 600) if s.char else 720)
-                    cards += f'<div id="{p}" class="card-wrap" style="top:{top}px">{inner}@@EXTRA_{p}@@</div>'
+                    big = lay_i == "none" and not s.wide   # 9:16, presenter off screen: the card grows into the free space
+                    top = card.get("top", 700 if big else ((510 if card["type"] == "figure" else 600) if s.char else 720))
+                    k = card.get("scale", 1.22 if big else 1.0)
+                    inner_ = f'<div style="position:absolute;inset:0;transform:scale({k});transform-origin:50% 0">{inner}@@EXTRA_{p}@@</div>' if k != 1 else f'{inner}@@EXTRA_{p}@@'
+                    cards += f'<div id="{p}" class="card-wrap" style="top:{top}px">{inner_}</div>'
                     rot = [-4, 4, -3, 3][i % 4]
                     A(f'tl.fromTo("#{p}", {{ opacity: 0, y: 80, rotation: {rot}, scale: 0.88 }}, {{ opacity: 1, y: 0, rotation: 0, scale: 1, duration: 0.45, ease: "back.out(1.6)" }}, {r3(st + (0.05 if i == 0 else 0))});')
                     if i < n - 1: A(f'tl.to("#{p}", {{ opacity: 0, y: -70, scale: 0.92, duration: 0.18, ease: "power2.in" }}, {r3(en - 0.18)});')
@@ -545,7 +548,9 @@ class Film:
                     f'<div id="presin" style="position:absolute;inset:0;transform-origin:50% 100%">{imgs}</div></div>')
         s.rigs(c, dur)
         A(f'tl.fromTo("#pres", {{ y: 260 }}, {{ y: 0, duration: 0.5, ease: "back.out(1.4)" }}, 0);')
-        if c["type"] in ("svg", "video") and any(sc.get("layout") for sc in scenes):
+        if s.wide and any(sc.get("layout") for sc in scenes):   # 16:9 layouts are applied in write() (#wcam / #col)
+            s.wide_lay = [(0 if i == 0 else start[i], sc.get("layout", "box")) for i, sc in enumerate(scenes)]
+        elif c["type"] in ("svg", "video") and any(sc.get("layout") for sc in scenes):
             body = s.camera(body, c, scenes, start)
         return body
 
@@ -776,10 +781,24 @@ class Film:
                    f'transform:scale({k});transform-origin:0 0">{hdr}{caps}{cards}</div>{pres}')
             # dark theme: an accent glow behind the presenter's head ("camera": {"glow": false | "#hex"} to change)
             gcol = s.sc.get("camera", {}).get("glow", th["accent"] if s.sc.get("theme") == "dark" else False)
-            if gcol and s.char:
+            glow = ""
+            if s.char:
                 c = s.char; cx = c["x"] + c["width"] / 2; cy = c["y"] + c.get("height", c["width"] * 0.6) * 0.42; R = 520
-                col = (f'<div id="presglow" style="position:absolute;left:{cx - R:.0f}px;top:{cy - R:.0f}px;width:{2 * R}px;height:{2 * R}px;border-radius:50%;'
-                       f'background:radial-gradient(circle, {gcol}80 0%, {gcol}40 30%, {gcol}14 55%, transparent 70%)"></div>') + col
+                if gcol:
+                    glow = (f'<div id="presglow" style="position:absolute;left:{cx - R:.0f}px;top:{cy - R:.0f}px;width:{2 * R}px;height:{2 * R}px;border-radius:50%;'
+                            f'background:radial-gradient(circle, {gcol}80 0%, {gcol}40 30%, {gcol}14 55%, transparent 70%)"></div>')
+                # layouts in 16:9: box = presenter on the right (default) | none = presenter off, the column moves to the
+                # centre | full = presenter close-up (scaled round the head, moved toward the centre), no card
+                cam = s.sc.get("camera", {}); kf = cam.get("full_scale", 1.55); fx = cam.get("full_x", -330)
+                colc = (s.W - 1080 * k) / 2 - cc.get("x", 50)
+                for t, L in getattr(s, "wide_lay", []):
+                    pw = {"none": "autoAlpha: 0, scale: 1, x: 0", "full": f"autoAlpha: 1, scale: {kf}, x: {fx}"}.get(L, "autoAlpha: 1, scale: 1, x: 0")
+                    s.js.append(f'tl.set("#wcam", {{ {pw} }}, {r3(t)});')
+                    s.js.append(f'tl.set("#col", {{ x: {r3(colc) if L == "none" else 0} }}, {r3(t)});')
+                    if t > 0 and L != "none": s.js.append(f'tl.fromTo("#wcam", {{ y: 30 }}, {{ y: 0, duration: 0.3, ease: "power2.out", immediateRender: false }}, {r3(t)});')
+                col = col.replace(pres, "")
+                col = (f'<div id="wcam" style="position:absolute;inset:0;transform-origin:{cx:.0f}px {cy:.0f}px">{glow}{pres}</div>') + col
+        js = "\n".join(s.js)   # again: the 16:9 layouts above add timeline sets
         html = f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"/><title>{esc(s.sc.get("title", "reel"))}</title><style>{css}</style>{head_extra}<script src="gsap.min.js"></script>{mod}</head>
 <body>

@@ -184,9 +184,14 @@ in the browser with the real fonts (`capfit`); kinetic words do the same (`kfit`
 `"caption_width"` (default 1040, estimated px) sets when a line splits.
 
 
+## Presenter only where the gesture fits
+Use layouts per scene: `none` when no gesture matches the line (the card grows to fill the space in 9:16), `box` when
+one does, `full` (big close-up, no card) for a reaction line like a hook or punchline.
+
 ## 16:9 (`"aspect": "16:9"`)
 1920×1080. The 9:16 column (header, captions, cards) keeps its 1080-wide coordinates on the left
 (`"column": {"x": 50, "y": -60, "scale": 0.94}`); dark theme adds an accent glow behind the presenter, the presenter stands on the right, bottom on the frame edge
-(`"presenter": {"x", "y", "width"}` overrides). Use the default caption style and normal cards; camera layouts
-(`box`/`full`), `kinetic` and full-frame inserts are still 9:16-only. Keep a scene to 3 caption lines so the card is not
+(`"presenter": {"x", "y", "width"}` overrides). Layouts work here too: `box` (presenter right), `none` (presenter
+off, the column moves to the centre), `full` (close-up scaled round the head: `camera.full_scale`, `camera.full_x`; give
+that scene no card). `kinetic` and full-frame inserts are still 9:16-only. Keep a scene to 3 caption lines so the card is not
 pushed to the bottom edge. Example: a 25 s five-step how-to (checklist per step, profile card at the end).
