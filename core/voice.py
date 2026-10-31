@@ -74,6 +74,7 @@ def speak(script, work):
             if not natural or plain(line).rstrip().endswith((".", "?", "!", ":", "…")) or li == len(src) - 1: groups.append(cur); cur = []
         for gi, grp in enumerate(groups):
             gap = 0.2 if (si == 0 and gi == 0) else (0.24 if gi == 0 else (0.12 if natural else 0.06))
+            if gi == 0: gap += sc.get("pause_before", 0)   # a beat of silence before the scene (lets the last one land)
             texts = [plain(src[li]) for li in grp]
             a = synth(" ".join(texts)); t += gap; n = len(a)
             cuts = [0]

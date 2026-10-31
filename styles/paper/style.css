@@ -282,3 +282,23 @@ html, body { margin: 0; background: {paper}; }
 .vfbtn { position: relative; margin-top: 26px; width: 520px; height: 110px; border-radius: 26px; background: #2f7bf6; color: #fff; border: 4px solid transparent; font-size: 50px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
 .vfdone { display: none; align-items: center; gap: 14px; color: {ink}; }
 .vfcur { left: 600px; top: 420px; }
+
+.mrow, .urow { margin-bottom: 30px; overflow: hidden; }
+.mlab { display: flex; justify-content: space-between; align-items: baseline; font-size: 34px; font-weight: 700; margin-bottom: 14px; }
+.mlab b { font-family: "IBM Plex Mono", monospace; font-weight: 500; font-size: 26px; color: {mid}; }
+.mbar { position: relative; height: 56px; border-radius: 16px; background: {paper}; border: 3px solid {edge}; overflow: hidden; }
+.mfill { position: absolute; left: 0; top: 0; bottom: 0; background: {accent}; transform-origin: 0 50%; }
+.mdiv { position: absolute; top: -2px; bottom: -2px; width: 8px; margin-left: -4px; background: {surface}; }
+.mstrike { position: absolute; left: -10px; right: -10px; top: 50%; height: 8px; margin-top: -4px; background: {accent}; transform: scaleX(0) rotate(-3deg); transform-origin: 0 50%; box-shadow: 0 0 0 4px {surface}; }
+.vswap { text-align: center; padding: 30px 30px 40px; }
+.vslab { font-size: 28px; color: {mid}; letter-spacing: 2px; text-transform: uppercase; }
+.vsold { position: relative; display: inline-block; margin-top: 16px; font-size: 96px; font-weight: 700; letter-spacing: -3px; }
+.vsline { position: absolute; left: -16px; right: -16px; top: 52%; height: 12px; background: {accent}; transform-origin: 0 50%; transform: scaleX(0) rotate(-4deg); }
+.vsnew { margin-top: 6px; font-family: "Instrument Serif", serif; font-style: italic; font-size: 190px; line-height: 1; color: {accent}; }
+.vssub { margin-top: 14px; font-size: 36px; color: {ink}; opacity: 0; }
+.vvsrow { position: absolute; left: 90px; right: 90px; top: 0; display: flex; gap: 34px; }
+.vvs { flex: 1; background: {surface}; border: 5px solid; border-radius: 30px; padding: 30px 26px 34px; box-shadow: 14px 16px 0 {shadow}; opacity: 0; }
+.vvi { width: 84px; height: 84px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.vvt { margin-top: 18px; font-size: 46px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+.vvx { margin-top: 10px; font-size: 38px; line-height: 1.2; font-weight: 500; }
+.uok { display: flex; align-items: center; gap: 16px; justify-content: center; background: #22a06b; color: #fff; font-size: 34px; font-weight: 700; padding: 18px 24px; border-radius: 18px; opacity: 0; }

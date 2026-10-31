@@ -640,4 +640,74 @@ def follow(p, c, x):
       <div id="{p}-btn" class="vfbtn"><span id="{p}-fa">{esc(c.get("button", "Follow"))}</span><span id="{p}-fb" class="vfdone">{ico("lucide:check", 40, x.th["ink"])}{esc(c.get("done", "Following"))}</span></div>
       <div id="{p}-cur" class="vcur vfcur"><svg viewBox="0 0 80 100" width="110" height="138"><path d="M30,8 c0,-8 14,-8 14,0 v40 l4,-2 c6,-3 12,0 12,6 l2,0 c6,-2 11,2 11,8 c6,-1 9,3 9,9 v14 c0,14 -10,22 -24,22 h-12 c-10,0 -16,-6 -22,-14 l-14,-22 c-4,-6 4,-12 10,-6 l10,10 z" fill="#fff" stroke="#141414" stroke-width="5" stroke-linejoin="round"/></svg></div></div>'''
 
+
+def meter(p, c, x):
+    """Usage bars in a tool panel. rows: [{label, value (0-100), sub, segments, merge_at}] fill in on the scene;
+    "break": {"at", "row"} crosses a bar out (it greys, a red line strikes through, the panel shakes) — pair it with the
+    card's "stamp" ("REMOVED"); a row with "segments": n shows n separate sessions that merge into one bar at merge_at."""
+    rows = c.get("rows", []); out = ""
+    for i, r in enumerate(rows):
+        t = x.at(r.get("at", "start+0.3")); v = r.get("value", 100); seg = r.get("segments")
+        divs = "".join(f'<i class="mdiv" style="left:{k / seg * 100:.2f}%"></i>' for k in range(1, seg)) if seg else ""
+        out += (f'<div class="mrow"><div class="mlab"><span>{esc(r["label"])}</span><b id="{p}-v{i}">{esc(r.get("sub", ""))}</b></div>'
+                f'<div id="{p}-b{i}" class="mbar"><div id="{p}-f{i}" class="mfill" style="width:{v}%"></div><div id="{p}-d{i}">{divs}</div>'
+                f'<div id="{p}-x{i}" class="mstrike"></div></div></div>')
+        x.A(f'tl.fromTo("#{p}-f{i}", {{ scaleX: 0 }}, {{ scaleX: 1, duration: {x.r(r.get("fill_for", 0.9))}, ease: "power2.out" }}, {x.r(t)});')
+        x.sfx(t, "pro_riser/nblips", -20)
+        if seg and r.get("merge_at"):
+            tm = x.at(r["merge_at"])
+            x.A(f'tl.to("#{p}-d{i} .mdiv", {{ opacity: 0, scaleY: 0, duration: 0.3, stagger: 0.05, ease: "power2.in" }}, {x.r(tm)});')
+            x.A(f'tl.fromTo("#{p}-f{i}", {{ filter: "brightness(1)" }}, {{ filter: "brightness(1.6)", duration: 0.25, yoyo: true, repeat: 1 }}, {x.r(tm + 0.3)});')
+            x.sfx(tm, "pro_zip/up", -14)
+    br = c.get("break")
+    if br:
+        t = x.at(br.get("at", "end-0.6")); i = br.get("row", 0)
+        x.A(f'tl.to("#{p}-f{i}", {{ backgroundColor: "{x.th["grey"]}", duration: 0.15 }}, {x.r(t)});')
+        x.A(f'tl.fromTo("#{p}-x{i}", {{ scaleX: 0 }}, {{ scaleX: 1, duration: 0.2, ease: "power3.out" }}, {x.r(t)});')
+        x.sfx(t, "swish/blade", -12)
+    x.A(f'tl.fromTo("#{p} .vpanel", {{ opacity: 0, y: 80 }}, {{ opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }}, {x.r(x.start)});')
+    x.A(f'tl.fromTo("#{p} .vpanel", {{ scale: 1 }}, {{ scale: 1.06, duration: {x.r(max(0.5, x.end - x.start))}, ease: "none", immediateRender: false }}, {x.r(x.start)});')   # slow push-in: never still
+    return f'<div class="vpanel">{_tool(x, c)}{out}</div>'
+
+def swap(p, c, x):
+    """An old name crossed out and the new one slamming in: label, from, to, sub, at."""
+    t = x.at(c.get("at", "line:0+0.5"))
+    x.A(f'tl.fromTo("#{p} .vpanel", {{ opacity: 0, y: 80 }}, {{ opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }}, {x.r(x.start)});')
+    x.A(f'tl.fromTo("#{p}-ol", {{ scaleX: 0 }}, {{ scaleX: 1, duration: 0.22, ease: "power3.out" }}, {x.r(t)});')
+    x.A(f'tl.to("#{p}-old", {{ opacity: 0.35, y: -16, scale: 0.8, duration: 0.3, ease: "power2.out" }}, {x.r(t + 0.18)});')
+    x.A(f'tl.fromTo("#{p}-new", {{ opacity: 0, scale: 2.2, rotation: -6 }}, {{ opacity: 1, scale: 1, rotation: -2, duration: 0.22, ease: "power4.in" }}, {x.r(t + 0.25)});')
+    x.A(f'tl.fromTo("#{p}-sub", {{ opacity: 0, y: 20 }}, {{ opacity: 1, y: 0, duration: 0.3 }}, {x.r(t + 0.6)});')
+    x.shake(t + 0.47); x.sfx(t, "swish/blade", -13); x.sfx(t + 0.47, "pro_impact/short", -9)
+    return f'''<div class="vpanel vswap"><div class="vslab mono">{esc(c.get("label", ""))}</div>
+      <div class="vsold"><span id="{p}-old">{esc(c["from"])}</span><i id="{p}-ol" class="vsline"></i></div>
+      <div id="{p}-new" class="vsnew">{esc(c["to"])}</div><div id="{p}-sub" class="vssub">{esc(c.get("sub", ""))}</div></div>'''
+
+def versus(p, c, x):
+    """Good vs bad, side by side: good {title, text, at}, bad {title, text, at}."""
+    out = ""
+    for k, (key, icon, col, dflt) in enumerate((("good", "lucide:check", "#22a06b", "line:0"), ("bad", "lucide:x", x.th["accent"], "line:1"))):
+        it = c.get(key, {}); t = x.at(it.get("at", dflt))
+        out += (f'<div id="{p}-{key}" class="vvs" style="border-color:{col}"><div class="vvi" style="background:{col}">{ico(icon, 54, "#fff")}</div>'
+                f'<div class="vvt" style="color:{col}">{esc(it.get("title", key))}</div><div class="vvx">{esc(it.get("text", ""))}</div></div>')
+        x.A(f'tl.fromTo("#{p}-{key}", {{ opacity: 0, y: 90, rotation: {(-5, 5)[k]} }}, {{ opacity: 1, y: 0, rotation: {(-2, 2)[k]}, duration: 0.4, ease: "back.out(1.7)" }}, {x.r(t)});')
+        x.sfx(t + 0.2, ("pro_pop/thup", "pro_pop/boop")[k], -10)
+    return f'<div class="vvsrow">{out}</div>'
+
+def usage(p, c, x):
+    """A Settings > Usage mock: a "Current session" bar and a weekly bar; at remove_at the session row folds away and a
+    "verified" badge pops."""
+    t = x.at(c.get("remove_at", "line:1"))
+    x.A(f'tl.fromTo("#{p} .vpanel", {{ opacity: 0, y: 80 }}, {{ opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }}, {x.r(x.start)});')
+    x.A(f'tl.fromTo("#{p} .ufill", {{ scaleX: 0 }}, {{ scaleX: 1, duration: 0.8, ease: "power2.out", stagger: 0.15 }}, {x.r(x.start + 0.3)});')
+    x.A(f'tl.to("#{p}-sess", {{ opacity: 0, scaleY: 0.2, transformOrigin: "50% 0%", duration: 0.3, ease: "power2.in" }}, {x.r(t)});')
+    x.A(f'tl.to("#{p}-wk, #{p}-ok", {{ y: -150, duration: 0.35, ease: "power3.inOut" }}, {x.r(t + 0.15)});')
+    x.A(f'tl.fromTo("#{p}-ok", {{ opacity: 0, scale: 0.3 }}, {{ opacity: 1, scale: 1, duration: 0.35, ease: "back.out(2.5)" }}, {x.r(t + 0.35)});')
+    x.sfx(t, "swish/soft", -14); x.sfx(t + 0.4, "pro_notify/ding_2045", -12)
+    row = lambda i, lab, sub, w: (f'<div id="{p}-{("sess", "wk")[i]}" class="urow"><div class="mlab"><span>{lab}</span><b>{sub}</b></div>'
+                                  f'<div class="mbar"><div class="mfill ufill" style="width:{w}%"></div></div></div>')
+    return f'''<div class="vpanel"><div class="vhd">{ico("lucide:settings", 36, x.th["ink"])}<span>{esc(c.get("title", "Settings › Usage"))}</span></div>
+      {row(0, "Current session", "5-hour limit", 64)}{row(1, "Weekly limit", "all models", 38)}
+      <div id="{p}-ok" class="uok">{ico("lucide:badge-check", 44, "#fff")}{esc(c.get("badge", "No session bar = verified"))}</div></div>'''
+
+CARDS.update(meter=meter, swap=swap, versus=versus, usage=usage)
 CARDS.update(reels=reels, phone=phone, gallery=gallery, voice=voice, timeline=timeline, upload=upload, share=share, follow=follow)

@@ -33,7 +33,8 @@ Keep each line under ~8 words: one line = one caption beat.
   ]
 }
 ```
-(The `//` notes are annotations; real JSON has no comments.) Counter forms: `{"name","value"}` fixed, `{"name","steps":[...]}` changes on each line, `{"name","from","to","count_for"}` counts up.
+(The `//` notes are annotations; real JSON has no comments.) A scene can take `"pause_before": 0.7` (seconds of silence before it) so the previous scene's last beat lands.
+Counter forms: `{"name","value"}` fixed, `{"name","steps":[...]}` changes on each line, `{"name","from","to","count_for"}` counts up.
 Write "AI", "SBI", "API" plainly (no spaces); add `voice.say` only for words Kokoro gets wrong.
 
 ## 2. Cards (one per scene; `python3 reel.py cards paper` lists them)
@@ -52,6 +53,10 @@ Write "AI", "SBI", "API" plainly (no spaces); add `voice.say` only for words Kok
 | `voice` | a voice track: waveform draws in, emotion tags pop on | `tool`, `icon`, `file`, `line`, `tags`, `at`, `tags_at` |
 | `timeline` | a chat ask, then scene blocks land on a time ruler, playhead sweeps | `tool`, `icon`, `ask`, `blocks`, `widths`, `seconds`, `at` |
 | `upload` | upload slots fill, then a big button is pressed | `tool`, `icon`, `items: [{label, src|icon|kind: palette (colors)|plan (bars), at}]`, `button`, `press_at` |
+| `meter` | usage bars that fill; one breaks (pair with a "REMOVED" stamp) or n sessions merge into one bar | `tool`, `icon`, `rows: [{label, sub, value, at, fill_for, segments, merge_at}]`, `break: {at, row}` |
+| `swap` | an old name crossed out, the new one slams in | `label`, `from`, `to`, `sub`, `at` |
+| `versus` | good vs bad, side by side | `good: {title, text, at}`, `bad: {title, text, at}` |
+| `usage` | a Settings › Usage mock; the session bar folds away, a "verified" badge pops | `remove_at`, `title`, `badge` |
 | `share` | send to a friend: reel preview, share sheet, contact picked, Send, DM lands | `image`, `contacts` ("A·bro"), `pick`, `pick_at`, `send_at`, `message` |
 | `follow` | follow ending without a profile: avatar with ring, handle, Follow → Following, burst, bell | `tap_at`, `button`, `done` (uses `brand.avatar`, `brand.handle`) |
 | `figure` | a live isometric line drawing (hairline, 33 objects) that reacts on cue | `name`, `path: [{at, x, y}]` (pointer 0–1 in the figure box; no path = it plays its own tour), `intensity` (0–1), `caption`, `readout` (red live readout, default on), `leave`, `mount_at`, `width`, `colors` |
