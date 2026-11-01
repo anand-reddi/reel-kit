@@ -709,5 +709,49 @@ def usage(p, c, x):
       {row(0, "Current session", "5-hour limit", 64)}{row(1, "Weekly limit", "all models", 38)}
       <div id="{p}-ok" class="uok">{ico("lucide:badge-check", 44, "#fff")}{esc(c.get("badge", "No session bar = verified"))}</div></div>'''
 
+
+def shot(p, c, x):
+    """A real screenshot in a browser window. The camera pans and zooms to each focus region in turn (synced to the
+    voice) and a highlight frames it, over a blurred copy of the screenshot. src, url, width (900), height (viewport px),
+    focus: [{at, x, y, w, h (% of the image), zoom (max, default 2.4), mark (true)}], reset_at (back to the full view)."""
+    from PIL import Image
+    src = x.asset(c["src"]); W = c.get("width", 900)
+    iw, ih = Image.open(os.path.join(x.f.out, src)).size; SH = W * ih / iw; VH = c.get("height", min(SH, 640))
+    left = (1080 - W) / 2
+    x.A(f'tl.fromTo("#{p}-win", {{ opacity: 0, y: 90, scale: 0.94 }}, {{ opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "power3.out" }}, {x.r(x.start)});')
+    x.A(f'tl.fromTo("#{p}-bg", {{ opacity: 0 }}, {{ opacity: 0.22, duration: 0.5 }}, {x.r(x.start)});')
+    marks = ""; prev = None; prev_in = 0
+    fx = c.get("focus", [])
+    if not fx:   # no focus: a slow push-in so the shot is never still
+        x.A(f'tl.fromTo("#{p}-cam", {{ scale: 1 }}, {{ scale: 1.08, duration: {x.r(max(0.5, x.end - x.start))}, ease: "none", transformOrigin: "50% 0%" }}, {x.r(x.start)});')
+    for i, f in enumerate(fx):
+        t = x.at(f.get("at", "start+0.4"))
+        rx, ry, rw, rh = (f[k] / 100 for k in ("x", "y", "w", "h"))
+        cx, cy = (rx + rw / 2) * W, (ry + rh / 2) * SH
+        k = max(1.0, min(f.get("zoom", 2.4), 0.86 * VH / (rh * SH)))
+        if rw * W * k <= 0.94 * W: tx = W / 2 - k * cx              # fits: centre it
+        else: tx = 24 - k * rx * W                                     # a wide line: start at its left edge, read along it
+        tx = min(0, max(W - k * W, tx)); ty = min(0, max(VH - k * SH, VH / 2 - k * cy)) if k * SH > VH else 0
+        x.A(f'tl.to("#{p}-cam", {{ x: {tx:.1f}, y: {ty:.1f}, scale: {k:.3f}, duration: 0.75, ease: "power3.inOut", transformOrigin: "0px 0px" }}, {x.r(t - 0.25)});')
+        x.sfx(t - 0.2, "swish/soft", -17)
+        if prev is not None: x.A(f'tl.to("#{p}-m{prev}", {{ opacity: 0, duration: 0.2 }}, {x.r(max(t - 0.25, prev_in + 0.32))});')
+        if f.get("mark", True):
+            marks += f'<div id="{p}-m{i}" class="shmark" style="left:{rx * 100:.2f}%;top:{ry * 100:.2f}%;width:{rw * 100:.2f}%;height:{rh * 100:.2f}%"></div>'
+            prev_in = max(t + 0.45, (prev_in + 0.55) if prev is not None else 0)
+            x.A(f'tl.fromTo("#{p}-m{i}", {{ opacity: 0, scale: 1.25 }}, {{ opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)", immediateRender: false }}, {x.r(prev_in)});')
+            prev = i
+        else: prev = None
+    if c.get("reset_at"):
+        t = x.at(c["reset_at"])
+        x.A(f'tl.to("#{p}-cam", {{ x: 0, y: 0, scale: 1, duration: 0.7, ease: "power3.inOut" }}, {x.r(t)});')
+        if prev is not None: x.A(f'tl.to("#{p}-m{prev}", {{ opacity: 0, duration: 0.2 }}, {x.r(t)});')
+    lock = '<svg viewBox="0 0 24 24" width="22" height="22"><rect x="5" y="10" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M8,10 V7 a4,4 0 0 1 8,0 V10" fill="none" stroke="currentColor" stroke-width="2.4"/></svg>'
+    return (f'<div id="{p}-bg" class="shbg" style="background-image:url({esc(src)})"></div>'
+            f'<div id="{p}-win" class="shwin" style="left:{left:.0f}px;width:{W}px"><div class="shbar"><i></i><i></i><i></i>'
+            f'<div class="shurl">{lock}<span>{esc(c.get("url", ""))}</span></div></div>'
+            f'<div class="shview" style="height:{VH:.0f}px"><div id="{p}-cam" class="shcam" style="width:{W}px;height:{SH:.0f}px">'
+            f'<img src="{esc(src)}"/>{marks}</div></div></div>')
+
+CARDS.update(shot=shot)
 CARDS.update(meter=meter, swap=swap, versus=versus, usage=usage)
 CARDS.update(reels=reels, phone=phone, gallery=gallery, voice=voice, timeline=timeline, upload=upload, share=share, follow=follow)

@@ -53,6 +53,7 @@ Write "AI", "SBI", "API" plainly (no spaces); add `voice.say` only for words Kok
 | `voice` | a voice track: waveform draws in, emotion tags pop on | `tool`, `icon`, `file`, `line`, `tags`, `at`, `tags_at` |
 | `timeline` | a chat ask, then scene blocks land on a time ruler, playhead sweeps | `tool`, `icon`, `ask`, `blocks`, `widths`, `seconds`, `at` |
 | `upload` | upload slots fill, then a big button is pressed | `tool`, `icon`, `items: [{label, src|icon|kind: palette (colors)|plan (bars), at}]`, `button`, `press_at` |
+| `shot` | a REAL screenshot in a browser window; the camera pans/zooms to each focus region on cue and a highlight frames it, over a blurred copy (prefer this to mock-ups for proof: posts, repos, docs, emails) | `src`, `url`, `width`, `height`, `focus: [{at, x, y, w, h (% of image), zoom}]`, `reset_at` |
 | `meter` | usage bars that fill; one breaks (pair with a "REMOVED" stamp) or n sessions merge into one bar | `tool`, `icon`, `rows: [{label, sub, value, at, fill_for, segments, merge_at}]`, `break: {at, row}` |
 | `swap` | an old name crossed out, the new one slams in | `label`, `from`, `to`, `sub`, `at` |
 | `versus` | good vs bad, side by side | `good: {title, text, at}`, `bad: {title, text, at}` |
@@ -188,6 +189,12 @@ is never split; no orphan last word). A chunk that is still slightly too wide is
 in the browser with the real fonts (`capfit`); kinetic words do the same (`kfit`). Keep red runs to 1-2 short words.
 `"caption_width"` (default 1040, estimated px) sets when a line splits.
 
+
+## Proof and readability (learned from a strong competitor reel)
+- Show real sources: screenshots via the `shot` card (README images, user-sent screenshots, pages rendered from their raw
+  source); mock-ups only when nothing real exists. Zoom to the exact words being said.
+- `"captions": "short"` (1–3 words, big, under the card) and `"header": "none"` read best on a phone.
+- Put the promise on screen in the hook with a scene `headline`.
 
 ## Presenter only where the gesture fits
 Use layouts per scene: `none` when no gesture matches the line (the card grows to fill the space in 9:16), `box` when
