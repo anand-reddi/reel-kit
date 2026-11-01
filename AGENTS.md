@@ -5,6 +5,7 @@ Make a reel: `python3 reel.py make script.json -o out.mp4 [--stills] [--quality 
 Always look at the `--stills` contact sheet before sending a video.
 
 ## Standing rules (from the channel owner)
+- **Voice pace:** speak at normal speed, `voice.speed` 1.0 (1.1+ felt rushed).
 - **Options first, then build:** before writing a script or rendering anything, present the options from
   `PLAYBOOK.md` ("Before making any video"): 2–3 hooks for this topic, the share angle, the save/follow angle, format
   and length. Discuss with the owner and settle the choices; only then write the script and build.

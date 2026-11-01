@@ -16,7 +16,7 @@ Keep each line under ~8 words: one line = one caption beat.
 {
   "style": "paper", "title": "...", "duration": 10,                    // optional: duration (s); default = voice length + 0.45
   "brand": { "handle": "@techinsixty", "bio": "line 1\nline 2", "avatar": "me.png" },
-  "voice": { "name": "am_michael", "speed": 1.18, "say": { "SQL": "sequel" } },
+  "voice": { "name": "am_puck", "speed": 1.0, "say": { "SQL": "sequel" } },
   "music": { "style": "beat", "bpm": 100, "key": "minor" },   // key: minor | major | dark ; style "none" = no music
   "levels": { "music": -31, "sfx": -24 },             // optional loudness of the beds (LUFS)
   "character": "default",                              // a folder (see CHARACTER.md) or "none"

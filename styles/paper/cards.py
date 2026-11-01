@@ -679,8 +679,8 @@ def swap(p, c, x):
     x.A(f'tl.fromTo("#{p}-sub", {{ opacity: 0, y: 20 }}, {{ opacity: 1, y: 0, duration: 0.3 }}, {x.r(t + 0.6)});')
     x.shake(t + 0.47); x.sfx(t, "swish/blade", -13); x.sfx(t + 0.47, "pro_impact/short", -9)
     return f'''<div class="vpanel vswap"><div class="vslab mono">{esc(c.get("label", ""))}</div>
-      <div class="vsold"><span id="{p}-old">{esc(c["from"])}</span><i id="{p}-ol" class="vsline"></i></div>
-      <div id="{p}-new" class="vsnew">{esc(c["to"])}</div><div id="{p}-sub" class="vssub">{esc(c.get("sub", ""))}</div></div>'''
+      <div class="vsold" style="font-size:{min(96, int(1250 / max(1, len(c["from"]) * 0.6)))}px"><span id="{p}-old">{esc(c["from"])}</span><i id="{p}-ol" class="vsline"></i></div>
+      <div id="{p}-new" class="vsnew" style="font-size:{min(190, int(1200 / max(1, len(c["to"]) * 0.8)))}px">{esc(c["to"])}</div><div id="{p}-sub" class="vssub">{esc(c.get("sub", ""))}</div></div>'''
 
 def versus(p, c, x):
     """Good vs bad, side by side: good {title, text, at}, bad {title, text, at}."""
