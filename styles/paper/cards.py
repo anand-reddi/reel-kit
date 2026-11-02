@@ -613,8 +613,11 @@ def share(p, c, x):
 
 def follow(p, c, x):
     """The follow ending without a profile: big avatar with a story ring, the handle, a Follow button that a cursor taps;
-    it turns into Following, the ring bursts, particles fly, a bell pops. Uses brand.avatar / brand.handle."""
-    b = x.brand; tap = x.at(c.get("tap_at", "line:0+0.5"))
+    it turns into Following, the ring bursts, particles fly, a bell pops. Uses brand.avatar / brand.handle.
+    "platform": "youtube" makes it the YouTube ending: a red Subscribe button that turns into a grey Subscribed, with a
+    YouTube badge on the avatar (use it for the YouTube cut of a reel; the line becomes "Subscribe for more like this.")."""
+    b = x.brand; tap = x.at(c.get("tap_at", "line:0+0.5")); yt = c.get("platform") == "youtube"
+    if yt: c = {"button": "Subscribe", "done": "Subscribed", **c}
     av = f'<img src="{esc(x.avatar)}"/>' if x.avatar else ""
     import random; rnd = random.Random(3)
     parts = "".join(f'<i class="vpt" style="background:{rnd.choice([x.th["accent"], "#ffffff", "#2f7bf6", "#f5a524"])}" data-dx="{rnd.uniform(-420, 420):.0f}" data-dy="{rnd.uniform(-380, 160):.0f}"></i>' for _ in range(28))
@@ -626,18 +629,20 @@ def follow(p, c, x):
     x.A(f'tl.to("#{p}-cur", {{ scale: 0.86, duration: 0.07, yoyo: true, repeat: 1 }}, {x.r(tap)});')
     x.A(f'tl.to("#{p}-btn", {{ scale: 0.9, duration: 0.07, yoyo: true, repeat: 1 }}, {x.r(tap)});')
     x.A(f'tl.set("#{p}-fa", {{ display: "none" }}, {x.r(tap + 0.07)}); tl.set("#{p}-fb", {{ display: "inline-flex" }}, {x.r(tap + 0.07)});')
-    x.A(f'tl.set("#{p}-btn", {{ backgroundColor: "{x.th["surface"]}", borderColor: "{x.th["edge"]}" }}, {x.r(tap + 0.07)});')
+    x.A(f'tl.set("#{p}-btn", {{ backgroundColor: "{x.th["surface"]}", borderColor: "{x.th["edge"]}", color: "{x.th["ink"]}" }}, {x.r(tap + 0.07)});')
     x.A(f'tl.fromTo("#{p}-burst", {{ opacity: 1, scale: 0.6 }}, {{ opacity: 0, scale: 1.9, duration: 0.6, ease: "power2.out", immediateRender: false }}, {x.r(tap + 0.05)});')
     x.A(f'tl.fromTo("#{p} .vpt", {{ opacity: 1, x: 0, y: 0, scale: 1 }}, {{ opacity: 0, x: (i, t) => +t.dataset.dx, y: (i, t) => +t.dataset.dy, scale: 0.3, duration: 0.9, ease: "power3.out", stagger: 0.005, immediateRender: false }}, {x.r(tap + 0.05)});')
     x.A(f'tl.fromTo("#{p}-bell", {{ opacity: 0, scale: 0, rotation: -30 }}, {{ opacity: 1, scale: 1, rotation: 0, duration: 0.35, ease: "back.out(3)" }}, {x.r(tap + 0.35)});')
     x.A(f'tl.to("#{p}-bell", {{ rotation: 14, duration: 0.08, yoyo: true, repeat: 5, ease: "sine.inOut" }}, {x.r(tap + 0.7)});')
     x.A(f'tl.to("#{p}-cur", {{ opacity: 0, x: 160, y: 160, duration: 0.3, ease: "power2.in" }}, {x.r(tap + 0.45)});')
     x.sfx(tap, "pro_click/soft", -6); x.sfx(tap + 0.05, "pro_logo_sting/zap_bloom", -11); x.sfx(tap + 0.4, "pro_notify/ding_2045", -13)
+    ytb = f'<div class="vfyt">{ico("logos:youtube-icon", 70)}</div>' if yt else ""
+    ytbtn = ' style="background:#ff0033;border-color:#ff0033;color:#fff"' if yt else ""
     return f'''<div class="vfol"><div class="vfav"><div id="{p}-ring" class="vfring"></div><div id="{p}-burst" class="vfburst"></div>
       <div id="{p}-av" class="vfimg">{av}</div><div class="vpts">{parts}</div>
-      <div id="{p}-bell" class="vbell">{ico("lucide:bell-ring", 46, "#fff")}</div></div>
+      <div id="{p}-bell" class="vbell">{ico("lucide:bell-ring", 46, "#fff")}</div>{ytb}</div>
       <div id="{p}-hn" class="vfhn">{esc(b.get("handle", "@you"))}</div>
-      <div id="{p}-btn" class="vfbtn"><span id="{p}-fa">{esc(c.get("button", "Follow"))}</span><span id="{p}-fb" class="vfdone">{ico("lucide:check", 40, x.th["ink"])}{esc(c.get("done", "Following"))}</span></div>
+      <div id="{p}-btn" class="vfbtn"{ytbtn}><span id="{p}-fa">{esc(c.get("button", "Follow"))}</span><span id="{p}-fb" class="vfdone">{ico("lucide:check", 40, x.th["ink"])}{esc(c.get("done", "Following"))}</span></div>
       <div id="{p}-cur" class="vcur vfcur"><svg viewBox="0 0 80 100" width="110" height="138"><path d="M30,8 c0,-8 14,-8 14,0 v40 l4,-2 c6,-3 12,0 12,6 l2,0 c6,-2 11,2 11,8 c6,-1 9,3 9,9 v14 c0,14 -10,22 -24,22 h-12 c-10,0 -16,-6 -22,-14 l-14,-22 c-4,-6 4,-12 10,-6 l10,10 z" fill="#fff" stroke="#141414" stroke-width="5" stroke-linejoin="round"/></svg></div></div>'''
 
 

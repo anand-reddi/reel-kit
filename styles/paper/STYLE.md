@@ -59,7 +59,7 @@ Write "AI", "SBI", "API" plainly (no spaces); add `voice.say` only for words Kok
 | `versus` | good vs bad, side by side | `good: {title, text, at}`, `bad: {title, text, at}` |
 | `usage` | a Settings › Usage mock; the session bar folds away, a "verified" badge pops | `remove_at`, `title`, `badge` |
 | `share` | send to a friend: reel preview, share sheet, contact picked, Send, DM lands | `image`, `contacts` ("A·bro"), `pick`, `pick_at`, `send_at`, `message` |
-| `follow` | follow ending without a profile: avatar with ring, handle, Follow → Following, burst, bell | `tap_at`, `button`, `done` (uses `brand.avatar`, `brand.handle`) |
+| `follow` | follow ending without a profile: avatar with ring, handle, Follow → Following, burst, bell; `"platform": "youtube"` = red Subscribe → Subscribed with a YouTube badge (the YouTube cut ends "Subscribe for more like this.") | `tap_at`, `button`, `done`, `platform` (uses `brand.avatar`, `brand.handle`) |
 | `figure` | a live isometric line drawing (hairline, 33 objects) that reacts on cue | `name`, `path: [{at, x, y}]` (pointer 0–1 in the figure box; no path = it plays its own tour), `intensity` (0–1), `caption`, `readout` (red live readout, default on), `leave`, `mount_at`, `width`, `colors` |
 
 Any card also takes `"sfx": [{"at", "id", "gain"}]` for extra sound hits, and `"stamp": "TEXT"` or `{"text","at","x","y","rot"}` — a red rubber stamp with a shake and impact sound,

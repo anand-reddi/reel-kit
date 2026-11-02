@@ -44,6 +44,18 @@ def _snap(a, i, win):
     e = [np.sqrt((a[j:j + hop] ** 2).mean()) for j in range(lo, hi - hop, hop // 2)]
     return lo + int(np.argmin(e)) * (hop // 2) + hop // 2
 
+INTRO = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "assets", "sounds", "intro-repulsor.wav")
+def intro(script):
+    """The opening sound on every video (the user's standing choice). "intro": false turns it off;
+    {"sound": "path.wav", "gain": -9, "lead": 0.4} swaps it; lead = seconds the first words wait."""
+    cfg = script.get("intro", {})
+    if cfg is False: return None
+    cfg = dict(cfg) if isinstance(cfg, dict) else {}
+    snd = cfg.get("sound", INTRO)
+    return dict(sound=snd, gain=cfg.get("gain", -9), lead=cfg.get("lead", 0.4)) if os.path.exists(snd) else None
+def intro_lead(script):
+    i = intro(script); return i["lead"] if i else 0.0
+
 def speak(script, work):
     k = _model(); v_cfg = script.get("voice", {})
     voice, speed, lang = v_cfg.get("name", "am_puck"), v_cfg.get("speed", 1.0), v_cfg.get("lang", "en-us")
@@ -66,7 +78,7 @@ def speak(script, work):
             for x, y in say_map.items(): text = re.sub(rf"(?<![\w]){re.escape(x)}(?![\w])", y, text)
             a, sr = k.create(text, voice=voice, speed=speed, lang=lang)
         return _trim(resample_poly(a, SR, sr))
-    lines, clips, t = [], [], 0.0
+    lines, clips, t = [], [], intro_lead(script)
     for si, sc in enumerate(script["scenes"]):
         src = sc["lines"]; groups, cur = [], []
         for li, line in enumerate(src):     # a sentence ends on . ? ! or : (or at the end of the scene)

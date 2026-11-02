@@ -48,6 +48,8 @@ def make(a):
     lint = run(["npx", "-y", "hyperframes", "lint"], fdir, env)
     if " 0 error" not in lint: print(lint[-800:])
     print("3/4 render"); run(["npx", "-y", "hyperframes", "render", ".", "-o", os.path.join(work, "video.mp4"), "-q", a.quality], fdir, env)
+    it = voice.intro(script)
+    if it: cues = [(0.0, "file:" + it["sound"], it["gain"])] + list(cues)
     print("4/4 sound"); lufs, n = sound.mix(work, cues, tm["duration"], script)
     print(f"    {n} sound effects, {lufs:.1f} LUFS")
     run(["ffmpeg", "-v", "error", "-y", "-i", os.path.join(work, "video.mp4"), "-i", os.path.join(work, "mix.wav"), "-map", "0:v", "-map", "1:a",

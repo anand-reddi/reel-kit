@@ -312,3 +312,6 @@ html, body { margin: 0; background: {paper}; }
 .shcam { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
 .shcam img { display: block; width: 100%; height: 100%; }
 .shmark { position: absolute; border: 5px solid {accent}; border-radius: 10px; box-shadow: 0 0 0 9999px #0000004d, 0 0 24px {accent}88; opacity: 0; }
+
+/* follow card, YouTube ending: the YouTube badge on the avatar */
+.vfyt { position: absolute; left: -6px; bottom: 6px; width: 110px; height: 110px; border-radius: 50%; background: #fff; display: grid; place-items: center; box-shadow: 0 10px 30px rgba(0,0,0,.35); }

@@ -37,8 +37,13 @@ def mix(work, cues, dur, cfg):
     mus = beat(n, cfg.get("music", {}))
     sfx = np.zeros(n + SR); ear = earshot(); os.makedirs(os.path.join(work, "sfx"), exist_ok=True); used = []
     if not ear: print("  ! earshot not found: rendering without sound effects (run setup.sh)")
-    for k, cue in enumerate(cues if ear else []):
+    for k, cue in enumerate(cues):
         at, sid, g = cue[:3]; opt = cue[3] if len(cue) > 3 else {}   # opt: {"dur": exact length, "align": "start"}
+        if sid.startswith("file:"):         # a local sound (the intro): starts on its cue
+            a, sr = sf.read(sid[5:]); a = a.mean(1) if a.ndim > 1 else a
+            if sr != SR: a = resample_poly(a, SR, sr)
+            i0 = int(at * SR); sfx[i0:i0 + len(a)] += a[:n + SR - i0] * 10 ** (g / 20); used.append(sid); continue
+        if not ear: continue
         out = os.path.join(work, "sfx", f"{k:03d}.wav")
         cmd = [ear, "sfx", "render", sid, "-o", out, "--json"] + (["--dur", f'{opt["dur"]:.3f}'] if opt.get("dur") else [])
         r = subprocess.run(cmd, capture_output=True, text=True)

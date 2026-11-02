@@ -46,3 +46,10 @@ Do not script or render until the owner has picked. Present, for this specific t
 5. Optional: an ending (loop, poster frame, keyword CTA).
 
 Discuss, settle the choices, then write the script and build.
+
+## Standing defaults (the user's choices)
+- **Intro sound on every video:** the Iron Man repulsor (`assets/sounds/intro-repulsor.wav`) plays at 0 s and the first
+  words wait 0.4 s for it. It is on by default; `"intro": false` turns it off, `"intro": {"sound", "gain", "lead"}` swaps it.
+- **Two cuts of each reel:** the Instagram cut ends "Follow for more like this." (`follow` card); the YouTube cut is the
+  same script ending "Subscribe for more like this." (`follow` card with `"platform": "youtube"`). The link line says
+  "link in bio" on Instagram and "link on my channel" on YouTube.
