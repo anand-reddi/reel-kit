@@ -47,8 +47,17 @@ def fit_layout(script, tm, work, sdir, st, cues):
         cues = st.build(script, tm, work, sdir)
     return cues
 
+def endings(script):
+    """Follow / Subscribe endings show the avatar already, so the presenter is hidden there (no double character).
+    Keep him with "presenter": true on that scene."""
+    if any(sc.get("layout") for sc in script.get("scenes", [])):
+        for sc in script["scenes"]:
+            if (sc.get("card") or {}).get("type") in ("follow", "profile") and not sc.get("presenter"):
+                sc["layout"] = "none"; sc.pop("pose", None)
+    return script
+
 def make(a):
-    script = json.load(open(a.script)); sdir = os.path.dirname(os.path.abspath(a.script))
+    script = endings(json.load(open(a.script))); sdir = os.path.dirname(os.path.abspath(a.script))
     name = os.path.splitext(os.path.basename(a.script))[0]
     work = os.path.abspath(a.work or os.path.join(sdir, "build", name)); os.makedirs(work, exist_ok=True)
     out = os.path.abspath(a.o or os.path.join(sdir, f"{name}.mp4")); os.makedirs(os.path.dirname(out), exist_ok=True)
@@ -110,7 +119,7 @@ if __name__ == "__main__":
             aud, sr = _model().create(ps, voice="am_puck", speed=1.0, lang="en-us", is_phonemes=True); sf.write(a.wav, aud, sr)
         sys.exit(0)
     if a.cmd == "layout":
-        script = json.load(open(a.script)); sdir = os.path.dirname(os.path.abspath(a.script))
+        script = endings(json.load(open(a.script))); sdir = os.path.dirname(os.path.abspath(a.script))
         name = os.path.splitext(os.path.basename(a.script))[0]
         work = os.path.abspath(a.work or os.path.join(sdir, "build", name)); os.makedirs(work, exist_ok=True)
         print("1/2 voice"); tm = voice.speak(script, work)

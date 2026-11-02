@@ -53,3 +53,8 @@ Discuss, settle the choices, then write the script and build.
 - **Two cuts of each reel:** the Instagram cut ends "Follow for more like this." (`follow` card); the YouTube cut is the
   same script ending "Subscribe for more like this." (`follow` card with `"platform": "youtube"`). The link line says
   "link in bio" on Instagram and "link on my channel" on YouTube.
+- **No double character on the ending:** the Follow / Subscribe card already shows the avatar, so `reel.py` hides the
+  presenter on `follow` and `profile` scenes (layout forced to `none`). `"presenter": true` on the scene keeps him.
+- **Natural speech:** write lines the way a person talks: contractions ("it's", "you'll"), short connectors ("So he...",
+  "Now...", "The catch?"), one idea per line, numbers said the way people say them ("24 gig", "up to 44 percent").
+  Avoid written phrasing like "utilises" or long noun stacks. The Backburner reel (Nov 2026) is the reference.
