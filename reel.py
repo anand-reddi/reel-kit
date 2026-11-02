@@ -65,13 +65,16 @@ def make(a):
     print(f"    {len(tm['lines'])} lines, {tm['duration']} s")
     st = style(script.get("style", "paper"))
     print(f"2/4 picture ({script.get('style', 'paper')})"); cues = st.build(script, tm, work, sdir)
-    cues = fit_layout(script, tm, work, sdir, st, cues)
-    env = dict(os.environ); b = browser()
-    if b: env["HYPERFRAMES_BROWSER_PATH"] = b
-    fdir = os.path.join(work, "film")
-    lint = run(["npx", "-y", "hyperframes", "lint"], fdir, env)
-    if " 0 error" not in lint: print(lint[-800:])
-    print("3/4 render"); run(["npx", "-y", "hyperframes", "render", ".", "-o", os.path.join(work, "video.mp4"), "-q", a.quality], fdir, env)
+    if hasattr(st, "render"):           # styles that draw their own frames (sketchbook): own render + caption QA
+        print("3/4 render"); st.render(script, tm, work, sdir, a.quality)
+    else:
+        cues = fit_layout(script, tm, work, sdir, st, cues)
+        env = dict(os.environ); b = browser()
+        if b: env["HYPERFRAMES_BROWSER_PATH"] = b
+        fdir = os.path.join(work, "film")
+        lint = run(["npx", "-y", "hyperframes", "lint"], fdir, env)
+        if " 0 error" not in lint: print(lint[-800:])
+        print("3/4 render"); run(["npx", "-y", "hyperframes", "render", ".", "-o", os.path.join(work, "video.mp4"), "-q", a.quality], fdir, env)
     it = voice.intro(script)
     if it: cues = [(0.0, "file:" + it["sound"], it["gain"])] + list(cues)
     print("4/4 sound"); lufs, n = sound.mix(work, cues, tm["duration"], script)
@@ -124,8 +127,12 @@ if __name__ == "__main__":
         work = os.path.abspath(a.work or os.path.join(sdir, "build", name)); os.makedirs(work, exist_ok=True)
         print("1/2 voice"); tm = voice.speak(script, work)
         print("2/2 picture"); st = style(script.get("style", "paper")); cues = st.build(script, tm, work, sdir)
+        if hasattr(st, "render"): sys.exit("this style checks captions while it renders: run reel.py make (use --quality draft for a quick pass)")
         fit_layout(script, tm, work, sdir, st, cues)
         from core import layout; probs = layout.check(work); sys.exit(1 if probs else 0)
     if a.cmd == "make": make(a)
     elif a.cmd == "styles": print("styles:", ", ".join(styles()))
-    else: print(f"{a.style} cards:", ", ".join(style(a.style).CARDS))
+    else:
+        C = style(a.style).CARDS
+        if isinstance(C, dict): print(f"{a.style} cards:"); [print(f"  {k:10s} {v}") for k, v in C.items()]
+        else: print(f"{a.style} cards:", ", ".join(C))

@@ -51,7 +51,10 @@ Styles: `paper` — off-white dotted paper, black/white UI cards with a red acce
 word-synced captions, presenter
 (see `styles/paper/STYLE.md`).
 `studio3d` — one continuous camera through a matte 3D studio (three.js), state bar, callout labels, titles, caption
-pill; each video brings its own scene module (see `styles/studio3d/STYLE.md`). `python3 reel.py styles` lists what the repo has now.
+pill; each video brings its own scene module (see `styles/studio3d/STYLE.md`).
+`sketchbook` — Looseleaf's hand-drawn paper UI (MIT) in its original look: sage desk, light paper, highlighter, Stubby the
+pencil reacting in poses. `sketchbook_dark` — the same cards in the krishexplainz look (near-black dotted page, dark
+paper, one red accent) with an original black cat that reacts with expressions. Both: `styles/sketchbook/STYLE.md`. `python3 reel.py styles` lists what the repo has now.
 
 ## 2. Adding a new style from a reference video
 When the user shares a reference video and wants "videos like this":

@@ -1,0 +1,215 @@
+{
+ "title": "He turned his iPhone into a second GPU",
+ "brand": {
+  "handle": "@krishexplainz",
+  "avatar": "assets/pfp-krish.png"
+ },
+ "voice": {
+  "name": "am_puck",
+  "speed": 1.0
+ },
+ "music": {
+  "style": "beat",
+  "bpm": 100,
+  "key": "minor"
+ },
+ "scenes": [
+  {
+   "lines": [
+    "This guy turned his iPhone into a second *GPU* for his Mac."
+   ],
+   "card": {
+    "type": "hook",
+    "rows": [
+     {
+      "text": "he turned his"
+     },
+     {
+      "text": "iPhone",
+      "kind": "big"
+     },
+     {
+      "text": "into a"
+     },
+     {
+      "text": "second GPU",
+      "kind": "mark",
+      "at": "word:second"
+     },
+     {
+      "text": "for his Mac"
+     }
+    ],
+    "doodle": {
+     "name": "lightning",
+     "at": "word:GPU",
+     "x": 70,
+     "y": 590
+    }
+   },
+   "react": [
+    {
+     "at": "word:GPU",
+     "react": "wow",
+     "jump": true
+    },
+    {
+     "at": "word:Mac+0.1",
+     "react": "idle",
+     "look": -1
+    }
+   ]
+  },
+  {
+   "pause_before": 0.35,
+   "lines": [
+    "The Mac runs the first 40 layers.",
+    "The phone runs the *rest.*"
+   ],
+   "card": {
+    "type": "split",
+    "title": "who runs which layers",
+    "tabs": [
+     "Mac",
+     "iPhone"
+    ],
+    "labels": [
+     "Mac · 1–40",
+     "iPhone · 41–64"
+    ],
+    "keys": [
+     {
+      "at": "line:0+0.1",
+      "tab": 0,
+      "value": 0
+     },
+     {
+      "at": "word:layers",
+      "value": 62.5
+     },
+     {
+      "at": "line:1",
+      "tab": 1,
+      "value": 62.5
+     },
+     {
+      "at": "word:rest",
+      "value": 100
+     }
+    ],
+    "doodle": {
+     "name": "sparkle",
+     "at": "word:rest",
+     "x": 70,
+     "y": 560,
+     "size": 80
+    }
+   },
+   "react": [
+    {
+     "at": "start",
+     "react": "idle",
+     "look": -1
+    },
+    {
+     "at": "word:rest",
+     "react": "smug",
+     "look": -1
+    }
+   ]
+  },
+  {
+   "pause_before": 0.35,
+   "lines": [
+    "Long prompts read up to *44 percent* faster, in his tests."
+   ],
+   "card": {
+    "type": "stat",
+    "label": "long prompts read",
+    "value": "+44%",
+    "sub": "faster, with the iPhone",
+    "at": "word:44",
+    "stamp": {
+     "text": "HIS TESTS",
+     "at": "word:tests",
+     "x": 40,
+     "y": 470
+    },
+    "doodle": {
+     "name": "confetti",
+     "at": "word:faster",
+     "x": 170,
+     "y": 610,
+     "size": 110
+    }
+   },
+   "react": [
+    {
+     "at": "start",
+     "react": "idle"
+    },
+    {
+     "at": "word:44",
+     "react": "wow",
+     "jump": true
+    },
+    {
+     "at": "word:faster",
+     "react": "happy"
+    }
+   ]
+  },
+  {
+   "pause_before": 0.35,
+   "lines": [
+    "And it's *free* on GitHub."
+   ],
+   "card": {
+    "type": "shot",
+    "src": "assets/gh-backburner.png",
+    "chips": [
+     {
+      "text": "free",
+      "mark": true,
+      "at": "word:free"
+     },
+     {
+      "text": "open source"
+     },
+     {
+      "text": "MIT",
+      "dim": true
+     }
+    ],
+    "doodle": {
+     "name": "heart",
+     "at": "word:free",
+     "x": 70,
+     "y": 520
+    }
+   },
+   "react": [
+    {
+     "at": "start",
+     "react": "idle",
+     "look": -1
+    },
+    {
+     "at": "word:free",
+     "react": "love"
+    }
+   ]
+  },
+  {
+   "pause_before": 0.35,
+   "lines": [
+    "*Follow* for more like this."
+   ],
+   "card": {
+    "type": "follow",
+    "tap_at": "word:follow+0.3"
+   }
+  }
+ ],
+ "style": "sketchbook_dark"
+}

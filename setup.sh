@@ -26,6 +26,13 @@ ICONS="${REELKIT_ICONS:-$HOME/.cache/reelkit/icons}"; mkdir -p "$ICONS"
 [ -d "$ICONS/node_modules/@iconify-json/logos" ] || npm i -s --no-audit --no-fund --prefix "$ICONS" \
   @iconify-json/logos @iconify-json/simple-icons @iconify-json/devicon @iconify-json/lucide @iconify-json/tabler @iconify-json/fluent-emoji-flat \
   || echo "WARN: icon library install failed (npm); cards with icons will retry on first use" >&2
+# sketchbook style: Looseleaf (MIT) pinned, React components drawn by hand; built with Vite at render time
+LL="${REELKIT_LOOSELEAF:-$HOME/.cache/reelkit/looseleaf}"; LL_COMMIT=4bdb647940e2fefb3cebb394f3bad25c766a27d2
+if [ ! -d "$LL/node_modules" ]; then
+  rm -rf "$LL"; mkdir -p "$LL"; ( cd "$LL" && git init -q && git fetch -q --depth 1 https://github.com/kevintngo/looseleaf.git "$LL_COMMIT" \
+    && git -c advice.detachedHead=false checkout -q FETCH_HEAD && npm ci --no-audit --no-fund -s ) \
+    || echo "WARN: Looseleaf install failed; the sketchbook style will not render until it is fixed" >&2
+fi
 command -v ffmpeg >/dev/null || echo "WARN: ffmpeg missing (apt-get install -y ffmpeg)" >&2
 command -v npx >/dev/null || echo "WARN: node/npx missing (HyperFrames renders through npx)" >&2
 found=""; for c in /opt/pw-browsers/chromium_headless_shell-*/chrome-headless-shell-*/chrome-headless-shell "$HOME"/.cache/ms-playwright/chromium_headless_shell-*/chrome-headless-shell-*/chrome-headless-shell; do [ -x "$c" ] && found="$c"; done
