@@ -6,6 +6,7 @@
   python3 reel.py styles | cards [style]                         # list styles / a style's cards
   python3 reel.py analyze ref.mp4 --out refs/name                # take a reference video apart (shots, camera, colours, beats)
   python3 reel.py check out.mp4                                  # motion QA: freezes, black/white frames, hard cut to black
+  python3 reel.py layout script.json                             # layout QA before a render: caption vs card / presenter overlaps
 """
 import argparse, glob, json, os, shutil, subprocess, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -33,6 +34,19 @@ def run(cmd, cwd=None, env=None):
     if r.returncode: sys.exit(f"failed: {' '.join(cmd)}\n{(r.stdout + r.stderr)[-1500:]}")
     return r.stdout + r.stderr
 
+def fit_layout(script, tm, work, sdir, st, cues):
+    """Layout QA on the built film; a caption that lands on a card moves under it (per scene caption_y), then re-check."""
+    try:
+        from core import layout
+    except Exception as e: print("    (layout check skipped:", e, ")"); return cues
+    for _ in range(2):
+        probs = layout.check(work); fx = getattr(layout.check, "fixes", {})
+        if not probs or not fx: break
+        for sc, y in fx.items(): script["scenes"][sc]["caption_y"] = y
+        print("    captions moved under their cards:", ", ".join(f"scene {k} -> y {v}" for k, v in sorted(fx.items())))
+        cues = st.build(script, tm, work, sdir)
+    return cues
+
 def make(a):
     script = json.load(open(a.script)); sdir = os.path.dirname(os.path.abspath(a.script))
     name = os.path.splitext(os.path.basename(a.script))[0]
@@ -42,6 +56,7 @@ def make(a):
     print(f"    {len(tm['lines'])} lines, {tm['duration']} s")
     st = style(script.get("style", "paper"))
     print(f"2/4 picture ({script.get('style', 'paper')})"); cues = st.build(script, tm, work, sdir)
+    cues = fit_layout(script, tm, work, sdir, st, cues)
     env = dict(os.environ); b = browser()
     if b: env["HYPERFRAMES_BROWSER_PATH"] = b
     fdir = os.path.join(work, "film")
@@ -73,6 +88,7 @@ if __name__ == "__main__":
     an = sp.add_parser("analyze", help="take a reference video apart: reel.py analyze ref.mp4 --out refs/name"); an.add_argument("src"); an.add_argument("--out", required=True)
     ck = sp.add_parser("check", help="motion QA of a render: freezes, black/white frames, hard cut to black"); ck.add_argument("video"); ck.add_argument("--out")
     ck.add_argument("--from", dest="a", default="0"); ck.add_argument("--to", dest="b", default="0"); ck.add_argument("--freeze", default="1.0")
+    ly = sp.add_parser("layout", help="layout QA without rendering: caption/card/presenter overlaps + a contact sheet"); ly.add_argument("script"); ly.add_argument("--work")
     ic = sp.add_parser("icons", help="search the icon library: reel.py icons openai"); ic.add_argument("query"); ic.add_argument("-n", type=int, default=40)
     a = ap.parse_args()
     if a.cmd == "analyze":
@@ -93,6 +109,14 @@ if __name__ == "__main__":
             import soundfile as sf
             aud, sr = _model().create(ps, voice="am_puck", speed=1.0, lang="en-us", is_phonemes=True); sf.write(a.wav, aud, sr)
         sys.exit(0)
+    if a.cmd == "layout":
+        script = json.load(open(a.script)); sdir = os.path.dirname(os.path.abspath(a.script))
+        name = os.path.splitext(os.path.basename(a.script))[0]
+        work = os.path.abspath(a.work or os.path.join(sdir, "build", name)); os.makedirs(work, exist_ok=True)
+        print("1/2 voice"); tm = voice.speak(script, work)
+        print("2/2 picture"); st = style(script.get("style", "paper")); cues = st.build(script, tm, work, sdir)
+        fit_layout(script, tm, work, sdir, st, cues)
+        from core import layout; probs = layout.check(work); sys.exit(1 if probs else 0)
     if a.cmd == "make": make(a)
     elif a.cmd == "styles": print("styles:", ", ".join(styles()))
     else: print(f"{a.style} cards:", ", ".join(style(a.style).CARDS))

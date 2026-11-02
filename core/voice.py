@@ -52,7 +52,7 @@ def intro(script):
     if cfg is False: return None
     cfg = dict(cfg) if isinstance(cfg, dict) else {}
     snd = cfg.get("sound", INTRO)
-    return dict(sound=snd, gain=cfg.get("gain", -9), lead=cfg.get("lead", 0.4)) if os.path.exists(snd) else None
+    return dict(sound=snd, gain=cfg.get("gain", -9), lead=cfg.get("lead", 0.3)) if os.path.exists(snd) else None
 def intro_lead(script):
     i = intro(script); return i["lead"] if i else 0.0
 

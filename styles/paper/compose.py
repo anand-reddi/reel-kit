@@ -644,7 +644,7 @@ class Film:
         lights = "" if bstyle == "glow" else "".join(f'<div style="position:absolute;left:{x}%;top:{y}%;width:{r}px;height:{r}px;border-radius:50%;background:{col};filter:blur({r // 3}px);opacity:{o}"></div>'
                          for x, y, r, col, o in ((8, 18, 160, "#ffb46b", 0.35), (78, 12, 200, "#6b8cff", 0.25), (86, 52, 120, "#ffd59a", 0.25)))
         L0 = scenes[0].get("layout", "box") if scenes else "box"
-        first_back = lay[L0 if L0 in lay else "box"]["back"]["opacity"]
+        first_back = 0   # starts hidden; the timeline sets the first layout at 0 s (a visible full-frame layer at load fails lint)
         glow = (f'<div id="camglow" style="position:absolute;border-radius:50%;pointer-events:none;'
                 f'background:radial-gradient(circle, {gcol}8c 0%, {gcol}4d 28%, {gcol}1a 52%, transparent 70%)"></div>') if gcol else ""
         return (f'<div id="cam" style="position:absolute;transform-origin:50% 50%">'

@@ -312,7 +312,7 @@ def clips(p, c, x):
             pills += f'<div id="{p}-pl{i}" class="clipl mono"><i></i>{esc(it["label"])}</div>'
             x.A(f'tl.fromTo("#{p}-pl{i}", {{ opacity: 0, y: 16 }}, {{ opacity: 1, y: 0, duration: 0.22, ease: "back.out(2)", immediateRender: false }}, {x.r(ts[i])});')
             if i + 1 < len(its): x.A(f'tl.to("#{p}-pl{i}", {{ opacity: 0, duration: 0.08 }}, {x.r(ts[i + 1] - 0.08)});')
-            if i: x.sfx(ts[i], "pro_pop/round", -12)
+            if i: x.sfx(ts[i], "pro_pop_in/round", -12)
     if c.get("url"):   # a browser bar: the address types in, then gets a red underline
         u = c["url"]; tu = x.at(c.get("url_at", "start+0.1")); per = 0.055
         chars = "".join(f'<span id="{p}-u{j}" style="opacity:0">{esc(ch)}</span>' for j, ch in enumerate(u))
@@ -332,6 +332,25 @@ def clips(p, c, x):
         x.A(f'tl.fromTo("#{p}-tg", {{ opacity: 0, y: -20 }}, {{ opacity: 1, y: 0, duration: 0.3, ease: "power3.out", immediateRender: false }}, {x.r(x.at(c.get("tagline_at", "start+0.3")))});')
     return f'<div class="clipwin" style="width:{w}px;margin-left:{(1080 - w) // 2}px">{title}<div class="clipin" style="height:{h}px">{vids}{tag}{pills}</div></div>'
 
+# ------------------------------------------------------------------ hero: a looping visual in the centre (e.g. a glowing orb on black), a logo on top
+def hero(p, c, x):
+    """The opening shot without the presenter: `media` (a video loop on black; its edges fade into the page) centred,
+    `logo` (an image) dropping in above it on a light plate (`plate: false` for a transparent logo).
+    keys: media, logo, size (px, default 760), logo_width (px, 820), logo_at, media_at"""
+    x.f.uses_video = True
+    src = x.asset(c["media"]); full = src if os.path.isabs(c["media"]) else os.path.join(x.f.sdir, c["media"])
+    size = c.get("size", 760); lw = c.get("logo_width", 820)
+    tm, tl_ = x.at(c.get("media_at", "start")), x.at(c.get("logo_at", "start+0.15"))
+    st = "position:absolute;inset:0;width:100%;height:100%;object-fit:cover"
+    vid = _vidspan(src, x.start, x.end + 0.4, _dur(full), 0, "", x, st)
+    x.A(f'tl.fromTo("#{p}-orb", {{ opacity: 0, scale: 0.55 }}, {{ opacity: 1, scale: 1, duration: 0.7, ease: "power3.out" }}, {x.r(tm)});')
+    x.A(f'tl.fromTo("#{p}-lg", {{ opacity: 0, y: -90, scale: 0.9 }}, {{ opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "back.out(1.7)" }}, {x.r(tl_)});')
+    x.A(f'tl.to("#{p}-orb", {{ scale: 1.06, duration: {x.r(max(0.5, x.end - tm - 0.7))}, ease: "sine.inOut" }}, {x.r(tm + 0.7)});')
+    plate = c.get("plate", True)
+    logo = f'<img src="{esc(x.asset(c["logo"]))}" style="width:100%;display:block"/>' if c.get("logo") else ""
+    return (f'<div class="hero"><div id="{p}-lg" class="herologo{" plate" if plate else ""}" style="width:{lw}px">{logo}</div>'
+            f'<div id="{p}-orb" class="heroorb" style="width:{size}px;height:{size}px">{vid}</div></div>')
+
 # ------------------------------------------------------------------ lineup: a row of transparent character clips popping in
 def lineup(p, c, x):
     x.f.uses_video = True
@@ -345,7 +364,7 @@ def lineup(p, c, x):
         tag = f'<div class="lutag mono{" free" if it.get("free") else ""}">{esc(it.get("tag", ""))}</div>' if it.get("tag") else ""
         out += f'<div id="{p}-c{i}" class="lucell" style="height:{h}px">{v}{tag}</div>'
         x.A(f'tl.fromTo("#{p}-c{i}", {{ opacity: 0, y: 60, scale: 0.8 }}, {{ opacity: 1, y: 0, scale: 1, duration: 0.35, ease: "back.out(2)", immediateRender: false }}, {x.r(t)});')
-        x.sfx(t, "pro_pop/round", -15)
+        x.sfx(t, "pro_pop_in/round", -15)
     if c.get("highlight") is not None:
         k = c["highlight"]; t = x.at(c.get("highlight_at", "line:1"))
         x.A(f'tl.fromTo("#{p}-c{k}", {{ scale: 1 }}, {{ scale: 1.12, duration: 0.3, ease: "back.out(3)", immediateRender: false }}, {x.r(t)});')
@@ -757,6 +776,6 @@ def shot(p, c, x):
             f'<div class="shview" style="height:{VH:.0f}px"><div id="{p}-cam" class="shcam" style="width:{W}px;height:{SH:.0f}px">'
             f'<img src="{esc(src)}"/>{marks}</div></div></div>')
 
-CARDS.update(shot=shot)
+CARDS.update(hero=hero, shot=shot)
 CARDS.update(meter=meter, swap=swap, versus=versus, usage=usage)
 CARDS.update(reels=reels, phone=phone, gallery=gallery, voice=voice, timeline=timeline, upload=upload, share=share, follow=follow)
