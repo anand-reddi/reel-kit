@@ -56,7 +56,18 @@ def intro(script):
 def intro_lead(script):
     i = intro(script); return i["lead"] if i else 0.0
 
+def silent(script, work):
+    """A reel without a voice ("voice": false): scenes last "beats" each on the script's tempo; writes a silent vo.wav."""
+    bpm = script.get("bpm", script.get("music", {}).get("bpm", 120)); spb = 60 / bpm; t = 0.0; sc = []
+    for s in script["scenes"]:
+        d = s.get("beats", 4) * spb; sc.append([round(t, 4), round(t + d, 4)]); t += d
+    timing = {"duration": round(t, 3), "lines": [], "scenes": sc}
+    sf.write(os.path.join(work, "vo.wav"), np.zeros(int(t * SR) + SR, dtype=np.float32), SR)
+    json.dump(timing, open(os.path.join(work, "timing.json"), "w"), indent=1)
+    return timing
+
 def speak(script, work):
+    if script.get("voice") is False: return silent(script, work)
     k = _model(); v_cfg = script.get("voice", {})
     voice, speed, lang = v_cfg.get("name", "am_puck"), v_cfg.get("speed", 1.0), v_cfg.get("lang", "en-us")
     say_map = v_cfg.get("say", {})          # pronunciation fixes, whole words: {"SQL": "sequel"} or {"Cindy": "/sˈɪndi/"}

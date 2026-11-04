@@ -1,0 +1,40 @@
+{
+ "style": "kinetic",
+ "title": "Every block",
+ "voice": false,
+ "bpm": 128,
+ "music": {"style": "beat", "bpm": 128, "key": "minor"},
+ "levels": {"music": -19, "sfx": -16},
+ "sfx_set": "cinema",
+ "palette": {"bg": "#0b0b0b", "paper": "#f2f1ee", "accent": "#e5372d", "hot": "#ff8a3d", "ink": "#0b0b0b"},
+ "hud": "KRISHEXPLAINZ  ·  KINETIC",
+ "scenes": [
+  {"beats": 8, "block": {"type": "Words", "charge": true, "shots": [
+    {"at": 1, "style": "punch3d", "text": "MEET", "fx": "punch"},
+    {"at": 2, "style": "slam", "text": "KINETIC", "ground": "accent", "dot": true},
+    {"at": 3, "style": "stack", "text": ["HUGE WORDS", "EVERY BEAT"], "ground": "paper", "in": "whipX", "fx": "none", "note": "one idea per beat", "noteAt": 0.5},
+    {"at": 5, "style": "split", "text": ["AND THEN", "DROP."], "in": "whipY", "fx": "punch", "big": true, "scramble": [0, 0.8]},
+    {"at": 6.5, "style": "pair", "text": ["LEFT", "RIGHT"], "ground": "accent", "second": 0.5, "glitch": true}
+  ]}},
+  {"beats": 8, "block": {"type": "Strike", "items": [
+    {"at": 0, "word": "WAITING.", "ui": {"type": "timeline", "title": "export_final_v3", "tag": "EXPORTING 4%"}},
+    {"at": 3, "word": "PLUGINS.", "ground": "paper", "ui": {"type": "tiles", "title": "plugins", "tiles": [["GLOW", "◆", "v1.0"], ["SHAKE", "●", "v2.1"], ["BLUR", "▲", "v3.2"], ["TEXT", "■", "v1.4"]]}},
+    {"at": 6, "word": "SERVERS.", "ui": {"type": "rack", "title": "render farm", "rows": ["NODE 01", "NODE 02", "NODE 03"]}}
+  ]}},
+  {"beats": 6, "block": {"type": "Graph", "number": "0", "label": "Keyframes", "sub": "dragged by hand", "ground": "paper", "ticks": ["4f", "8f", "12f", "16f"], "portal": true}},
+  {"beats": 8, "block": {"type": "Hero", "kicker": "Written by", "title": "Claude", "sub": "in Claude Code", "chevron": "> ", "landZoom": 1.6}},
+  {"beats": 10, "block": {"type": "Prompt", "label": "BRIEF.md", "unit": "chars", "doodles": true, "text": [["make a ", 0], ["launch film", 1], [" for my app, ", 0], ["fast", 1], [", red and black, ", 0], ["30 seconds", 1]]}},
+  {"beats": 6, "block": {"type": "Stretch", "word": "ELASTIC.", "grounds": [[0, "accent"], [3, "paper"], [5, "accent"]], "code": true}},
+  {"beats": 8, "block": {"type": "Fly", "words": [["CAMERA", "bg"], ["FLIES", "accent"], ["THROUGH", "bg"], ["THE TYPE.", "accent"]]}},
+  {"beats": 10, "block": {"type": "Notes", "preview": "ELASTIC.", "file": "preview.mp4", "tag": "LIVE", "panel": "notes from the client",
+    "notes": [["hotter orange", "recolor"], ["cut the intro in half", "trim"], ["more punch", "punch"]],
+    "segments": [["INTRO", 260], ["BUILD", 240], ["DROP", 220], ["END", 120]]}},
+  {"beats": 8, "block": {"type": "Counters", "title": "made of", "counters": [["1", "web page"], ["{lines}", "lines of code"], ["{frames}", "frames. all code."]]}},
+  {"beats": 8, "block": {"type": "Progress", "lines": ["RENDERED", "ON A LAPTOP."], "label": "RENDERING", "doneLabel": "DONE", "doneRight": "60 FPS"}},
+  {"beats": 8, "block": {"type": "Chain", "nodes": [["BRIEF", "brief.md · 142 chars"], ["CODE", "film.js · {lines} lines"], ["FILM.", "1080p · 60 fps", "accent"]]}},
+  {"beats": 6, "block": {"type": "Rewind", "from": 12, "label": "PLAYBACK"}},
+  {"beats": 8, "block": {"type": "Picture", "src": "../../paper/examples/cyt-new-home.jpg", "reveal": "slash", "weather": "rain", "tint": 0.6,
+    "words": [[1, "YOUR"], [2.5, "SCREENSHOTS", "accent"], [4.5, "IN THE FILM."]], "cutIns": [[6, 1.7, [0.3, 0.35]]]}},
+  {"beats": 6, "block": {"type": "Logo", "mark": "lucide:clapperboard", "wordmark": "krishexplainz", "tagline": "Motion design, written in code.", "small": "FOLLOW FOR MORE"}}
+ ]
+}

@@ -57,7 +57,9 @@ word-synced captions, presenter
 pill; each video brings its own scene module (see `styles/studio3d/STYLE.md`).
 `sketchbook` — Looseleaf's hand-drawn paper UI (MIT) in its original look: sage desk, light paper, highlighter, Stubby the
 pencil reacting in poses. `sketchbook_dark` — the same cards in the krishexplainz look (near-black dotted page, dark
-paper, one red accent) with an original black cat that reacts with expressions. Both: `styles/sketchbook/STYLE.md`. `python3 reel.py styles` lists what the repo has now.
+paper, one red accent) with an original black cat that reacts with expressions. Both: `styles/sketchbook/STYLE.md`. `kinetic` — kinetic-type motion design in 9:16: huge words on every beat, ground flips, whip pans, 3D type the camera
+flies through, slot counters, comets; 14 blocks on the beat grid, with or without a voice (`styles/kinetic/STYLE.md`).
+`python3 reel.py styles` lists what the repo has now.
 
 ## 2. Adding a new style from a reference video
 When the user shares a reference video and wants "videos like this":

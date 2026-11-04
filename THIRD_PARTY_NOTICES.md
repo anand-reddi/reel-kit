@@ -44,3 +44,10 @@ font from Looseleaf (https://github.com/kevintngo/looseleaf, commit 4bdb647), in
 > OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 The black cat in `styles/sketchbook/app/cat.tsx` is original to reel-kit.
+
+## kinetic style
+- Archivo variable font (wght 100-900, wdth 62-125), SIL Open Font License 1.1, via @fontsource-variable/archivo:
+  `assets/fonts/archivo-var-latin.woff2`.
+- The kinetic style's look and block list follow Scenario's "kinetic film" exploration (scenario.com/explorations/kinetic-film)
+  and the MIT-licensed motion library in github.com/scenario-labs/skills. The engine (`styles/kinetic/engine`) is our own
+  code; nothing from Scenario's unlicensed kinetic-film engine is included.

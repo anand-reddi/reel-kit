@@ -10,6 +10,9 @@ def main(work, out, times=None):
     from PIL import Image, ImageDraw, ImageFont
     tm = json.load(open(os.path.join(work, "timing.json")))
     pts = [(t, 0, "") for t in times] if times else [(0.2, 0, "(first frame)")]
+    if not times and not tm["lines"]:   # a reel without a voice: three moments per scene
+        for i, (a, b) in enumerate(tm.get("scenes", [])):
+            for k in (.2, .55, .9): pts.append((round(a + (b - a) * k, 2), i, f"scene {i + 1}"))
     for ln in ([] if times else tm["lines"]):
         pts.append((round(ln["end"] - 0.08, 2), ln["scene"], ln.get("text", "")))
     SEEK = r"""async (t) => {

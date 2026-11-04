@@ -1,0 +1,109 @@
+@font-face { font-family: AV; src: url(assets/archivo-var-latin.woff2) format("woff2"); font-weight: 100 900; font-stretch: 62% 125%; }
+@font-face { font-family: AS; src: url(assets/archivo-latin-800-normal.woff2); }
+@font-face { font-family: MO; src: url(assets/jetbrains-mono-latin-500-normal.woff2); }
+html, body { margin: 0; background: #000; }
+#root { position: relative; width: 1080px; height: 1920px; overflow: hidden; font-family: AV, sans-serif; }
+#ground { position: absolute; inset: 0; background: {bg}; }
+#cam { position: absolute; inset: 0; transform-origin: 50% 50%; }
+.blk, .shot { position: absolute; inset: 0; visibility: hidden; }
+.shot { overflow: hidden; }
+#fx { position: absolute; inset: 0; pointer-events: none; z-index: 20; }
+#invert { position: absolute; inset: 0; background: {paper}; opacity: 0; z-index: 30; }
+.flash { position: absolute; inset: 0; opacity: 0; }
+.svgl { position: absolute; left: 0; top: 0; overflow: visible; }
+.mono { font-family: MO, monospace; text-transform: uppercase; letter-spacing: .08em; }
+.kw { position: absolute; left: 0; right: 0; text-align: center; white-space: nowrap; text-transform: uppercase; letter-spacing: -.03em; line-height: .86; transform: translateY(-50%); }
+.kw .fitw { display: inline-block; }
+.kw .ch { display: inline-block; }
+.gl { pointer-events: none; }
+.ghosts { position: absolute; inset: 0; visibility: hidden; }
+.ghost { position: absolute; left: 0; white-space: nowrap; font-family: AS; text-transform: uppercase; color: transparent; letter-spacing: -.02em; }
+.charge { position: absolute; left: 510px; top: 930px; width: 60px; height: 60px; border-radius: 50%; background: {accent}; box-shadow: 0 0 60px 20px {accent}; visibility: hidden; }
+.kbar { position: absolute; left: 140px; right: 140px; top: 1260px; height: 26px; background: {accent}; transform-origin: 0 50%; }
+.knote { position: absolute; left: 0; right: 0; top: 1500px; text-align: center; font-size: 40px; }
+.p3d { position: absolute; inset: 0; perspective: 1100px; perspective-origin: 50% 50%; }
+.ex3 { position: absolute; left: 50%; top: 50%; transform-style: preserve-3d; }
+.exl { position: absolute; left: 0; top: 0; white-space: nowrap; text-transform: uppercase; letter-spacing: -.03em; line-height: 1; transform: translate(-50%,-50%); }
+.echo { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); white-space: nowrap; font-family: AS; text-transform: uppercase; color: transparent; }
+.codewall { position: absolute; left: 40px; right: 40px; top: 0; font-family: MO; font-size: 22px; line-height: 1.35; white-space: pre; overflow: hidden; height: 4000px; visibility: hidden; }
+.gburst { position: absolute; inset: 0; }
+.gb { position: absolute; font-family: MO; font-weight: 700; }
+/* Strike mocks */
+.mock { position: absolute; left: 90px; right: 90px; height: 560px; border-radius: 26px; overflow: hidden; background: #161616; border: 4px solid {paper}; box-shadow: 0 30px 80px rgba(0,0,0,.6); }
+.mbar { height: 58px; display: flex; align-items: center; gap: 10px; padding: 0 22px; background: #262626; color: #b8b8be; font-size: 22px; }
+.mbar i { width: 15px; height: 15px; border-radius: 50%; background: #55555a; } .mbar i:first-child { background: {accent}; }
+.mbar span { margin-left: 12px; flex: 1; } .mbar em { font-style: normal; color: {accent}; }
+.mbody { padding: 26px; display: flex; flex-direction: column; gap: 16px; }
+.mrow { display: flex; gap: 8px; } .mclip { height: 54px; border-radius: 8px; background: #3a3a3a; } .mrow:nth-child(2) .mclip { background: #4a2a28; }
+.mprog { height: 18px; border-radius: 9px; background: #2c2c2c; margin-top: 18px; } .mprog b { display: block; width: 4%; height: 100%; background: {accent}; border-radius: 9px; }
+.mtiles { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; } .mtile { height: 200px; border-radius: 18px; background: #262626; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #ddd; gap: 8px; }
+.mtile b { font-size: 60px; color: {accent}; } .mtile span { font-size: 30px; font-weight: 800; } .mtile em { font-style: normal; color: #888; font-size: 22px; }
+.mrack { height: 110px; border-radius: 14px; background: #262626; display: flex; align-items: center; gap: 16px; padding: 0 24px; color: #ddd; font-size: 30px; }
+.mrack i { width: 18px; height: 18px; border-radius: 50%; background: #3ad16a; } .mrack span { flex: 1; } .mrack b { width: 200px; height: 16px; background: #3a3a3a; border-radius: 8px; }
+.mline { color: #aaa; font-size: 34px; } .mimg { width: 100%; height: 470px; object-fit: cover; border-radius: 12px; }
+.strike { position: absolute; left: 40px; right: 40px; height: 40px; background: #ff4a3a; border-radius: 20px; transform-origin: 0 50%; transform: rotate(-9deg) scaleX(0); box-shadow: 0 0 40px 10px {accent}, 0 0 120px 30px {accent}88; }
+/* Graph */
+.gworld { position: absolute; inset: 0; transform-origin: 50% 50%; }
+.gtick { position: absolute; width: 120px; text-align: center; font-size: 24px; }
+.glab { position: absolute; left: 0; right: 0; top: 560px; text-align: center; font-weight: 900; font-size: 64px; font-stretch: 112%; text-transform: uppercase; letter-spacing: .02em; }
+.gsub { position: absolute; left: 0; right: 0; top: 650px; text-align: center; font-size: 30px; opacity: .7; }
+/* Hero */
+.hsub { position: absolute; left: 0; right: 0; top: 1240px; text-align: center; font-size: 44px; }
+/* Prompt */
+.pworld { position: absolute; inset: 0; }
+.plab { position: absolute; left: 110px; top: 590px; font-size: 26px; opacity: .6; }
+.ptxt { position: absolute; left: 110px; right: 110px; top: 660px; font-size: 64px; line-height: 1.32; text-transform: none; letter-spacing: 0; }
+.ptxt .pw { display: inline-block; white-space: nowrap; }
+.pkw { position: relative; display: inline; } .pkw > b { position: absolute; left: -8px; right: -8px; top: 6px; bottom: 2px; background: {accent}; border-radius: 8px; z-index: -1; transform-origin: 0 50%; transform: scaleX(0); }
+.pdoodle { clip-path: inset(0 100% 0 0); position: absolute; left: -26px; right: -26px; top: -16px; bottom: -14px; border: 5px solid {ink}; border-radius: 50%; transform: rotate(-3deg); }
+.pcaret { display: inline-block; width: 30px; height: 70px; background: {accent}; vertical-align: -12px; margin-left: 6px; }
+.punit { position: absolute; right: 110px; top: 1230px; font-size: 26px; opacity: .7; }
+/* Fly */
+.shot.fly { perspective: 900px; perspective-origin: 50% 50%; }
+.frig { position: absolute; left: 50%; top: 50%; transform-style: preserve-3d; }
+.fnode { position: absolute; left: 0; top: 0; transform-style: preserve-3d; }
+.portal { position: absolute; left: -470px; top: -620px; width: 940px; height: 1240px; border: 18px solid {accent}; clip-path: polygon(12% 0, 88% 0, 100% 9%, 100% 91%, 88% 100%, 12% 100%, 0 91%, 0 9%); box-sizing: border-box; }
+/* Notes */
+.nprev { position: absolute; left: 90px; right: 90px; top: 260px; height: 520px; border-radius: 24px; overflow: hidden; border: 4px solid {paper}; }
+.npw { position: relative; height: 462px; } .npw .kw { top: 231px; }
+.npanel { position: absolute; left: 90px; right: 90px; top: 840px; padding: 26px 30px; border-radius: 22px; background: #151515; border: 3px solid #333; text-transform: none; letter-spacing: 0; font-size: 38px; }
+.nph { font-size: 22px; opacity: .55; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 14px; }
+.nrow { display: flex; gap: 14px; margin: 10px 0; } .nrow b { color: {accent}; }
+.ntl { position: absolute; left: 90px; right: 90px; top: 1380px; height: 90px; display: flex; gap: 8px; }
+.nseg { height: 90px; border-radius: 12px; background: #2a2a2a; color: #ccc; font-size: 22px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.nseg:nth-child(3) { background: {accent}; color: #fff; }
+/* Counters */
+.cplane { position: absolute; left: -200px; right: -200px; top: 200px; height: 4000px; font-size: 26px; line-height: 1.4; white-space: pre; opacity: .16; transform: perspective(900px) rotateX(55deg); transform-origin: 50% 0; text-transform: none; letter-spacing: 0; }
+.ctitle { position: absolute; left: 0; right: 0; top: 300px; text-align: center; font-size: 30px; }
+.cgrp { position: absolute; inset: 0; visibility: hidden; }
+.slots { position: absolute; left: 0; right: 0; top: 960px; transform: translateY(-60%); display: flex; justify-content: center; font-weight: 900; font-stretch: 70%; }
+.reel { overflow: hidden; position: relative; } .reel .strip { position: absolute; left: 0; right: 0; top: 0; text-align: center; }
+.clab { position: absolute; left: 0; right: 0; top: 1260px; text-align: center; font-weight: 900; font-size: 58px; font-stretch: 112%; text-transform: uppercase; }
+/* Progress */
+.scan { position: absolute; left: 50px; width: 8px; height: 260px; background: {accent}; box-shadow: 0 0 30px 8px {accent}; }
+.belt { position: absolute; left: 0; top: 1100px; display: flex; gap: 22px; }
+.bcard { width: 300px; height: 300px; border-radius: 24px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 60px; font-stretch: 112%; text-transform: uppercase; flex: none; }
+.pbar { position: absolute; left: 90px; right: 90px; top: 1520px; height: 22px; border-radius: 11px; background: rgba(128,128,128,.3); overflow: hidden; }
+.pbar b { display: block; height: 100%; background: {accent}; transform-origin: 0 50%; transform: scaleX(0); }
+.plabel { position: absolute; left: 90px; top: 1570px; font-size: 28px; } .pright { position: absolute; right: 90px; top: 1570px; font-size: 28px; }
+/* Chain */
+.cworld { position: absolute; left: 0; top: 0; width: 1080px; height: 99999px; }
+.cnode { position: absolute; width: 1080px; height: 320px; } .cnode .kw { top: 160px; }
+.csub { position: absolute; left: 0; right: 0; top: 330px; text-align: center; font-size: 30px; }
+/* Rewind */
+.rwin { position: absolute; left: 90px; right: 90px; top: 480px; height: 960px; border-radius: 26px; overflow: hidden; border: 5px solid {paper}; background: #000; box-shadow: 0 30px 90px rgba(0,0,0,.7); }
+.rscr { position: absolute; left: 0; right: 0; top: 58px; bottom: 0; background: #111; }
+/* Picture */
+.pframe { position: absolute; inset: 0; overflow: hidden; }
+.pimg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.ptint { position: absolute; inset: 0; }
+/* Logo */
+.lline { position: absolute; left: 140px; right: 140px; top: 958px; height: 4px; transform-origin: 50% 50%; }
+.lslash { position: absolute; left: 534px; top: 760px; width: 12px; height: 400px; background: {accent}; transform: rotate(18deg); transform-origin: 50% 100%; box-shadow: 0 0 40px {accent}; }
+.lmark { position: absolute; left: 0; right: 0; top: 640px; display: flex; justify-content: center; color: {accent}; } .lmark svg, .lmark img { width: 280px; height: 280px; }
+.ltag { position: absolute; left: 80px; right: 80px; top: 1240px; text-align: center; font-size: 46px; font-weight: 500; }
+.lsmall { position: absolute; left: 0; right: 0; top: 1640px; text-align: center; font-size: 24px; }
+/* hud, subtitles */
+.hud { position: absolute; left: 50px; right: 50px; top: 120px; display: flex; justify-content: space-between; font-size: 22px; color: {paper}; opacity: .75; z-index: 25; mix-blend-mode: normal; }
+.sub { position: absolute; left: 60px; right: 60px; top: 1650px; text-align: center; font-size: 34px; color: {paper}; z-index: 26; text-transform: none; letter-spacing: 0;
+  text-shadow: 0 0 6px #000, 0 2px 0 #000, 0 0 18px rgba(0,0,0,.9); opacity: 0; }
