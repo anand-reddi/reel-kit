@@ -135,7 +135,9 @@ def filmstrip(p, c, x):
 # ------------------------------------------------------------------ wall: contact-sheet tiles landing on a tilted wall + a counter
 def wall(p, c, x):
     """src (a contact-sheet image), grid: [cols, rows] of the source sheet, show: columns on the wall (6),
-    count: {to, label, at}, land: [from, until] (when the tiles land), tilt (deg, 16), skip: [tile indexes to leave out]."""
+    count: {to, label, at}, land: [from, until] (when the tiles land), tilt (deg, 16), skip: [tile indexes to leave out],
+    logo: {icon, text, at, burst_at} -- an opening: the logo spins in with its name typing beside it, then bursts and
+    the tiles fly out of it onto the wall (set land[0] to the burst)."""
     c.setdefault("scale", 1.0)
     sc_, sr = c["grid"]; iw, ih = _size(x, c["src"]); src = x.asset(c["src"])
     skip = set(c.get("skip", [])); idx = [k for k in range(sc_ * sr) if k not in skip]
@@ -147,12 +149,31 @@ def wall(p, c, x):
         r, q = divmod(j, cols); sx, sy = k % sc_, k // sc_
         tiles_ += (f'<div id="{p}-w{j}" class="wtile" style="left:{q * tw:.1f}px;top:{r * th_:.1f}px;width:{tw - 6:.1f}px;height:{th_ - 6:.1f}px;'
                    f'background-image:url({esc(src)});background-size:{sc_ * 100}% {sr * 100}%;background-position:{sx * 100 / max(1, sc_ - 1):.3f}% {sy * 100 / max(1, sr - 1):.3f}%"></div>')
+    H = rows * th_; tilt = c.get("tilt", 16); yEnd = -(H - 700) * 0.6 - 60; D = max(1, x.end - x.start)
+    lg = c.get("logo"); logo = ""
+    if lg:   # the opening: logo spins in, its name types, then it bursts into the tiles
+        ta = x.at(lg.get("at", "start")); tb = x.at(lg.get("burst_at", "start+0.9")); name = lg.get("text", "")
+        chars = "".join(f'<span id="{p}-lc{i}" style="opacity:0">{esc(ch) if ch != " " else "&nbsp;"}</span>' for i, ch in enumerate(name))
+        logo = (f'<div id="{p}-lg" class="wlogo"><div id="{p}-lgi" class="wlgi">{ico(lg["icon"], 170)}</div>'
+                f'<div class="wlgt">{chars}<i id="{p}-lcur"></i></div><div id="{p}-ring" class="wring"></div></div>')
+        x.A(f'tl.fromTo("#{p}-lgi", {{ rotation: -200, scale: 0.2, opacity: 0 }}, {{ rotation: 0, scale: 1, opacity: 1, duration: 0.5, ease: "back.out(1.8)", immediateRender: false }}, {x.r(ta)});')
+        per = min(0.05, max(0.02, (tb - ta - 0.5) / max(1, len(name))))
+        for i in range(len(name)): x.A(f'tl.set("#{p}-lc{i}", {{ opacity: 1 }}, {x.r(ta + 0.25 + i * per)});')
+        x.typing(ta + 0.25, len(name) * per, -17, "pro_typing_run/glass")
+        x.A(f'tl.to("#{p}-lgi", {{ scale: 1.25, rotation: 30, duration: 0.12, ease: "power2.in" }}, {x.r(tb - 0.12)});')
+        x.A(f'tl.to("#{p}-lg", {{ opacity: 0, scale: 1.6, filter: "blur(10px)", duration: 0.22, ease: "power2.out" }}, {x.r(tb)});')
+        x.A(f'tl.fromTo("#{p}-ring", {{ scale: 0.2, opacity: 1 }}, {{ scale: 3.2, opacity: 0, duration: 0.5, ease: "power2.out", immediateRender: false }}, {x.r(tb)});')
+        x.sfx(ta, "pro_logo_sting/zap_bloom", -15); x.sfx(tb, "whoosh_big/thump_airy", -11)
     for rank, j in enumerate(order):
         t = t0 + (t1 - t0) * rank / max(1, len(order) - 1)
-        x.A(f'tl.fromTo("#{p}-w{j}", {{ opacity: 0, scale: 1.8, z: 300 }}, {{ opacity: 1, scale: 1, z: 0, duration: 0.25, ease: "power3.out", immediateRender: false }}, {x.r(t)});')
-        if rank % 6 == 0: x.sfx(t + 0.2, "pro_hover_tick/glass", -20)
-    H = rows * th_; tilt = c.get("tilt", 16)
-    x.A(f'tl.fromTo("#{p}-wall", {{ y: 80 }}, {{ y: {-(H - 700) * 0.6 - 60:.0f}, duration: {x.r(max(1, x.end - x.start))}, ease: "none" }}, {x.r(x.start)});')
+        if lg:   # fly out of the logo (card px 540, 330 -> wall px, allowing for the wall's drift at that moment)
+            r, q = divmod(j, cols); wy = 80 + (yEnd - 80) * (t - x.start) / D
+            dx = 590 - (q * tw + tw / 2); dy = 330 - (r * th_ + th_ / 2) - wy; rot = rnd.uniform(-60, 60)
+            x.A(f'tl.fromTo("#{p}-w{j}", {{ opacity: 0, x: {dx:.0f}, y: {dy:.0f}, scale: 0.15, rotation: {rot:.0f} }}, {{ opacity: 1, x: 0, y: 0, scale: 1, rotation: 0, duration: 0.5, ease: "power3.out", immediateRender: false }}, {x.r(t)});')
+        else:
+            x.A(f'tl.fromTo("#{p}-w{j}", {{ opacity: 0, scale: 1.8, z: 300 }}, {{ opacity: 1, scale: 1, z: 0, duration: 0.25, ease: "power3.out", immediateRender: false }}, {x.r(t)});')
+        if rank % 6 == 0: x.sfx(t + (0.45 if lg else 0.2), "pro_hover_tick/glass", -20)
+    x.A(f'tl.fromTo("#{p}-wall", {{ y: 80 }}, {{ y: {yEnd:.0f}, duration: {x.r(D)}, ease: "none" }}, {x.r(x.start)});')
     cn = c.get("count"); badge = ""
     if cn:
         ta = x.at(cn.get("at", "line:0"))
@@ -161,7 +182,7 @@ def wall(p, c, x):
         x.A(f'tl.fromTo("#{p}-bd", {{ opacity: 0, scale: 0.4, rotation: -8 }}, {{ opacity: 1, scale: 1, rotation: -3, duration: 0.4, ease: "back.out(2.5)", immediateRender: false }}, {x.r(ta - 0.65)});')
         x.sfx(ta - 0.6, "pro_riser/nblips", -16); x.sfx(ta, "pro_impact/air", -12)
     return (f'<div class="wview"><div style="position:absolute;left:{(1080 - 1180) / 2:.0f}px;top:0;width:1180px;transform:perspective(1600px) rotateX({tilt}deg) rotateZ(-4deg);transform-origin:50% 0">'
-            f'<div id="{p}-wall" class="wwall" style="height:{H:.0f}px">{tiles_}</div></div></div>{badge}')
+            f'<div id="{p}-wall" class="wwall" style="height:{H:.0f}px">{tiles_}</div></div></div>{logo}{badge}')
 
 # ------------------------------------------------------------------ polaroid: instant photos dropping onto a pile
 def polaroid(p, c, x):
@@ -185,8 +206,11 @@ def polaroid(p, c, x):
 # ------------------------------------------------------------------ promptplay: prompt -> build steps -> result in a frame
 def promptplay(p, c, x):
     """text (the prompt), label (small mono label), send_at, steps: [{label, at}] (a build bar ticking each one),
-    result: {src (clip/image), title, at}."""
+    result: {src (clip/image), title, at}. screen: {label} -- an empty film screen waits under the prompt from the
+    first frame (slate icon, shimmer), the progress bar runs along its bottom edge, the steps sit in a row under it,
+    and the result fades into that same screen (no dead space while the prompt types)."""
     c.setdefault("scale", 1.0)
+    if c.get("screen"): return _promptscreen(p, c, x)
     text = c["text"]; t0 = x.at(c.get("type_at", "start+0.3")); send = x.at(c.get("send_at", "line:0:end"))
     per = min(0.05, max(0.02, (send - 0.2 - t0) / max(1, len(text))))
     chars = "".join(f'<span id="{p}-c{i}" style="opacity:0">{esc(ch) if ch != " " else "&nbsp;"}</span>' for i, ch in enumerate(text))
@@ -219,6 +243,48 @@ def promptplay(p, c, x):
     return (f'<div id="{p}-bar" class="ppbar"><div class="pplab mono">{esc(c.get("label", ""))}</div>'
             f'<div class="ppin"><span class="pr">&gt;</span><span class="ppt">{chars}</span><b id="{p}-go" class="ppgo">↑</b></div></div>'
             f'<div id="{p}-steps" class="ppsteps"><div class="ppprog"><b id="{p}-prog"></b></div>{ss}</div>{res}')
+
+def _promptscreen(p, c, x):
+    text = c["text"]; t0 = x.at(c.get("type_at", "start+0.3")); send = x.at(c.get("send_at", "line:0:end"))
+    per = min(0.05, max(0.02, (send - 0.2 - t0) / max(1, len(text))))
+    chars = "".join(f'<span id="{p}-c{i}" style="opacity:0">{esc(ch) if ch != " " else "&nbsp;"}</span>' for i, ch in enumerate(text))
+    for i in range(len(text)): x.A(f'tl.set("#{p}-c{i}", {{ opacity: 1 }}, {x.r(t0 + i * per)});')
+    x.typing(t0, len(text) * per, -15, "pro_typing_run/glass")
+    x.A(f'tl.fromTo("#{p}-go", {{ scale: 1 }}, {{ scale: 0.8, backgroundColor: "{x.th["accent"]}", duration: 0.1, yoyo: true, repeat: 1, immediateRender: false }}, {x.r(send)});')
+    x.sfx(send, "toggle/on", -11)
+    r = c.get("result", {}); tr = x.at(r.get("at", "end-2")) if r else x.end
+    # the waiting screen: in from the start, a shimmer sweeping until the result arrives
+    x.A(f'tl.fromTo("#{p}-scr", {{ opacity: 0, y: 60 }}, {{ opacity: 1, y: 0, duration: 0.4, ease: "power3.out", immediateRender: false }}, {x.r(x.start + 0.1)});')
+    n = max(1, int((tr - x.start) / 1.1))
+    x.A(f'tl.fromTo("#{p}-sh", {{ x: -500 }}, {{ x: 1300, duration: 1.1, ease: "none", repeat: {n - 1}, immediateRender: false }}, {x.r(x.start + 0.2)});')
+    x.A(f'tl.to("#{p}-wait", {{ opacity: 0.35, duration: 0.5, yoyo: true, repeat: {max(1, int((tr - x.start) / 0.5) - 1)}, ease: "sine.inOut" }}, {x.r(x.start + 0.3)});')
+    steps = c.get("steps", []); ss = ""
+    for i, s_ in enumerate(steps):
+        ts_ = x.at(s_.get("at", f"line:{i}"))
+        ss += f'<div id="{p}-s{i}" class="ppst"><i></i><span>{esc(s_["label"])}</span></div>'
+        x.A(f'tl.set("#{p}-s{i}", {{ className: "ppst on" }}, {x.r(ts_)});')
+        x.A(f'tl.fromTo("#{p}-s{i}", {{ opacity: 0.25, scale: 1.25 }}, {{ opacity: 1, scale: 1, duration: 0.25, ease: "back.out(2)", immediateRender: false }}, {x.r(ts_)});')
+        x.sfx(ts_, "ui_pop/step", -15)
+    x.A(f'tl.fromTo("#{p}-steps", {{ opacity: 0, y: 24 }}, {{ opacity: 1, y: 0, duration: 0.3, ease: "power3.out", immediateRender: false }}, {x.r(send + 0.1)});')
+    if steps:
+        b = x.at(steps[-1].get("at", "line:0"))
+        x.A(f'tl.fromTo("#{p}-prog", {{ scaleX: 0 }}, {{ scaleX: 1, duration: {x.r(max(0.4, b - send))}, ease: "none", immediateRender: false }}, {x.r(send + 0.1)});')
+        x.sfx(send + 0.2, "pro_riser/nblips", -19)
+    res = ""
+    if r:
+        st = "position:absolute;inset:0;width:100%;height:100%;object-fit:cover"
+        res = f'<div id="{p}-res" class="pps-res">{_media(x, r["src"], tr - 0.1, x.end + 0.4, st)}</div>'
+        x.A(f'tl.fromTo("#{p}-res", {{ opacity: 0, scale: 1.08, filter: "blur(14px)" }}, {{ opacity: 1, scale: 1, filter: "blur(0px)", duration: 0.45, ease: "power3.out", immediateRender: false }}, {x.r(tr - 0.15)});')
+        x.A(f'tl.to("#{p}-wait, #{p}-sh", {{ opacity: 0, duration: 0.2 }}, {x.r(tr - 0.15)});')
+        x.A(f'tl.set("#{p}-ttl", {{ innerText: "{esc(r.get("title", ""))}" }}, {x.r(tr)});')
+        x.sfx(tr - 0.15, "logo_sting/spark", -15)
+    sc = c["screen"] if isinstance(c["screen"], dict) else {}
+    return (f'<div class="pp-s"><div id="{p}-bar" class="ppbar big"><div class="pplab mono">{esc(c.get("label", ""))}</div>'
+            f'<div class="ppin"><span class="pr">&gt;</span><span class="ppt">{chars}</span><b id="{p}-go" class="ppgo">↑</b></div></div>'
+            f'<div id="{p}-scr" class="pps"><div class="pprbar mono"><b></b><b></b><b></b><span id="{p}-ttl">{esc(sc.get("title", "untitled film"))}</span></div>'
+            f'<div class="pps-in"><div id="{p}-wait" class="pps-wait">{ico("lucide:clapperboard", 110)}<span>{esc(sc.get("label", "waiting for your idea…"))}</span></div>'
+            f'<div id="{p}-sh" class="pps-sh"></div>{res}<div class="pps-prog"><b id="{p}-prog"></b></div></div></div>'
+            f'<div id="{p}-steps" class="ppsteps row">{ss}</div></div>')
 
 # ------------------------------------------------------------------ dial: a ring gauge
 def dial(p, c, x):

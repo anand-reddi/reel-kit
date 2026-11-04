@@ -5,12 +5,12 @@ timeline AND every <video> seeked to that moment, on one labelled sheet. For sho
 """
 import json, os, sys, textwrap
 
-def main(work, out):
+def main(work, out, times=None):
     from playwright.sync_api import sync_playwright
     from PIL import Image, ImageDraw, ImageFont
     tm = json.load(open(os.path.join(work, "timing.json")))
-    pts = [(0.2, 0, "(first frame)")]
-    for ln in tm["lines"]:
+    pts = [(t, 0, "") for t in times] if times else [(0.2, 0, "(first frame)")]
+    for ln in ([] if times else tm["lines"]):
         pts.append((round(ln["end"] - 0.08, 2), ln["scene"], ln.get("text", "")))
     SEEK = r"""async (t) => {
       window.__timelines.reel.seek(t, false);

@@ -16,7 +16,8 @@
   "say": {
    "ukiyo-e": "oo-kee-yo-eh",
    "RPG": "R P G",
-   "66": "sixty-six"
+   "66": "sixty-six",
+   "11.8k": "eleven point eight K"
   }
  },
  "music": {
@@ -39,35 +40,36 @@
    "layout": "none",
    "cut": "hard",
    "lines": [
-    "This repo gives Claude",
-    "its own *film studio.*"
+    "This Claude Code skill has *66* video styles…",
+    "and it makes the whole film in code."
    ],
    "card": {
-    "type": "spotlight",
-    "src": "assets/opuscar/gh-repo.png",
-    "width": 960,
-    "height": 760,
-    "focus": [
-     {
-      "at": "start+0.3",
-      "x": 86.5,
-      "y": 12.2,
-      "w": 12.5,
-      "h": 3.0,
-      "zoom": 1.7,
-      "label": "11.8k stars"
-     },
-     {
-      "at": "line:1",
-      "x": 74.2,
-      "y": 19.6,
-      "w": 24.5,
-      "h": 18.8,
-      "zoom": 1.5,
-      "label": "made in code",
-      "side": "below"
-     }
-    ]
+    "type": "wall",
+    "src": "assets/opuscar/styles66.jpg",
+    "grid": [
+     17,
+     4
+    ],
+    "skip": [
+     66,
+     67
+    ],
+    "show": 6,
+    "land": [
+     "word:66-0.1",
+     "line:0:end"
+    ],
+    "logo": {
+     "icon": "logos:claude-icon",
+     "text": "Claude Code",
+     "at": "start",
+     "burst_at": "word:66-0.1"
+    },
+    "count": {
+     "to": 66,
+     "label": "video styles",
+     "at": "word:video+0.35"
+    }
    }
   },
   {
@@ -76,7 +78,7 @@
    "cut": "whip",
    "lines": [
     "Story, drawings, music, voice…",
-    "all of it in *code.*"
+    "all of it."
    ],
    "card": {
     "type": "tiles",
@@ -102,11 +104,7 @@
       "icon": "lucide:mic",
       "at": "line:0:end-0.35"
      }
-    ],
-    "bar": {
-     "text": "all of it in code · no video AI",
-     "at": "word:code-0.25"
-    }
+    ]
    }
   },
   {
@@ -166,36 +164,6 @@
      "from": 1,
      "to": 98,
      "label": "winners"
-    }
-   }
-  },
-  {
-   "label": "66 styles",
-   "layout": "none",
-   "cut": "zoom",
-   "lines": [
-    "And you get *66 styles:*"
-   ],
-   "card": {
-    "type": "wall",
-    "src": "assets/opuscar/styles66.jpg",
-    "grid": [
-     17,
-     4
-    ],
-    "skip": [
-     66,
-     67
-    ],
-    "show": 6,
-    "land": [
-     "start+0.05",
-     "line:0:end-0.1"
-    ],
-    "count": {
-     "to": 66,
-     "label": "film styles",
-     "at": "word:styles"
     }
    }
   },
@@ -273,6 +241,10 @@
      "src": "assets/opuscar/spy.mp4",
      "title": "example · spy-titles style",
      "at": "word:shot+0.2"
+    },
+    "screen": {
+     "label": "waiting for your idea…",
+     "title": "untitled film"
     }
    }
   },
@@ -286,15 +258,13 @@
      "at": "word:Now"
     },
     {
-     "face": "smile",
-     "at": "word:free"
+     "face": "talk",
+     "at": "word:One"
     }
    ],
    "lines": [
     "Now, it's not instant.",
-    "One film takes around half an *hour.*",
-    "But for a *free* tool?",
-    "That's crazy."
+    "One film takes around half an *hour.*"
    ],
    "card": {
     "type": "dial",
@@ -303,12 +273,43 @@
     "number": 30,
     "unit": "min",
     "note": "about 30–60 min per film",
-    "badge": {
-     "text": "FREE",
-     "at": "word:free"
-    },
     "at": "line:1",
     "scale": 0.82
+   }
+  },
+  {
+   "label": "free",
+   "layout": "none",
+   "cut": "whip",
+   "lines": [
+    "But it's *free* and open source,",
+    "with 11.8k stars on GitHub."
+   ],
+   "card": {
+    "type": "spotlight",
+    "src": "assets/opuscar/gh-repo.png",
+    "width": 960,
+    "height": 760,
+    "focus": [
+     {
+      "at": "word:free",
+      "x": 74.5,
+      "y": 68.0,
+      "w": 15,
+      "h": 2.6,
+      "zoom": 2.0,
+      "label": "MIT · free"
+     },
+     {
+      "at": "line:1",
+      "x": 86.5,
+      "y": 12.2,
+      "w": 12.5,
+      "h": 3.0,
+      "zoom": 2.2,
+      "label": "11.8k stars"
+     }
+    ]
    }
   },
   {
