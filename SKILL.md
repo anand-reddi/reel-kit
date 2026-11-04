@@ -47,6 +47,9 @@ cd ~/reel-kit && python3 reel.py styles
      `{issue, time, change, before, after}`. The next review checks those first. At most 3 rounds, then tell the owner what is left.
 8. Send the MP4 with a one-line summary.
 
+Rotate cards and sound sets between reels (paper STYLE.md, "More cards" + "Sound sets"); show the owner
+`python3 reel.py board script.json` before rendering when they ask to see frames first.
+
 Styles: `paper` — off-white dotted paper, black/white UI cards with a red accent, live hairline line figures,
 word-synced captions, presenter
 (see `styles/paper/STYLE.md`).

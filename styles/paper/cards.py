@@ -779,3 +779,5 @@ def shot(p, c, x):
 CARDS.update(hero=hero, shot=shot)
 CARDS.update(meter=meter, swap=swap, versus=versus, usage=usage)
 CARDS.update(reels=reels, phone=phone, gallery=gallery, voice=voice, timeline=timeline, upload=upload, share=share, follow=follow)
+
+from . import cards_more  # noqa: E402,F401  (spotlight, tiles, filmstrip, wall, polaroid, promptplay, dial, stack, copycmd)

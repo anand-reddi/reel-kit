@@ -207,3 +207,32 @@ one does, `full` (big close-up, no card) for a reaction line like a hook or punc
 off, the column moves to the centre), `full` (close-up scaled round the head: `camera.full_scale`, `camera.full_x`; give
 that scene no card). `kinetic` and full-frame inserts are still 9:16-only. Keep a scene to 3 caption lines so the card is not
 pushed to the bottom edge. Example: a 25 s five-step how-to (checklist per step, profile card at the end).
+
+## More cards (cards_more.py): switch visuals between reels
+Don't reuse the same cards reel after reel: pick from these too. Each has its own sounds. All work in both themes.
+
+| type | use for | keys | sounds |
+|---|---|---|---|
+| `spotlight` | a real screenshot dimmed; a spotlight glides + zooms to each region, a red label pin lands beside it (repos, docs, posts) | `src`, `width`, `height`, `dim`, `focus: [{at, x, y, w, h (%), zoom, label, side}]`, `reset_at` | paper swipe, sleeve whoosh, glass tap, marimba |
+| `tiles` | 2-4 big icon tiles flipping on per word, a red code bar sweeping under them ("story, music, voice") | `title`, `items: [{label, icon, at}]`, `bar: {text, at}` | toggle on, zip up, shimmer |
+| `filmstrip` | stills or clips running through a lit film gate, counter ticking (montages, eras, "98 films") | `title`, `items: [{src, label, sub}]`, `at`, `until`, `counter: {from, to, label}` | film shutter, domino ticks, tine |
+| `wall` | a contact-sheet image cut into tiles landing on a tilted, drifting wall; big counter badge ("66 styles") | `src`, `grid: [cols, rows]`, `skip`, `show`, `land: [from, until]`, `count: {to, label, at}`, `tilt` | glass ticks, blip riser, air impact |
+| `polaroid` | clips/images dropping as tilted instant photos with a written label (named examples) | `items: [{src, label, at}]` | flick, desk knock |
+| `promptplay` | prompt types + sends, build steps tick, the result plays in a frame (input -> output) | `label`, `text`, `send_at`, `steps: [{label, at}]`, `result: {src, title, at}` | glass typing, toggle, blips, spark sting |
+| `dial` | a ring gauge sweeping to a value; number, unit, note, a slammed badge (time, cost, score) | `title`, `value` (0-100), `number`, `unit`, `note`, `badge: {text, at}`, `at` | roll riser, tine, kick + shake |
+| `stack` | 2-3 media panels stacked with label pills, flying in from alternate sides (use cases) | `width`, `items: [{src, label, at}]` | tight whoosh, wide pop |
+| `copycmd` | commands in chips, a finger taps Copy, a toast lands (install steps) | `title`, `lines`, `at`, `until`, `tap_at`, `toast` | key thock, finger tap, ding |
+
+`src` can be an image or a clip (mp4/webm/mov) on every card. Wide cards keep scale 1.0 in `none` layouts; in `box`
+layouts keep cards short (or set `"scale"`), the caption sits at y 850.
+
+### Sound sets
+`"sfx_set"` swaps every cut sound in the reel: `classic` (default), `cinema` (paper swipe, film shutter, blade, tape
+stop), `soft` (sleeve, bamboo, mirror shutter, breath), `digital` (zips, chirps, data glitch, sub drops). Rotate sets
+between reels so they don't all sound the same; card sounds stay as listed above.
+
+### Storyboard before render
+`python3 reel.py board script.json` writes `build/<name>/board/board.jpg`: one frame at the end of every spoken line
+(and the first frame) with clips seeked to the right moment. Send it to the owner and render only after they approve.
+
+Example: `examples/opuscar-ig.json` (36 s, every new card, `sfx_set: cinema`).

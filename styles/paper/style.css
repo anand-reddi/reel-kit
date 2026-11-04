@@ -321,3 +321,97 @@ html, body { margin: 0; background: {paper}; }
 .herologo { position: relative; z-index: 2; }
 .herologo.plate { background: #f8f8fa; border-radius: 34px; padding: 26px 36px; box-shadow: 0 24px 60px rgba(0,0,0,.45); }
 .heroorb { position: relative; border-radius: 50%; overflow: hidden; -webkit-mask-image: radial-gradient(circle, #000 58%, transparent 72%); mask-image: radial-gradient(circle, #000 58%, transparent 72%); }
+
+/* ---------- cards_more.py: spotlight, tiles, filmstrip, wall, polaroid, promptplay, dial, stack, copycmd ---------- */
+.spfr { position: absolute; top: 0; overflow: hidden; border-radius: 28px; border: 4px solid {ink}; box-shadow: 14px 16px 0 {accent}; background: #0d1117; }
+.spcam { position: absolute; left: 0; top: 0; }
+.spcam img { width: 100%; height: 100%; display: block; }
+.spdim { position: absolute; inset: 0; --cx: 50%; --cy: 50%; --rx: 2400px; --ry: 2400px; --d: 0;
+  background: radial-gradient(var(--rx) var(--ry) at var(--cx) var(--cy), rgba(0,0,0,0) 0%, rgba(0,0,0,0) 86%, rgba(11,11,11,var(--d)) 100%); }
+.spin { position: absolute; transform: translateX(-50%); opacity: 0; background: {accent}; color: #fff; font-weight: 700; font-size: 34px;
+  padding: 12px 26px 12px 20px; border-radius: 999px; display: flex; align-items: center; gap: 12px; white-space: nowrap; box-shadow: 0 10px 30px rgba(0,0,0,.5); }
+.spin i { width: 14px; height: 14px; border-radius: 50%; background: #fff; }
+.tiles { position: absolute; inset: 0; }
+.tlttl { position: absolute; top: 0; color: {mid}; font-size: 26px; letter-spacing: .08em; text-transform: uppercase; }
+.tile { position: absolute; background: {surface}; border: 4px solid {edge}; border-radius: 30px; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 18px; color: {mid}; transform-style: preserve-3d; backface-visibility: hidden; transition: none; }
+.tile .tlab { font-size: 46px; font-weight: 700; color: {ink}; }
+.tile .tic { color: {mid}; line-height: 0; }
+.tile .tnum { position: absolute; left: 22px; top: 16px; font-size: 22px; color: {mid}; }
+.tile.on { border-color: {ink}; box-shadow: 0 0 0 0 {accent}, 10px 12px 0 {accent}; }
+.tile.on .tic { color: {accent}; }
+.tbar { position: absolute; height: 92px; border-radius: 22px; background: {accent}; color: #fff; font-size: 34px; display: flex; align-items: center; gap: 22px; padding: 0 30px; box-sizing: border-box; opacity: 0; }
+.tbar b { font-size: 38px; }
+.fsttl { position: absolute; left: 0; right: 0; top: 0; text-align: center; color: {mid}; font-size: 26px; letter-spacing: .08em; text-transform: uppercase; }
+.fstrip { position: absolute; left: 0; width: 1080px; top: 60px; height: 520px; background: #050505; overflow: hidden; border-top: 3px solid #1d1d1d; border-bottom: 3px solid #1d1d1d; }
+.fsh { position: absolute; left: 0; height: 34px; width: 99999px; }
+.fsh.top { top: 14px; } .fsh.bot { bottom: 14px; }
+.fsh i { position: absolute; top: 0; width: 24px; height: 30px; border-radius: 6px; background: #1c1c1c; }
+.fsreel { position: absolute; top: 63px; left: 0; height: 394px; }
+.fsf { position: absolute; top: 0; overflow: hidden; border-radius: 10px; filter: brightness(.35) saturate(.6); }
+.fsf.on { filter: none; }
+.fslab { position: absolute; left: 18px; bottom: 16px; background: rgba(0,0,0,.78); color: #fff; padding: 10px 18px; border-radius: 14px; display: flex; flex-direction: column; }
+.fslab b { font-size: 30px; } .fslab span { font-size: 22px; color: #bbb; }
+.fsgate { position: absolute; top: 55px; border: 5px solid {accent}; border-radius: 16px; box-shadow: 0 0 60px {accent}66; pointer-events: none; }
+.fshud { position: absolute; left: 0; right: 0; top: 620px; display: flex; justify-content: center; align-items: baseline; gap: 16px; color: {ink}; }
+.fshud span { font-size: 26px; color: {mid}; letter-spacing: .08em; text-transform: uppercase; }
+.fshud b { font-size: 120px; font-weight: 800; color: {accent}; font-variant-numeric: tabular-nums; line-height: 1; }
+.fshud small { font-size: 46px; color: {mid}; font-weight: 700; }
+.wview { position: absolute; left: 0; top: 0; width: 1080px; height: 780px; overflow: hidden;
+  -webkit-mask-image: linear-gradient(transparent 0, #000 12%, #000 80%, transparent 100%); mask-image: linear-gradient(transparent 0, #000 12%, #000 80%, transparent 100%); }
+.wwall { position: relative; width: 1180px; transform-style: preserve-3d; }
+.wtile { position: absolute; border-radius: 10px; background-repeat: no-repeat; opacity: 0; box-shadow: 0 6px 18px rgba(0,0,0,.6); }
+.wbadge { position: absolute; left: 50%; top: 250px; margin-left: -260px; width: 520px; opacity: 0; background: {paper}; border: 5px solid {accent}; border-radius: 36px;
+  display: flex; flex-direction: column; align-items: center; padding: 20px 0 30px; box-shadow: 0 0 0 14px rgba(11,11,11,.55), 0 30px 80px rgba(0,0,0,.7); }
+.wbadge b { font-size: 210px; line-height: 1; font-weight: 800; color: {ink}; font-variant-numeric: tabular-nums; }
+.wbadge span { font-size: 40px; font-weight: 700; color: {accent}; text-transform: uppercase; letter-spacing: .06em; }
+.polas { position: absolute; inset: 0; }
+.pola { position: absolute; width: 580px; background: #f4f1ea; padding: 22px 22px 0; border-radius: 6px; box-shadow: 0 30px 60px rgba(0,0,0,.65); opacity: 0; }
+.polimg { position: relative; width: 536px; height: 400px; overflow: hidden; background: #111; }
+.polcap { height: 96px; display: flex; align-items: center; justify-content: center; color: #141414; font-size: 46px; font-weight: 800; letter-spacing: -.01em; }
+.ppbar { position: absolute; left: 90px; right: 90px; top: 0; transform-origin: 50% 0; }
+.pplab { color: {mid}; font-size: 26px; margin-bottom: 14px; }
+.ppin { background: {surface}; border: 4px solid {ink}; border-radius: 30px; height: 120px; display: flex; align-items: center; gap: 18px; padding: 0 22px 0 32px; box-shadow: 10px 12px 0 {accent}; }
+.ppin .pr { color: {accent}; font-size: 46px; font-weight: 800; }
+.ppt { flex: 1; font-size: 40px; color: {ink}; white-space: nowrap; overflow: hidden; }
+.ppgo { width: 72px; height: 72px; border-radius: 50%; background: #3a3a3a; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 40px; }
+.ppsteps { position: absolute; left: 140px; right: 140px; top: 200px; opacity: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 18px 24px; }
+.ppprog { grid-column: 1 / -1; height: 14px; border-radius: 99px; background: {grey}; overflow: hidden; margin-bottom: 10px; }
+.ppprog b { display: block; height: 100%; background: {accent}; transform-origin: 0 50%; transform: scaleX(0); }
+.ppst { display: flex; align-items: center; gap: 16px; font-size: 40px; font-weight: 700; color: {mid}; opacity: .25; }
+.ppst i { width: 30px; height: 30px; border-radius: 50%; border: 4px solid {mid}; box-sizing: border-box; }
+.ppst.on { color: {ink}; } .ppst.on i { background: {accent}; border-color: {accent}; }
+.ppres { position: absolute; left: 190px; right: 190px; top: 400px; border-radius: 26px; overflow: hidden; border: 4px solid {ink}; background: #111; opacity: 0; box-shadow: 0 30px 80px rgba(0,0,0,.6); }
+.pprbar { height: 54px; display: flex; align-items: center; gap: 10px; padding: 0 22px; background: #232326; color: #b8b8be; font-size: 24px; }
+.pprbar b { width: 15px; height: 15px; border-radius: 50%; background: #55555a; } .pprbar b:first-child { background: {accent}; }
+.pprbar span { margin-left: 14px; }
+.pprin { position: relative; height: 394px; }
+.dial { position: absolute; left: 280px; top: 0; width: 520px; height: 560px; }
+.dttl { position: absolute; left: -200px; right: -200px; top: -10px; text-align: center; color: {mid}; font-size: 26px; letter-spacing: .08em; text-transform: uppercase; }
+.dial svg { position: absolute; left: 0; top: 30px; overflow: visible; }
+.dtk line { stroke: {grey}; stroke-width: 4; stroke-linecap: round; }
+.dtrack { fill: none; stroke: {surface}; stroke-width: 34; }
+.darc { fill: none; stroke: {accent}; stroke-width: 34; stroke-linecap: round; }
+.ddot { fill: {ink}; }
+.dmid { position: absolute; left: 0; right: 0; top: 160px; display: flex; flex-direction: column; align-items: center; }
+.dmid b { font-size: 150px; font-weight: 800; color: {ink}; line-height: 1; font-variant-numeric: tabular-nums; }
+.dmid span { font-size: 44px; font-weight: 700; color: {ink}; }
+.dmid em { font-style: normal; font-size: 26px; color: {mid}; margin-top: 10px; }
+.dbadge { position: absolute; right: -170px; top: 40px; opacity: 0; background: {accent}; color: #fff; font-weight: 800; font-size: 46px; padding: 14px 30px; border-radius: 20px; border: 4px solid #fff; letter-spacing: .04em; }
+.stks { position: absolute; inset: 0; }
+.stk { position: absolute; border-radius: 24px; overflow: hidden; border: 4px solid {ink}; box-shadow: 0 24px 60px rgba(0,0,0,.7); opacity: 0; background: #111; }
+.stklab { position: absolute; left: 22px; top: 20px; background: rgba(11,11,11,.85); color: #fff; font-size: 36px; font-weight: 700; padding: 10px 24px 10px 18px; border-radius: 999px;
+  border: 3px solid #fff; display: flex; align-items: center; gap: 12px; }
+.stklab i { width: 16px; height: 16px; border-radius: 50%; background: {accent}; }
+.ccw { position: absolute; left: 50px; right: 50px; top: 0; }
+.ccbar { height: 74px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px 0 28px; background: {surface}; border: 4px solid {ink}; border-bottom: 0; border-radius: 26px 26px 0 0; color: {mid}; font-size: 26px; }
+.ccbtn { display: flex; align-items: center; gap: 10px; background: #2a2a2a; color: {ink}; padding: 8px 18px; border-radius: 14px; font-size: 26px; font-weight: 700; }
+.ccbtn em { font-style: normal; }
+.ccbtn.on { background: {accent}; color: #fff; }
+.ccbody { background: #000; border: 4px solid {ink}; border-radius: 0 0 26px 26px; padding: 26px; display: flex; flex-direction: column; gap: 18px; box-shadow: 12px 14px 0 {accent}; }
+.ccl { background: {surface}; border: 2px solid {edge}; border-radius: 16px; padding: 20px 22px; font-size: 25px; color: {ink}; opacity: 0; white-space: nowrap; }
+.ccl .pr { color: {accent}; margin-right: 16px; font-weight: 700; }
+.ccfg { position: absolute; right: -10px; top: 30px; opacity: 0; }
+.cctoast { position: absolute; left: 50%; top: 420px; transform: translateX(-50%); opacity: 0; background: {ink}; color: {paper}; font-weight: 800; font-size: 40px;
+  padding: 18px 34px; border-radius: 999px; display: flex; align-items: center; gap: 14px; white-space: nowrap; }
+.cctoast svg { color: {accent}; }

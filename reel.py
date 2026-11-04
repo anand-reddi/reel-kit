@@ -6,6 +6,7 @@
   python3 reel.py styles | cards [style]                         # list styles / a style's cards
   python3 reel.py analyze ref.mp4 --out refs/name                # take a reference video apart (shots, camera, colours, beats)
   python3 reel.py check out.mp4                                  # motion QA: freezes, black/white frames, hard cut to black
+  python3 reel.py board script.json                              # every frame on one sheet, no render (show the owner first)
   python3 reel.py layout script.json                             # layout QA before a render: caption vs card / presenter overlaps
 """
 import argparse, glob, json, os, shutil, subprocess, sys
@@ -100,6 +101,7 @@ if __name__ == "__main__":
     an = sp.add_parser("analyze", help="take a reference video apart: reel.py analyze ref.mp4 --out refs/name"); an.add_argument("src"); an.add_argument("--out", required=True)
     ck = sp.add_parser("check", help="motion QA of a render: freezes, black/white frames, hard cut to black"); ck.add_argument("video"); ck.add_argument("--out")
     ck.add_argument("--from", dest="a", default="0"); ck.add_argument("--to", dest="b", default="0"); ck.add_argument("--freeze", default="1.0")
+    bd = sp.add_parser("board", help="every frame on one sheet without rendering (end of each line, videos seeked)"); bd.add_argument("script"); bd.add_argument("--work")
     ly = sp.add_parser("layout", help="layout QA without rendering: caption/card/presenter overlaps + a contact sheet"); ly.add_argument("script"); ly.add_argument("--work")
     ic = sp.add_parser("icons", help="search the icon library: reel.py icons openai"); ic.add_argument("query"); ic.add_argument("-n", type=int, default=40)
     a = ap.parse_args()
@@ -130,6 +132,16 @@ if __name__ == "__main__":
         if hasattr(st, "render"): sys.exit("this style checks captions while it renders: run reel.py make (use --quality draft for a quick pass)")
         fit_layout(script, tm, work, sdir, st, cues)
         from core import layout; probs = layout.check(work); sys.exit(1 if probs else 0)
+    if a.cmd == "board":
+        script = endings(json.load(open(a.script))); sdir = os.path.dirname(os.path.abspath(a.script))
+        name = os.path.splitext(os.path.basename(a.script))[0]
+        work = os.path.abspath(a.work or os.path.join(sdir, "build", name)); os.makedirs(work, exist_ok=True)
+        print("1/3 voice"); tm = voice.speak(script, work)
+        print("2/3 picture"); st = style(script.get("style", "paper")); cues = st.build(script, tm, work, sdir)
+        if hasattr(st, "render"): sys.exit("this style renders its own frames: run reel.py make --quality draft")
+        fit_layout(script, tm, work, sdir, st, cues)
+        print("3/3 board"); from core import board; os.makedirs(os.path.join(work, "board"), exist_ok=True)
+        board.main(work, os.path.join(work, "board")); sys.exit(0)
     if a.cmd == "make": make(a)
     elif a.cmd == "styles": print("styles:", ", ".join(styles()))
     else:

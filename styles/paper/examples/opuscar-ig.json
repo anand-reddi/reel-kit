@@ -1,0 +1,379 @@
+{
+ "_note": "Assets are not committed (LemoLab films, CC BY 4.0, ~40 MB). Pull clips with ffmpeg -ss <t> -i https://github.com/lemomo-ai/lemo-opuscar/releases/download/films/<slug>.mp4 -t <dur>, stills from opuscar98.mp4, the style sheet and the repo screenshot (avatars blurred) from the owner. Shown here for the card keys.",
+ "style": "paper",
+ "theme": "dark",
+ "captions": "short",
+ "header": "none",
+ "title": "This repo gives Claude its own film studio",
+ "credits": "Film clips, stills and the style sheet: LemoLab, github.com/lemomo-ai/lemo-opuscar (CC BY 4.0), trimmed and framed. GitHub screenshot with avatars blurred.",
+ "brand": {
+  "handle": "@krishexplainz",
+  "avatar": "assets/pfp-krish.png"
+ },
+ "voice": {
+  "name": "am_puck",
+  "speed": 1.0,
+  "say": {
+   "ukiyo-e": "oo-kee-yo-eh",
+   "RPG": "R P G",
+   "66": "sixty-six"
+  }
+ },
+ "music": {
+  "style": "beat",
+  "bpm": 100,
+  "key": "minor"
+ },
+ "character": "otaku",
+ "camera": {
+  "box": [
+   80,
+   1330,
+   920,
+   640
+  ]
+ },
+ "scenes": [
+  {
+   "label": "hook",
+   "layout": "none",
+   "cut": "hard",
+   "lines": [
+    "This repo gives Claude",
+    "its own *film studio.*"
+   ],
+   "card": {
+    "type": "spotlight",
+    "src": "assets/opuscar/gh-repo.png",
+    "width": 960,
+    "height": 760,
+    "focus": [
+     {
+      "at": "start+0.3",
+      "x": 86.5,
+      "y": 12.2,
+      "w": 12.5,
+      "h": 3.0,
+      "zoom": 1.7,
+      "label": "11.8k stars"
+     },
+     {
+      "at": "line:1",
+      "x": 74.2,
+      "y": 19.6,
+      "w": 24.5,
+      "h": 18.8,
+      "zoom": 1.5,
+      "label": "made in code",
+      "side": "below"
+     }
+    ]
+   }
+  },
+  {
+   "label": "studio",
+   "layout": "none",
+   "cut": "whip",
+   "lines": [
+    "Story, drawings, music, voice…",
+    "all of it in *code.*"
+   ],
+   "card": {
+    "type": "tiles",
+    "title": "the film studio",
+    "items": [
+     {
+      "label": "Story",
+      "icon": "lucide:book-open",
+      "at": "word:Story"
+     },
+     {
+      "label": "Drawings",
+      "icon": "lucide:pen-tool",
+      "at": "word:drawings"
+     },
+     {
+      "label": "Music",
+      "icon": "lucide:music",
+      "at": "word:music"
+     },
+     {
+      "label": "Voice",
+      "icon": "lucide:mic",
+      "at": "line:0:end-0.35"
+     }
+    ],
+    "bar": {
+     "text": "all of it in code · no video AI",
+     "at": "word:code-0.25"
+    }
+   }
+  },
+  {
+   "label": "proof",
+   "layout": "none",
+   "cut": "flash",
+   "lines": [
+    "Look at this. It made a film",
+    "of every *Best Picture* winner ever.",
+    "Ninety-eight films,",
+    "each in its own style."
+   ],
+   "card": {
+    "type": "filmstrip",
+    "title": "OPUSCAR 98 · films by LemoLab",
+    "at": "start+0.4",
+    "until": "line:3:end-0.3",
+    "items": [
+     {
+      "src": "assets/opuscar/os00.jpg"
+     },
+     {
+      "src": "assets/opuscar/os01.jpg"
+     },
+     {
+      "src": "assets/opuscar/os02.jpg"
+     },
+     {
+      "src": "assets/opuscar/os03.jpg"
+     },
+     {
+      "src": "assets/opuscar/os04.jpg"
+     },
+     {
+      "src": "assets/opuscar/os05.jpg"
+     },
+     {
+      "src": "assets/opuscar/os06.jpg"
+     },
+     {
+      "src": "assets/opuscar/os07.jpg"
+     },
+     {
+      "src": "assets/opuscar/os08.jpg"
+     },
+     {
+      "src": "assets/opuscar/os09.jpg"
+     },
+     {
+      "src": "assets/opuscar/os10.jpg"
+     },
+     {
+      "src": "assets/opuscar/os11.jpg"
+     }
+    ],
+    "counter": {
+     "from": 1,
+     "to": 98,
+     "label": "winners"
+    }
+   }
+  },
+  {
+   "label": "66 styles",
+   "layout": "none",
+   "cut": "zoom",
+   "lines": [
+    "And you get *66 styles:*"
+   ],
+   "card": {
+    "type": "wall",
+    "src": "assets/opuscar/styles66.jpg",
+    "grid": [
+     17,
+     4
+    ],
+    "skip": [
+     66,
+     67
+    ],
+    "show": 6,
+    "land": [
+     "start+0.05",
+     "line:0:end-0.1"
+    ],
+    "count": {
+     "to": 66,
+     "label": "film styles",
+     "at": "word:styles"
+    }
+   }
+  },
+  {
+   "label": "named",
+   "layout": "none",
+   "cut": "whip",
+   "lines": [
+    "ukiyo-e, pixel RPG,",
+    "newsreel, watercolor…"
+   ],
+   "card": {
+    "type": "polaroid",
+    "items": [
+     {
+      "src": "assets/opuscar/ukiyoe.mp4",
+      "label": "Ukiyo-e",
+      "at": "word:ukiyo-e"
+     },
+     {
+      "src": "assets/opuscar/pixel-rpg.mp4",
+      "label": "Pixel RPG",
+      "at": "word:pixel"
+     },
+     {
+      "src": "assets/opuscar/newsreel.mp4",
+      "label": "Newsreel",
+      "at": "word:newsreel"
+     },
+     {
+      "src": "assets/opuscar/watercolor.mp4",
+      "label": "Watercolor",
+      "at": "line:1:end-0.9"
+     }
+    ]
+   }
+  },
+  {
+   "label": "one line",
+   "layout": "none",
+   "cut": "zoom",
+   "lines": [
+    "You just type *one line,* like",
+    "a film about my morning coffee,",
+    "in spy-movie style.",
+    "It writes the story,",
+    "draws every shot,",
+    "scores the music,",
+    "adds the *voice.*"
+   ],
+   "card": {
+    "type": "promptplay",
+    "label": "// claude code",
+    "text": "morning coffee · spy film",
+    "send_at": "line:2:end-0.15",
+    "steps": [
+     {
+      "label": "Story",
+      "at": "word:story"
+     },
+     {
+      "label": "Shots",
+      "at": "word:shot"
+     },
+     {
+      "label": "Music",
+      "at": "word:music"
+     },
+     {
+      "label": "Voice",
+      "at": "word:voice"
+     }
+    ],
+    "result": {
+     "src": "assets/opuscar/spy.mp4",
+     "title": "example · spy-titles style",
+     "at": "word:shot+0.2"
+    }
+   }
+  },
+  {
+   "label": "honest",
+   "layout": "box",
+   "cut": "zoom",
+   "face": [
+    {
+     "face": "shrug",
+     "at": "word:Now"
+    },
+    {
+     "face": "smile",
+     "at": "word:free"
+    }
+   ],
+   "lines": [
+    "Now, it's not instant.",
+    "One film takes around half an *hour.*",
+    "But for a *free* tool?",
+    "That's crazy."
+   ],
+   "card": {
+    "type": "dial",
+    "title": "one film",
+    "value": 50,
+    "number": 30,
+    "unit": "min",
+    "note": "about 30–60 min per film",
+    "badge": {
+     "text": "FREE",
+     "at": "word:free"
+    },
+    "at": "line:1",
+    "scale": 0.82
+   }
+  },
+  {
+   "label": "use cases",
+   "layout": "none",
+   "cut": "zoom",
+   "caption_y": 1330,
+   "lines": [
+    "Launch videos, explainers, intros for your channel.",
+    "Styles you could never pull off by *hand.*"
+   ],
+   "card": {
+    "type": "stack",
+    "width": 700,
+    "items": [
+     {
+      "src": "assets/opuscar/blueprint.mp4",
+      "label": "Launch videos",
+      "at": "word:launch"
+     },
+     {
+      "src": "assets/opuscar/risograph.mp4",
+      "label": "Explainers",
+      "at": "word:explainers"
+     },
+     {
+      "src": "assets/opuscar/lowpoly.mp4",
+      "label": "Channel intros",
+      "at": "word:intros"
+     }
+    ]
+   }
+  },
+  {
+   "label": "save",
+   "layout": "none",
+   "cut": "flash",
+   "lines": [
+    "Save this for",
+    "your next *project.*"
+   ],
+   "card": {
+    "type": "copycmd",
+    "title": "install · claude code",
+    "lines": [
+     "claude plugin marketplace add lemomo-ai/lemo-opuscar",
+     "claude plugin install lemo-opuscar@lemolab"
+    ],
+    "at": "start+0.1",
+    "until": "start+0.6",
+    "tap_at": "word:project",
+    "toast": "Copied · films by LemoLab, MIT"
+   }
+  },
+  {
+   "label": "follow",
+   "layout": "none",
+   "lines": [
+    "Follow for more like this."
+   ],
+   "card": {
+    "type": "follow",
+    "tap_at": "word:follow+0.3"
+   }
+  }
+ ],
+ "sfx_set": "cinema"
+}

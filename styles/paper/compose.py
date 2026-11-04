@@ -321,9 +321,24 @@ class Film:
             A(f'tl.set("#{p}", {{ opacity: 0 }}, {r3(en)});')
         else:
             A(f'tl.to("#{p}", {{ opacity: 0, scale: 0.9, filter: "blur(12px)", duration: 0.16, ease: "power2.in" }}, {r3(en - 0.16)});')
+    # "sfx_set" in the script swaps the cut sounds for a whole reel, so reels don't all sound alike:
+    # classic (default) | cinema (paper, film shutter, blade, tape) | soft (sleeves, bamboo, mirror shutter) | digital (zips, blips, glitch)
+    SFX_SETS = {
+        "classic": {},
+        "cinema": {"zoom": [("swipe/paper", -14, 0)], "whip": [("swish/blade", -12, -0.04)],
+                   "flash": [("shutter/film", -12, 0), ("cut_hit/air", -18, 0)], "impact": [("impact/punch", -11, 0)],
+                   "glitch": [("glitch/stutter", -13, 0)], "dip": [("downlifter/tape", -16, 0)], "slide": [("swipe/cloth", -16, 0)]},
+        "soft": {"zoom": [("whoosh_fast/sleeve", -15, 0)], "whip": [("fit/whoosh.short/bamboo_swish", -13, -0.04)],
+                 "flash": [("shutter/mirror", -13, 0)], "impact": [("cut_hit/sub", -11, 0)], "glitch": [("glitch/mid", -14, 0)],
+                 "dip": [("reverse_swell/breath", -17, -0.2)], "slide": [("swipe/velvet", -17, 0)]},
+        "digital": {"zoom": [("pro_zip/up", -15, 0)], "whip": [("whoosh_fast/tight", -12, -0.04)],
+                    "flash": [("glitch/chirp", -13, 0), ("pro_sub_drop/quick", -18, 0)], "impact": [("sub_drop/punch", -11, 0)],
+                    "glitch": [("glitch/data", -13, 0)], "dip": [("pro_zip/down", -15, 0)], "slide": [("ui_pop/fall", -16, 0)]},
+    }
     def cut(s, cut, t):
         A = s.js.append; s.fx_used.add(cut)
-        for sid, g, off in s.CUT_SFX.get(cut, s.CUT_SFX["zoom"]): s.cues.append((round(t + off, 3), sid, g))
+        cs = {**s.CUT_SFX, **s.SFX_SETS.get(s.sc.get("sfx_set", "classic"), {})}
+        for sid, g, off in cs.get(cut, cs["zoom"]): s.cues.append((round(t + off, 3), sid, g))
         if cut == "flash":
             A(f'tl.fromTo("#fxflash", {{ opacity: 0.95 }}, {{ opacity: 0, duration: 0.22, ease: "power2.out", immediateRender: false }}, {r3(t)});')
         elif cut == "dip":
