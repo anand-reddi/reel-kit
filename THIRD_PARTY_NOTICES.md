@@ -51,3 +51,9 @@ The black cat in `styles/sketchbook/app/cat.tsx` is original to reel-kit.
 - The kinetic style's look and block list follow Scenario's "kinetic film" exploration (scenario.com/explorations/kinetic-film)
   and the MIT-licensed motion library in github.com/scenario-labs/skills. The engine (`styles/kinetic/engine`) is our own
   code; nothing from Scenario's unlicensed kinetic-film engine is included.
+
+## PLAYBOOK.md script rules
+- The hook-system, 50-point hook rubric, rehook and anti-pattern rules are adapted from Hooksmith
+  (github.com/arhamhi/hooksmith), MIT License, Copyright (c) 2026 Hooksmith contributors.
+- The retention spine, three failure modes and named-persona send rules are adapted from Vyral's content-skills
+  (github.com/vyralcontent/content-skills), MIT License. Their product-promotion sections are not included.

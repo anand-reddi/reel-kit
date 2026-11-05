@@ -20,7 +20,7 @@ cd ~/reel-kit && python3 reel.py styles
 
 ## 1. Making a video
 1. Pick the style (ask if the user didn't say and more than one fits) and read `styles/<style>/STYLE.md` in full.
-2. Options first: read `PLAYBOOK.md` and present its pre-video options (2–3 hooks, share angle, save/follow angle,
+2. Options first: read `PLAYBOOK.md` and present its pre-video options (2–3 scored hook systems, share angle, save/follow angle,
    format and length). Wait for the owner to choose; do not script or render before that.
 3. Settle the story: hook in the first 2 s, 3–6 beats, a closing line. Write for shares, not likes: build it around
    one takeaway that makes the viewer feel smart enough to send it to a friend; end on that, not on "comment below". Fact-check every claim, number and name with a
