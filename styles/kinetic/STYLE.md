@@ -66,7 +66,7 @@ Example: `examples/every-block.json` (50 s, every block, music only).
 | `split` | `[small, big]`: the small line first, the big word slams in from the right `second` beats later |
 | `cut` | a hard-cut word for runs of beat cuts (`size`, `rot`, `rgb` for an RGB split) |
 
-Extras on any shot: `in: cut|whipX|whipXr|whipY`; `fx: punch|hit|beat|none` (`big` = the heavier impact, `cue`/`gain`
+Extras on any shot: `mark` / `mark2` (brand logos, an icon "set:name", .svg or image, that pop in above the word; show the logo whenever a brand is named; `markY`, `markColor`); `in: cut|whipX|whipXr|whipY`; `fx: punch|hit|beat|none` (`big` = the heavier impact, `cue`/`gain`
 = an extra sound); `scramble: [a, b]` (glyphs resolve between beats a and b of the shot); `glitch` (`glitchAt`);
 `inverts: [beats]` (2-frame invert flashes); `flip: {at, ground, color}` (ground flips mid-shot); `dot` (accent the
 last character); `glyphs` (a burst of code glyphs); `code` (the film's source as a backdrop); `note` + `noteAt` (a mono

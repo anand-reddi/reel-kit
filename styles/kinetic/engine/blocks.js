@@ -21,6 +21,12 @@ function extras(sh, word, s, a, b, T) {   // options shared by all Words styles
   (s.inverts || []).forEach(k => { const t = a + k * B; K.tl.set('#invert', { opacity: 1 }, t); K.tl.set('#invert', { opacity: 0 }, t + 2 / 30); sfx(t, 'cut_hit/air', -15); });
   if (s.flip) { const t = a + s.flip.at * B; K.ground(t, s.flip.ground); if (s.flip.color || s.flip.ground) tl.set(word, { color: col(s.flip.color) || readable(s.flip.ground) }, t); sfx(t, 'cut_hit/kick', -13); }
   if (s.dot) { const sp = word.querySelector('.fitw') || word; const tx = sp.textContent; sp.innerHTML = esc(tx.slice(0, -1)) + `<span style="color:${col(s.dotColor || 'accent')}">${esc(tx.slice(-1))}</span>`; }
+  // mark / mark2: brand logos that pop in above the word (a logo whenever a brand is named)
+  if (s.mark) { const row = el('div', 'kmarks', sh); row.style.color = col(s.markColor) || readable(s.ground);
+    row.style.top = ((s.markY ?? (H / 2 - 430))) + 'px';
+    [s.mark, s.mark2].filter(Boolean).forEach((m, k) => { const d = el('div', 'kmark', row, m);
+      tl.fromTo(d, { scale: 0, rotation: -25, opacity: 0 }, { scale: 1, rotation: 0, opacity: 1, duration: .28, ease: 'back.out(2.2)', immediateRender: false }, a + .04 + k * .08); });
+    sfx(a + .06, 'pro_pop_in/deep', -14); }
   if (s.glyphs) K.glyphBurst(a + .02, W / 2, H / 2, 26, 'paper', Math.round(a * 17));
   if (s.code) K.codeWall(sh, a, b, { c: readable(s.ground), opacity: .1 });
   if (s.note) { const n = el('div', 'knote mono', sh); n.style.color = col(s.noteColor) || readable(s.ground); const t0 = a + (s.noteAt ?? 1) * B;
@@ -343,14 +349,14 @@ BL.Picture = (box, c, T, S) => {
     tl.to(ov, { scale: 1.06, rotation: -2, duration: Math.max(.1, t2 - a - .1), ease: 'none' }, a + .16);
     tl.to(ov, { scale: 2.4, opacity: 0, duration: .12, ease: 'power3.in' }, t2); tl.set(ov, { visibility: 'hidden' }, t2 + .12); sfx(t2, 'whoosh_fast/sleeve', -11); }
   // tag: a small mono label under the words (a place, a source), types in after the reveal
-  if (c.tag) { const g = el('div', 'ptag mono', sh, esc(c.tag)); g.style.top = ((phone ? (c.wordsY || 1680) : 1450) + 150) + 'px';
+  if (c.tag) { const g = el('div', 'ptag mono', sh, esc(c.tag)); g.style.top = ((c.wordsY || (phone ? 1680 : 1450)) + 150) + 'px';
     tl.fromTo(g, { opacity: 0, y: 14 }, { opacity: .9, y: 0, duration: .18, ease: 'power3.out', immediateRender: false }, a + .12); }
   const rv = c.reveal || 'slash';
   if (rv === 'slash') { tl.fromTo(frame, { clipPath: 'polygon(0 0, 0 0, 0 100%, 0 100%)' }, { clipPath: 'polygon(0 0, 120% 0, 100% 100%, -20% 100%)', duration: .22, ease: 'expo.out', immediateRender: false }, a); sfx(a, 'swish/blade', -11); }
   else if (rv === 'iris') { tl.fromTo(frame, { clipPath: 'circle(0% at 50% 50%)' }, { clipPath: 'circle(80% at 50% 50%)', duration: .3, ease: 'power3.out', immediateRender: false }, a); sfx(a, 'whoosh_fast/crisp', -12); }
   else if (rv === 'none') { /* on screen from the first frame (a hook) */ }
   else { tl.fromTo(frame, { clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0% 0)', duration: .25, ease: 'expo.out', immediateRender: false }, a); sfx(a, 'swipe/paper', -12); }
-  (c.words || []).forEach(([k, w, cc], i, arr) => { const t = T(k), t2 = i + 1 < arr.length ? T(arr[i + 1][0]) : b; const e = big(sh, w, { ground: 'bg', color: cc || 'paper', y: phone ? (c.wordsY || 1680) : 1450 }); e.style.textShadow = '0 8px 30px rgba(0,0,0,.6)'; fit(e, 960, 300, 320); K.vis(e, t, t2);
+  (c.words || []).forEach(([k, w, cc], i, arr) => { const t = T(k), t2 = i + 1 < arr.length ? T(arr[i + 1][0]) : b; const e = big(sh, w, { ground: 'bg', color: cc || 'paper', y: c.wordsY || (phone ? 1680 : 1450) }); e.style.textShadow = '0 8px 30px rgba(0,0,0,.6)'; fit(e, 960, 300, 320); K.vis(e, t, t2);
     tl.fromTo(e, { scale: 2, opacity: 0 }, { scale: 1, opacity: 1, duration: .13, ease: 'power4.out', immediateRender: false }, t);
     tl.fromTo(m, { scale: 1.07 }, { scale: 1, duration: .3, ease: 'power3.out', immediateRender: false }, t); sfx(t, 'cut_hit/punch', -12); K.shake(t, 10, .18); });
   (c.cutIns || []).forEach(([k, z, xy, snd]) => { const t = T(k); const [px, py] = xy || [.5, .5];

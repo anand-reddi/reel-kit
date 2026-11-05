@@ -33,7 +33,7 @@ def _size(x, src):
 # ------------------------------------------------------------------ spotlight: screenshot, spotlight + label pins
 def spotlight(p, c, x):
     """src (image), width (960), height (view px, default fits up to 800), dim (0.74),
-    focus: [{at, x, y, w, h (% of the image), label, zoom (default 1.6), side: below|above}], reset_at."""
+    focus: [{at, x, y, w, h (% of the image), label, icon (a brand logo in the pin), zoom (default 1.6), side: below|above}], reset_at."""
     W = c.get("width", 960); iw, ih = _size(x, c["src"]); SH = W * ih / iw; VH = c.get("height", min(SH, 800))
     c.setdefault("scale", 1.0); src = x.asset(c["src"]); left = (1080 - W) / 2; dim = c.get("dim", 0.84)
     x.A(f'tl.fromTo("#{p}-fr", {{ opacity: 0, y: 70, rotation: -2 }}, {{ opacity: 1, y: 0, rotation: 0, duration: 0.45, ease: "back.out(1.4)" }}, {x.r(x.start)});')
@@ -55,7 +55,7 @@ def spotlight(p, c, x):
             above = f.get("side") == "above" or sy1 + 90 > VH
             py = (sy0 - 78) if above else (sy1 + 18)
             pins += (f'<div id="{p}-pin{i}" class="spin" style="left:{min(max(sx, 170), W - 170):.0f}px;top:{max(8, py):.0f}px">'
-                     f'<i></i>{esc(f["label"])}</div>')
+                     f'{ico(f["icon"], 40) if f.get("icon") else "<i></i>"}{esc(f["label"])}</div>')
             x.A(f'tl.fromTo("#{p}-pin{i}", {{ opacity: 0, y: {(-1 if not above else 1) * 18}, scale: 0.7 }}, {{ opacity: 1, y: 0, scale: 1, duration: 0.3, ease: "back.out(2.2)", immediateRender: false }}, {x.r(t + 0.35)});')
             x.sfx(t + 0.38, "mallet/marimba", -15)
             nxt = c["focus"][i + 1] if i + 1 < len(c["focus"]) else None

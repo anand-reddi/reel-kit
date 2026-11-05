@@ -122,3 +122,5 @@ html, body { margin: 0; background: #000; }
 .poverlay { position: absolute; z-index: 3; filter: drop-shadow(0 18px 40px rgba(0,0,0,.6)); }
 .kbackdrop { position: absolute; inset: -60px; background-size: cover; background-position: center; }
 .ptag { position: absolute; left: 0; right: 0; text-align: center; z-index: 3; color: #f2f1ee; font-size: 40px; letter-spacing: .12em; text-transform: uppercase; text-shadow: 0 4px 18px rgba(0,0,0,.8); }
+.kmarks { position: absolute; left: 0; right: 0; display: flex; justify-content: center; gap: 70px; z-index: 3; }
+.kmark svg, .kmark img { width: 230px; height: 230px; display: block; }

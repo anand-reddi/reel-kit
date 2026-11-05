@@ -83,7 +83,7 @@ def build(script, timing, work, sdir):
         def assets_in(d):
             if isinstance(d, dict):
                 return {k: (asset(x) if k in ASSET_KEYS and isinstance(x, str) and not x.startswith("http") else
-                            mark(x) if k == "mark" else assets_in(x)) for k, x in d.items()}
+                            mark(x) if k in ("mark", "mark2") else assets_in(x)) for k, x in d.items()}
             if isinstance(d, list): return [assets_in(x) for x in d]
             return d
         blk = assets_in(blk)
