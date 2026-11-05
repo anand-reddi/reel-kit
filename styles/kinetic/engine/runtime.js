@@ -40,7 +40,8 @@ function setGround(t, g) { tl.set(ground, { backgroundColor: col(g) || P.bg }, t
 K.ground = setGround;
 
 // visible only between a and b
-function window_(e, a, b) { tl.set(e, { visibility: 'hidden' }, 0); tl.set(e, { visibility: 'visible' }, a); if (b != null) tl.set(e, { visibility: 'hidden' }, b); }
+function window_(e, a, b) { a = Math.max(a, 0.0002); tl.set(e, { visibility: 'hidden' }, 0); tl.set(e, { visibility: 'visible' }, a);   // a set before 0 would lose to the hide at 0
+  if (b != null) tl.set(e, { visibility: 'hidden' }, b); }
 K.vis = window_;
 
 // ------------------------------------------------------------------ camera and transitions

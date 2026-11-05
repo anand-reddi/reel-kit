@@ -124,3 +124,17 @@ html, body { margin: 0; background: #000; }
 .ptag { position: absolute; left: 0; right: 0; text-align: center; z-index: 3; color: #f2f1ee; font-size: 40px; letter-spacing: .12em; text-transform: uppercase; text-shadow: 0 4px 18px rgba(0,0,0,.8); }
 .kmarks { position: absolute; left: 0; right: 0; display: flex; justify-content: center; gap: 70px; z-index: 3; }
 .kmark svg, .kmark img { width: 230px; height: 230px; display: block; }
+.player { position: absolute; z-index: 2; border-radius: 26px; overflow: hidden; background: #16171b; box-shadow: 0 40px 120px rgba(0,0,0,.7), 0 0 0 2px rgba(255,255,255,.08); }
+.plbar { height: 64px; display: flex; align-items: center; gap: 14px; padding: 0 26px; background: #22242a; color: #c9cbd1; font: 600 28px AS, sans-serif; }
+.plbar i { width: 20px; height: 20px; border-radius: 50%; background: #ff5f57; } .plbar i:nth-child(2) { background: #febc2e; } .plbar i:nth-child(3) { background: #28c840; }
+.plbar span { margin-left: 16px; opacity: .8; }
+.plscreen { position: relative; overflow: hidden; background: #000; }
+.plctl { height: 78px; display: flex; align-items: center; gap: 24px; padding: 0 28px; background: #1b1c21; color: #fff; }
+.plctl b { font-size: 30px; } .plctl em { font: 500 26px MO, monospace; opacity: .75; font-style: normal; }
+.pltrack { position: relative; flex: 1; height: 10px; border-radius: 5px; background: rgba(255,255,255,.18); }
+.plfill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; background: {accent}; }
+.plknob { position: absolute; top: 50%; width: 26px; height: 26px; margin: -13px 0 0 -13px; border-radius: 50%; background: #fff; }
+.psub { position: absolute; left: 60px; right: 60px; z-index: 3; text-align: center; font: 800 64px AV, sans-serif; line-height: 1.25; color: #fff; text-shadow: 0 6px 24px rgba(0,0,0,.7); }
+.psw { display: inline-block; padding: 0 12px; margin: 0 2px; border-radius: 10px; }
+.cmark { position: absolute; left: 0; right: 0; top: -190px; display: flex; justify-content: center; }
+.cmark svg, .cmark img { width: 190px; height: 190px; }

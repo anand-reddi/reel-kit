@@ -287,16 +287,18 @@ BL.Progress = (box, c, T, S) => {
 // ================================================================== Chain: three words far apart, the camera rides a comet between them
 BL.Chain = (box, c, T, S) => {
   const a = S.start, b = S.end, g = c.ground || 'bg'; K.ground(a, g); const sh = layer(box, a, b); const ink = readable(g);
-  const nodes = c.nodes || []; const gap = 1500; const world = el('div', 'cworld', sh);
+  const nodes = c.nodes || []; const gap = c.gap || 1500; const world = el('div', 'cworld', sh);
   const pos = nodes.map((n, i) => [i % 2 ? 680 : 400, 900 + i * gap]);
   const d = 'M' + pos.map(p => p.join(' ')).join(' L'); const per = (b - a - .3) / Math.max(1, nodes.length);
-  const cm = K.comet(world, d, a + per * .6, per * (nodes.length - 1), 'accent', 10);
+  const ts = nodes.map((_, i) => c.at && c.at[i] != null ? T(c.at[i]) : a + .1 + i * per);   // at: when each node lands (on its word)
+  const cm = K.comet(world, d, ts[0] + .1, Math.max(.2, ts[ts.length - 1] - ts[0] - .1), 'accent', 10);
   nodes.forEach(([w, sub, cc], i) => { const [x, y] = pos[i]; const n = el('div', 'cnode', world); n.style.left = '0px'; n.style.top = (y - 160) + 'px';
     const ww = big(n, w, { ground: g, color: cc || null, y: 160 }); fit(ww, 900, 260, 280); const sb = el('div', 'csub mono', n, esc(sub || '')); sb.style.color = ink;
-    const t = a + .1 + i * per; K.vis(n, t - .02, b); tl.fromTo(ww, { scale: 2.2, opacity: 0 }, { scale: 1, opacity: 1, duration: .14, ease: 'power4.out', immediateRender: false }, t);
+    const t = ts[i]; K.vis(n, t - .02, b);
+    if (c.marks && c.marks[i]) { const mk = el('div', 'cmark', n, c.marks[i]); mk.style.color = ink; tl.fromTo(mk, { scale: 0, rotation: -30 }, { scale: 1, rotation: 0, duration: .26, ease: 'back.out(2.2)', immediateRender: false }, t + .03); } tl.fromTo(ww, { scale: 2.2, opacity: 0 }, { scale: 1, opacity: 1, duration: .14, ease: 'power4.out', immediateRender: false }, t);
     tl.fromTo(sb, { opacity: 0 }, { opacity: .8, duration: .2, immediateRender: false }, t + .12); K.fx(t, i === nodes.length - 1 ? 'punch' : 'hit'); });
-  const o = { k: 0 }; tl.fromTo(o, { k: 0 }, { k: 1, duration: b - a, ease: 'none', immediateRender: false, onUpdate: () => {
-    const y = 900 + Math.min(nodes.length - 1, o.k * nodes.length - .3 < 0 ? 0 : (o.k * nodes.length - .3)) * gap; world.style.transform = `translateY(${-(y - 900)}px)`; } }, a);
+  tl.set(world, { y: 0 }, a); ts.forEach((t, i) => { if (!i) return; const s0 = Math.max(ts[i - 1] + .12, t - .3); tl.to(world, { y: -i * gap, duration: Math.max(.1, t - s0), ease: 'power3.inOut' }, s0); });
+  tl.to(world, { y: '-=60', duration: Math.max(.2, b - ts[ts.length - 1]), ease: 'none' }, ts[ts.length - 1] + .05);
 };
 
 // ================================================================== Rewind: the film so far plays backwards in a tilting window
@@ -332,6 +334,23 @@ BL.Picture = (box, c, T, S) => {
     tl.to(phone, { rotation: 1.5, y: -14, duration: Math.max(.3, b - a - .4), ease: 'sine.inOut' }, a + (en === 'keep' || en === 'none' ? 0 : .42));
     if (en !== 'keep' && en !== 'none') sfx(a, 'whoosh_fast/sleeve', -13);
   }
+  // device: "player" puts the clip in a desktop video-player window (title bar, controls, a progress bar that runs)
+  if (c.device === 'player') {
+    const bg = el('div', 'pbgblur', sh); bg.style.backgroundImage = `url(${c.poster || c.src})`;
+    tl.fromTo(bg, { scale: 1.25 }, { scale: 1.32, duration: b - a, ease: 'none', immediateRender: false }, a);
+    const pw = c.playerWidth || 960, ph = Math.round(pw / (c.aspect || 1)), top = c.playerTop ?? 250;
+    const win = el('div', 'player', sh); win.style.width = pw + 'px'; win.style.left = Math.round((W - pw) / 2) + 'px'; win.style.top = top + 'px';
+    el('div', 'plbar', win, `<i></i><i></i><i></i><span>${esc(c.title || '')}</span>`);
+    const scr = el('div', 'plscreen', win); scr.style.height = ph + 'px'; host = scr;
+    const ctl = el('div', 'plctl', win, `<b>❚❚</b><div class="pltrack"><div class="plfill"></div><div class="plknob"></div></div><em class="mono">${esc(c.time || '')}</em>`);
+    const fill = ctl.querySelector('.plfill'), knob = ctl.querySelector('.plknob'); const p0 = c.progress || [.08, .62];
+    tl.fromTo(fill, { width: p0[0] * 100 + '%' }, { width: p0[1] * 100 + '%', duration: b - a, ease: 'none', immediateRender: false }, a);
+    tl.fromTo(knob, { left: p0[0] * 100 + '%' }, { left: p0[1] * 100 + '%', duration: b - a, ease: 'none', immediateRender: false }, a);
+    const en = c.enter || 'none';
+    if (en === 'rise') { tl.fromTo(win, { y: 500, rotation: -4, opacity: 0 }, { y: 0, rotation: 0, opacity: 1, duration: .4, ease: 'back.out(1.3)', immediateRender: false }, a); sfx(a, 'whoosh_fast/sleeve', -13); }
+    tl.fromTo(win, { rotationX: 0 }, { rotationX: 4, y: -10, duration: b - a, ease: 'sine.inOut', immediateRender: false }, a);
+    phone = win; c.wordsY = c.wordsY || (top + ph + 230);
+  }
   const frame = el('div', 'pframe', host); let m;
   if (/\.(mp4|webm|mov)$/i.test(c.src)) { m = el('video', 'pimg', frame); m.src = c.src; m.muted = true; m.dataset.start = a; m.dataset.duration = b - a; m.dataset.mediaStart = c.mediaStart || 0; }
   else { m = el('img', 'pimg', frame); m.src = c.src; }
@@ -356,6 +375,12 @@ BL.Picture = (box, c, T, S) => {
   else if (rv === 'iris') { tl.fromTo(frame, { clipPath: 'circle(0% at 50% 50%)' }, { clipPath: 'circle(80% at 50% 50%)', duration: .3, ease: 'power3.out', immediateRender: false }, a); sfx(a, 'whoosh_fast/crisp', -12); }
   else if (rv === 'none') { /* on screen from the first frame (a hook) */ }
   else { tl.fromTo(frame, { clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0% 0)', duration: .25, ease: 'expo.out', immediateRender: false }, a); sfx(a, 'swipe/paper', -12); }
+  // subs: [{start, end, words: [[at, word]]}] voice subtitles under the picture, the spoken word lit in an accent box
+  (c.subs || []).forEach(L => { const t0 = T(L.start), t1 = T(L.end); const line = el('div', 'psub', sh); line.style.top = (c.subsY || c.wordsY || 1500) + 'px'; K.vis(line, t0, t1);
+    const ws = L.words.map(([k, w]) => [T(k), el('span', 'psw', line, esc(w))]);
+    ws.forEach(([t, e], i) => { const t2 = i + 1 < ws.length ? ws[i + 1][0] : t1;
+      tl.fromTo(e, { opacity: .35 }, { opacity: 1, duration: .06, immediateRender: false }, t);
+      tl.set(e, { backgroundColor: col('accent'), color: '#fff' }, t); tl.set(e, { backgroundColor: 'rgba(0,0,0,0)', color: '' }, t2); }); });
   (c.words || []).forEach(([k, w, cc], i, arr) => { const t = T(k), t2 = i + 1 < arr.length ? T(arr[i + 1][0]) : b; const e = big(sh, w, { ground: 'bg', color: cc || 'paper', y: c.wordsY || (phone ? 1680 : 1450) }); e.style.textShadow = '0 8px 30px rgba(0,0,0,.6)'; fit(e, 960, 300, 320); K.vis(e, t, t2);
     tl.fromTo(e, { scale: 2, opacity: 0 }, { scale: 1, opacity: 1, duration: .13, ease: 'power4.out', immediateRender: false }, t);
     tl.fromTo(m, { scale: 1.07 }, { scale: 1, duration: .3, ease: 'power3.out', immediateRender: false }, t); sfx(t, 'cut_hit/punch', -12); K.shake(t, 10, .18); });

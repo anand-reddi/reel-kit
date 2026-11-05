@@ -5,6 +5,7 @@ writes a contact sheet of every checked moment so the frames can be looked at be
 
   python3 reel.py layout script.json            # voice + picture (no render), then this check
 """
+HEAD = 150   # how far the presenter's head can rise above the camera box (px)
 import json, os, sys
 
 JS = r"""
@@ -73,6 +74,9 @@ def check(work, out_dir=None):
                 for cd in m["cards"]:
                     if inter(c, cd): probs.append(f"{tag}: caption {c['id']} overlaps card {cd['id']} (caption y {c['y']:.0f}-{c['y'] + c['h']:.0f}, card y {cd['y']:.0f}-{cd['y'] + cd['h']:.0f})")
                 if m["cam"] and m.get("box") and inter(c, m["cam"]): probs.append(f"{tag}: caption {c['id']} overlaps the presenter box (y {m['cam']['y']:.0f})")
+                if m["cam"] and m.get("box"):   # the presenter's hair and head rise above the box
+                    cm = m["cam"]; hz = {"x": cm["x"] + cm["w"] * .18, "y": cm["y"] - HEAD, "w": cm["w"] * .64, "h": HEAD}
+                    if inter(c, hz): probs.append(f"{tag}: caption {c['id']} sits on the presenter's head (caption bottom {c['y'] + c['h']:.0f}, head top {hz['y']:.0f})")
                 for h in m["heads"]:
                     if inter(c, h): probs.append(f"{tag}: caption {c['id']} overlaps the headline")
                 if c["x"] < 20 or c["x"] + c["w"] > 1060: probs.append(f"{tag}: caption {c['id']} runs off the frame")
@@ -81,7 +85,7 @@ def check(work, out_dir=None):
                     if inter(c, cd):
                         need = cd["y"] + cd["h"] + 34
                         fix[sc] = max(fix.get(sc, 0), need)
-                        lim[sc] = min(lim.get(sc, 1920), (m["cam"]["y"] - 20) if (m["cam"] and m.get("box")) else 1880)
+                        lim[sc] = min(lim.get(sc, 1920), (m["cam"]["y"] - HEAD - 10) if (m["cam"] and m.get("box")) else 1880)
             for cd in m["cards"]:
                 if m["cam"] and m.get("box") and inter(cd, m["cam"], pad=-30): probs.append(f"{tag}: card {cd['id']} overlaps the presenter box (card bottom {cd['y'] + cd['h']:.0f}, box top {m['cam']['y']:.0f})")
                 if cd["x"] < -2 or cd["x"] + cd["w"] > 1082 or cd["y"] + cd["h"] > 1922: probs.append(f"{tag}: card {cd['id']} runs off the frame")
