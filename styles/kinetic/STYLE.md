@@ -27,6 +27,7 @@ Example: `examples/every-block.json` (50 s, every block, music only).
   each scene lasts `beats` on the `bpm` grid, and the music carries it (raise `levels.music`).
 - **Times** inside a block: a number is beats after the block start (`B(k)`); strings work as in the other styles:
   `"1.5s"`, `"line:1"`, `"line:1:end"`, `"word:code"`, `"end-0.2"`.
+- **Backdrop** on any block: `"backdrop": {"src", "blur", "dim"}` puts a blurred, darkened image behind it instead of the flat ground (keep text grounds `bg` so the ink stays light).
 - **Colours**: palette names (`bg`, `paper`, `accent`, `hot`, `ink`) or hex. Text picks a readable ink on its ground.
 - Numbers on screen come from the film or the user, never invented: `{lines}` (lines of engine code), `{frames}`,
   `{seconds}` are filled in.
@@ -49,7 +50,7 @@ Example: `examples/every-block.json` (50 s, every block, music only).
 | `Progress` | line 1 renders itself (outline, a scan line fills it), line 2 slams, cards ride a conveyor, a progress bar | `lines`, `cards: [[word, ground, ink]]`, `label`, `doneLabel`, `doneRight`, `ground` |
 | `Chain` | words far apart in one world; the camera rides a comet from node to node, each lands with a hit | `nodes: [[word, sub, colour]]` |
 | `Rewind` | the film so far plays backwards inside a tilting playback window, which then fills the screen | `from` (seconds to rewind from), `label` |
-| `Picture` | an image or a clip: slash/iris/wipe reveal (`none` = on screen from frame 1, for a hook), push and pan, a punch-in on every word, cut-ins, weather | `src`, `words: [[beat, text, colour]]`, `reveal`, `cutIns: [[beat, zoom, [x, y], sound]]`, `weather: rain|snow|dust`, `tint`, `fit`, `device: phone` (a realistic phone mockup over a blurred copy; `enter: rise|swing|keep|none`, `phoneWidth`, `phoneTop`, `wordsY`, `zoom`) |
+| `Picture` | an image or a clip: slash/iris/wipe reveal (`none` = on screen from frame 1, for a hook), push and pan, a punch-in on every word, cut-ins, weather | `src`, `words: [[beat, text, colour]]`, `reveal`, `cutIns: [[beat, zoom, [x, y], sound]]`, `weather: rain|snow|dust`, `tint`, `fit`, `device: phone` (a realistic phone mockup over a blurred copy; `enter: rise|swing|keep|none`, `phoneWidth`, `phoneTop`, `wordsY`, `zoom`); `blur: [px, at]` (starts out of focus, snaps sharp at `at`); `overlay: {src, out, width, top}` (a title or logo over the picture that flicks out fast at `out`); `tag` (a small mono label under the words, e.g. a place) |
 | `Logo` | a line, a slash and a hit; the mark drops in, the name types, tagline and small print | `mark` (an .svg, an image or an icon "set:name"), `wordmark`, `tagline`, `small`, `case`, `width` |
 
 ### Words shots

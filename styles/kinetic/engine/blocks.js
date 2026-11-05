@@ -306,6 +306,7 @@ BL.Rewind = (box, c, T, S) => {
 };
 
 // ================================================================== Picture: key art or a screenshot, pushed, panned, punched in
+const rv0 = c => (c.reveal || 'slash') === 'none';   // on screen from frame 1
 BL.Picture = (box, c, T, S) => {
   const a = S.start, b = S.end, sh = layer(box, a, b, 'shot pic'); K.ground(a, c.ground || 'bg');
   // device: "phone" puts the picture on a realistic phone (titanium frame, Dynamic Island, side buttons) floating over a
@@ -332,6 +333,18 @@ BL.Picture = (box, c, T, S) => {
   const tint = el('div', 'ptint', frame); tint.style.background = phone ? 'none' : `linear-gradient(transparent 35%, rgba(0,0,0,${c.tint ?? .55}))`;
   if (phone) tl.fromTo(frame, { scale: c.zoom || 1.04 }, { scale: (c.zoom || 1.04) + .06, duration: b - a, ease: 'none', immediateRender: false }, a);   // a slow push on the screen
   else tl.fromTo(frame, { scale: 1.02, x: -20 }, { scale: 1.16, x: 30, duration: b - a, ease: 'none', immediateRender: false }, a);   // push + pan
+  // blur: [px, at] starts out of focus (a backdrop for an overlay) and snaps into focus at `at`
+  if (c.blur) { const [px, k] = c.blur, t = T(k); tl.set(m, { filter: `blur(${px}px) brightness(.55)` }, a);
+    tl.to(m, { filter: 'blur(0px) brightness(1)', duration: .22, ease: 'power3.out' }, t); K.flash(t, '#fff', .06, .25); sfx(t, 'whoosh_fast/crisp', -12); }
+  // overlay: {src, out, width} an image (a title or logo) over the picture: pops in at the start, flicks out fast at `out`
+  if (c.overlay) { const o = c.overlay, ov = el('img', 'poverlay', sh); ov.src = o.src; const ow = o.width || 760; ov.style.width = ow + 'px';
+    ov.style.left = Math.round((W - ow) / 2) + 'px'; ov.style.top = (o.top ?? 560) + 'px'; const t2 = T(o.out);
+    tl.fromTo(ov, { scale: 1.18, opacity: rv0(c) ? 1 : 0 }, { scale: 1, opacity: 1, duration: .16, ease: 'power4.out', immediateRender: false }, a);
+    tl.to(ov, { scale: 1.06, rotation: -2, duration: Math.max(.1, t2 - a - .1), ease: 'none' }, a + .16);
+    tl.to(ov, { scale: 2.4, opacity: 0, duration: .12, ease: 'power3.in' }, t2); tl.set(ov, { visibility: 'hidden' }, t2 + .12); sfx(t2, 'whoosh_fast/sleeve', -11); }
+  // tag: a small mono label under the words (a place, a source), types in after the reveal
+  if (c.tag) { const g = el('div', 'ptag mono', sh, esc(c.tag)); g.style.top = ((phone ? (c.wordsY || 1680) : 1450) + 150) + 'px';
+    tl.fromTo(g, { opacity: 0, y: 14 }, { opacity: .9, y: 0, duration: .18, ease: 'power3.out', immediateRender: false }, a + .12); }
   const rv = c.reveal || 'slash';
   if (rv === 'slash') { tl.fromTo(frame, { clipPath: 'polygon(0 0, 0 0, 0 100%, 0 100%)' }, { clipPath: 'polygon(0 0, 120% 0, 100% 100%, -20% 100%)', duration: .22, ease: 'expo.out', immediateRender: false }, a); sfx(a, 'swish/blade', -11); }
   else if (rv === 'iris') { tl.fromTo(frame, { clipPath: 'circle(0% at 50% 50%)' }, { clipPath: 'circle(80% at 50% 50%)', duration: .3, ease: 'power3.out', immediateRender: false }, a); sfx(a, 'whoosh_fast/crisp', -12); }

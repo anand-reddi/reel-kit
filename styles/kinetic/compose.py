@@ -100,6 +100,10 @@ Promise.all(['900 100px AV', '400 100px AS', '400 40px MO'].map(f => document.fo
   D.scenes.forEach((s, i) => {
     const box = K.el('div', 'blk', cam); K.vis(box, s.start, i + 1 < D.scenes.length ? D.scenes[i + 1].start : null);
     const T = v => typeof v === 'number' ? s.start + v * K.B : (v in s.times ? s.times[v] : s.start);
+    const bd = s.block.backdrop;   // backdrop: {src, blur, dim} an image behind any block (instead of a flat ground)
+    if (bd) { const d = K.el('div', 'kbackdrop', box); d.style.backgroundImage = `url(${bd.src})`;
+      d.style.filter = `blur(${bd.blur ?? 14}px) brightness(${1 - (bd.dim ?? .55)})`;
+      K.tl.fromTo(d, { scale: 1.08 }, { scale: 1.16, duration: s.end - s.start, ease: 'none', immediateRender: false }, s.start); }
     K.blocks[s.type](box, s.block, T, { start: s.start, end: s.end, i });
   });
   K.tl.set({}, {}, D.duration);
