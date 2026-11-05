@@ -49,7 +49,7 @@ Example: `examples/every-block.json` (50 s, every block, music only).
 | `Progress` | line 1 renders itself (outline, a scan line fills it), line 2 slams, cards ride a conveyor, a progress bar | `lines`, `cards: [[word, ground, ink]]`, `label`, `doneLabel`, `doneRight`, `ground` |
 | `Chain` | words far apart in one world; the camera rides a comet from node to node, each lands with a hit | `nodes: [[word, sub, colour]]` |
 | `Rewind` | the film so far plays backwards inside a tilting playback window, which then fills the screen | `from` (seconds to rewind from), `label` |
-| `Picture` | an image or a clip: slash/iris/wipe reveal, push and pan, a punch-in on every word, cut-ins, weather | `src`, `words: [[beat, text, colour]]`, `reveal`, `cutIns: [[beat, zoom, [x, y], sound]]`, `weather: rain|snow|dust`, `tint`, `fit` |
+| `Picture` | an image or a clip: slash/iris/wipe reveal (`none` = on screen from frame 1, for a hook), push and pan, a punch-in on every word, cut-ins, weather | `src`, `words: [[beat, text, colour]]`, `reveal`, `cutIns: [[beat, zoom, [x, y], sound]]`, `weather: rain|snow|dust`, `tint`, `fit` |
 | `Logo` | a line, a slash and a hit; the mark drops in, the name types, tagline and small print | `mark` (an .svg, an image or an icon "set:name"), `wordmark`, `tagline`, `small`, `case`, `width` |
 
 ### Words shots

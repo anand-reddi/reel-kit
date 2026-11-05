@@ -317,6 +317,7 @@ BL.Picture = (box, c, T, S) => {
   const rv = c.reveal || 'slash';
   if (rv === 'slash') { tl.fromTo(frame, { clipPath: 'polygon(0 0, 0 0, 0 100%, 0 100%)' }, { clipPath: 'polygon(0 0, 120% 0, 100% 100%, -20% 100%)', duration: .22, ease: 'expo.out', immediateRender: false }, a); sfx(a, 'swish/blade', -11); }
   else if (rv === 'iris') { tl.fromTo(frame, { clipPath: 'circle(0% at 50% 50%)' }, { clipPath: 'circle(80% at 50% 50%)', duration: .3, ease: 'power3.out', immediateRender: false }, a); sfx(a, 'whoosh_fast/crisp', -12); }
+  else if (rv === 'none') { /* on screen from the first frame (a hook) */ }
   else { tl.fromTo(frame, { clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0% 0)', duration: .25, ease: 'expo.out', immediateRender: false }, a); sfx(a, 'swipe/paper', -12); }
   (c.words || []).forEach(([k, w, cc], i, arr) => { const t = T(k), t2 = i + 1 < arr.length ? T(arr[i + 1][0]) : b; const e = big(sh, w, { ground: 'bg', color: cc || 'paper', y: 1450 }); fit(e, 960, 300, 320); K.vis(e, t, t2);
     tl.fromTo(e, { scale: 2, opacity: 0 }, { scale: 1, opacity: 1, duration: .13, ease: 'power4.out', immediateRender: false }, t);

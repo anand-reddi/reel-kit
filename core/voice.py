@@ -90,26 +90,33 @@ def speak(script, work):
             a, sr = k.create(text, voice=voice, speed=speed, lang=lang)
         return _trim(resample_poly(a, SR, sr))
     lines, clips, t = [], [], intro_lead(script)
-    for si, sc in enumerate(script["scenes"]):
-        src = sc["lines"]; groups, cur = [], []
-        for li, line in enumerate(src):     # a sentence ends on . ? ! or : (or at the end of the scene)
-            cur.append(li)
-            if not natural or plain(line).rstrip().endswith((".", "?", "!", ":", "…")) or li == len(src) - 1: groups.append(cur); cur = []
-        for gi, grp in enumerate(groups):
-            gap = 0.2 if (si == 0 and gi == 0) else (0.24 if gi == 0 else (0.12 if natural else 0.06))
-            if gi == 0: gap += sc.get("pause_before", 0)   # a beat of silence before the scene (lets the last one land)
-            texts = [plain(src[li]) for li in grp]
-            a = synth(" ".join(texts)); t += gap; n = len(a)
-            cuts = [0]
-            if len(grp) > 1:
-                solo = np.array([len(synth(x)) for x in texts], float)
-                for b in (np.cumsum(solo)[:-1] / solo.sum() * n).astype(int): cuts.append(_snap(a, b, int(0.14 * SR)))
-            cuts.append(n)
-            for j, li in enumerate(grp):
-                s0, s1 = t + cuts[j] / SR, t + cuts[j + 1] / SR
-                lines.append(dict(scene=si, line=li, text=texts[j], start=round(s0, 3), end=round(s1, 3),
-                                  words=_words(texts[j], src[li], s0, s1 - s0)))
-            clips.append((t, a)); t += n / SR
+    # Sentences, not lines, are what gets voiced: a sentence ends on . ? ! or : ("…" is a breath, not an end).
+    # A scene whose last line is left open ("," "…" or no punctuation before a scene that starts lower-case) runs on
+    # into the next scene, so a sentence split across two visuals is still read in one breath.
+    allv = [(si, li, line) for si, sc in enumerate(script["scenes"]) for li, line in enumerate(sc["lines"])]
+    groups, cur = [], []
+    for q, (si, li, line) in enumerate(allv):
+        cur.append(q); txt = plain(line).rstrip(); last_in_scene = li == len(script["scenes"][si]["lines"]) - 1
+        nxt = allv[q + 1] if q + 1 < len(allv) else None
+        runs_on = (natural and last_in_scene and nxt is not None and (txt.endswith((",", "…", "—")) or
+                   (not txt.endswith((".", "?", "!", ":")) and plain(nxt[2])[:1].islower())))
+        if not natural or txt.endswith((".", "?", "!", ":")) or (last_in_scene and not runs_on) or nxt is None: groups.append(cur); cur = []
+    for gi, grp in enumerate(groups):
+        si0 = allv[grp[0]][0]; first_of_scene = allv[grp[0]][1] == 0
+        gap = 0.2 if gi == 0 else (0.24 if first_of_scene else (0.12 if natural else 0.06))
+        if first_of_scene: gap += script["scenes"][si0].get("pause_before", 0)   # a beat of silence before the scene
+        texts = [plain(allv[q][2]) for q in grp]
+        a = synth(" ".join(texts)); t += gap; n = len(a)
+        cuts = [0]
+        if len(grp) > 1:
+            solo = np.array([len(synth(x)) for x in texts], float)
+            for b in (np.cumsum(solo)[:-1] / solo.sum() * n).astype(int): cuts.append(_snap(a, b, int(0.14 * SR)))
+        cuts.append(n)
+        for j, q in enumerate(grp):
+            si, li, raw = allv[q]; s0, s1 = t + cuts[j] / SR, t + cuts[j + 1] / SR
+            lines.append(dict(scene=si, line=li, text=texts[j], start=round(s0, 3), end=round(s1, 3),
+                              words=_words(texts[j], raw, s0, s1 - s0)))
+        clips.append((t, a)); t += n / SR
     dur = script.get("duration") or math.ceil((t + 0.45) * 10) / 10
     if t > dur - 0.2: raise SystemExit(f"voice runs {t:.2f}s but duration is {dur}s: cut words or raise voice.speed")
     n = int(dur * SR); vo = np.zeros(n)

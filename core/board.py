@@ -9,7 +9,7 @@ def main(work, out, times=None):
     from playwright.sync_api import sync_playwright
     from PIL import Image, ImageDraw, ImageFont
     tm = json.load(open(os.path.join(work, "timing.json")))
-    pts = [(t, 0, "") for t in times] if times else [(0.2, 0, "(first frame)")]
+    pts = [(t[0], t[1], t[2]) if isinstance(t, (list, tuple)) else (t, 0, "") for t in times] if times else [(0.2, 0, "(first frame)")]
     if not times and not tm["lines"]:   # a reel without a voice: three moments per scene
         for i, (a, b) in enumerate(tm.get("scenes", [])):
             for k in (.2, .55, .9): pts.append((round(a + (b - a) * k, 2), i, f"scene {i + 1}"))
