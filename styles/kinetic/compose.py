@@ -123,7 +123,7 @@ Promise.all(['900 100px AV', '400 100px AS', '400 40px MO'].map(f => document.fo
     return cues
 
 SEEK = r"""async (t) => {
-  window.__timelines.reel.seek(t, false);
+  window.__timelines.reel.seek(Math.max(t, 0.0005), false);   // past 0, so sets placed at 0 have rendered
   const ps = [];
   for (const v of document.querySelectorAll('video[data-start]')) { const s = +v.dataset.start, d = +v.dataset.duration, m = +(v.dataset.mediaStart || 0);
     const on = t >= s && t < s + d; v.style.visibility = on ? 'visible' : 'hidden';

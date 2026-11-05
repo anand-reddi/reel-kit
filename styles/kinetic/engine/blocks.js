@@ -308,18 +308,36 @@ BL.Rewind = (box, c, T, S) => {
 // ================================================================== Picture: key art or a screenshot, pushed, panned, punched in
 BL.Picture = (box, c, T, S) => {
   const a = S.start, b = S.end, sh = layer(box, a, b, 'shot pic'); K.ground(a, c.ground || 'bg');
-  const frame = el('div', 'pframe', sh); let m;
+  // device: "phone" puts the picture on a realistic phone (titanium frame, Dynamic Island, side buttons) floating over a
+  // blurred, darkened copy of itself; reveals, push/pan and cut-ins then happen on the phone's screen.
+  let host = sh, phone = null;
+  if (c.device === 'phone') {
+    const bg = el('div', 'pbgblur', sh); bg.style.backgroundImage = `url(${c.poster || c.src})`;
+    tl.fromTo(bg, { scale: 1.25 }, { scale: 1.35, duration: b - a, ease: 'none', immediateRender: false }, a);
+    phone = el('div', 'phone', sh); const pw = c.phoneWidth || 650; phone.style.width = pw + 'px'; phone.style.height = Math.round(pw * 2.12) + 'px';
+    phone.style.left = Math.round((W - pw) / 2) + 'px'; phone.style.top = (c.phoneTop ?? 170) + 'px';
+    ['b1', 'b2', 'b3', 'b4'].forEach(k => el('i', 'pbtn ' + k, phone));
+    const scr = el('div', 'pscreen', phone); el('div', 'pisland', phone); el('div', 'pglare', phone); host = scr;
+    const en = c.enter || 'rise';
+    if (en === 'rise') tl.fromTo(phone, { y: 700, rotation: -9, opacity: 0 }, { y: 0, rotation: -2, opacity: 1, duration: .42, ease: 'back.out(1.3)', immediateRender: false }, a);
+    else if (en === 'swing') tl.fromTo(phone, { rotationY: -70, x: -300, opacity: 0 }, { rotationY: 0, x: 0, rotation: -2, opacity: 1, duration: .4, ease: 'power3.out', immediateRender: false }, a);
+    else tl.set(phone, { rotation: -2 }, a);
+    tl.to(phone, { rotation: 1.5, y: -14, duration: Math.max(.3, b - a - .4), ease: 'sine.inOut' }, a + (en === 'keep' || en === 'none' ? 0 : .42));
+    if (en !== 'keep' && en !== 'none') sfx(a, 'whoosh_fast/sleeve', -13);
+  }
+  const frame = el('div', 'pframe', host); let m;
   if (/\.(mp4|webm|mov)$/i.test(c.src)) { m = el('video', 'pimg', frame); m.src = c.src; m.muted = true; m.dataset.start = a; m.dataset.duration = b - a; m.dataset.mediaStart = c.mediaStart || 0; }
   else { m = el('img', 'pimg', frame); m.src = c.src; }
   if (c.fit === 'contain') m.style.objectFit = 'contain';
-  const tint = el('div', 'ptint', frame); tint.style.background = `linear-gradient(transparent 35%, rgba(0,0,0,${c.tint ?? .55}))`;
-  tl.fromTo(frame, { scale: 1.02, x: -20 }, { scale: 1.16, x: 30, duration: b - a, ease: 'none', immediateRender: false }, a);   // push + pan
+  const tint = el('div', 'ptint', frame); tint.style.background = phone ? 'none' : `linear-gradient(transparent 35%, rgba(0,0,0,${c.tint ?? .55}))`;
+  if (phone) tl.fromTo(frame, { scale: c.zoom || 1.04 }, { scale: (c.zoom || 1.04) + .06, duration: b - a, ease: 'none', immediateRender: false }, a);   // a slow push on the screen
+  else tl.fromTo(frame, { scale: 1.02, x: -20 }, { scale: 1.16, x: 30, duration: b - a, ease: 'none', immediateRender: false }, a);   // push + pan
   const rv = c.reveal || 'slash';
   if (rv === 'slash') { tl.fromTo(frame, { clipPath: 'polygon(0 0, 0 0, 0 100%, 0 100%)' }, { clipPath: 'polygon(0 0, 120% 0, 100% 100%, -20% 100%)', duration: .22, ease: 'expo.out', immediateRender: false }, a); sfx(a, 'swish/blade', -11); }
   else if (rv === 'iris') { tl.fromTo(frame, { clipPath: 'circle(0% at 50% 50%)' }, { clipPath: 'circle(80% at 50% 50%)', duration: .3, ease: 'power3.out', immediateRender: false }, a); sfx(a, 'whoosh_fast/crisp', -12); }
   else if (rv === 'none') { /* on screen from the first frame (a hook) */ }
   else { tl.fromTo(frame, { clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0% 0)', duration: .25, ease: 'expo.out', immediateRender: false }, a); sfx(a, 'swipe/paper', -12); }
-  (c.words || []).forEach(([k, w, cc], i, arr) => { const t = T(k), t2 = i + 1 < arr.length ? T(arr[i + 1][0]) : b; const e = big(sh, w, { ground: 'bg', color: cc || 'paper', y: 1450 }); fit(e, 960, 300, 320); K.vis(e, t, t2);
+  (c.words || []).forEach(([k, w, cc], i, arr) => { const t = T(k), t2 = i + 1 < arr.length ? T(arr[i + 1][0]) : b; const e = big(sh, w, { ground: 'bg', color: cc || 'paper', y: phone ? (c.wordsY || 1680) : 1450 }); e.style.textShadow = '0 8px 30px rgba(0,0,0,.6)'; fit(e, 960, 300, 320); K.vis(e, t, t2);
     tl.fromTo(e, { scale: 2, opacity: 0 }, { scale: 1, opacity: 1, duration: .13, ease: 'power4.out', immediateRender: false }, t);
     tl.fromTo(m, { scale: 1.07 }, { scale: 1, duration: .3, ease: 'power3.out', immediateRender: false }, t); sfx(t, 'cut_hit/punch', -12); K.shake(t, 10, .18); });
   (c.cutIns || []).forEach(([k, z, xy, snd]) => { const t = T(k); const [px, py] = xy || [.5, .5];
