@@ -263,8 +263,9 @@ html, body { margin: 0; background: {paper}; }
 .vrv { position: absolute; left: 110px; top: 20px; width: 230px; height: 409px; border-radius: 22px; overflow: hidden; border: 4px solid {edge}; box-shadow: 14px 16px 0 {shadow}; z-index: 4; }
 .vrv img { width: 100%; height: 100%; object-fit: cover; }
 .vsheet { left: 380px; width: 600px; top: 40px; }
-.vcts { display: flex; justify-content: space-between; padding: 10px 6px 0; }
-.vct { display: flex; flex-direction: column; align-items: center; gap: 10px; font-size: 24px; color: {mid}; }
+.vcts { display: flex; justify-content: space-between; gap: 14px; padding: 10px 0 0; }
+.vct { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 12px; font-size: 23px; line-height: 1.2; color: {mid}; }
+.vct > span { width: 100%; text-align: center; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .vav { position: relative; width: 104px; height: 104px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 46px; font-weight: 700; color: #fff; }
 .vck { position: absolute; right: -6px; bottom: -6px; width: 40px; height: 40px; border-radius: 50%; background: {accent}; border: 3px solid {surface}; display: flex; align-items: center; justify-content: center; transform: scale(0); }
 .vsend { margin-top: 28px; text-align: center; font-size: 38px; font-weight: 700; padding: 18px; border-radius: 18px; background: {grey}; color: {mid}; }
