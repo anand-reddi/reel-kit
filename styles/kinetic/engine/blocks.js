@@ -351,6 +351,17 @@ BL.Picture = (box, c, T, S) => {
     tl.fromTo(win, { rotationX: 0 }, { rotationX: 4, y: -10, duration: b - a, ease: 'sine.inOut', immediateRender: false }, a);
     phone = win; c.wordsY = c.wordsY || (top + ph + 230);
   }
+  // device: "scope" puts the clip in a round sensor lens: tick ring that turns, crosshair, corner HUD text
+  if (c.device === 'scope') {
+    const sz = c.scopeSize || 940, top = c.scopeTop ?? 300, sc = el('div', 'scope', sh);
+    sc.style.width = sc.style.height = sz + 'px'; sc.style.left = Math.round((W - sz) / 2) + 'px'; sc.style.top = top + 'px';
+    const lens = el('div', 'slens', sc); host = lens;
+    const ring = el('div', 'sring', sc, `<svg viewBox="0 0 200 200">${Array.from({ length: 72 }, (_, k) => `<line x1="100" y1="${k % 6 ? 3 : 0}" x2="100" y2="${k % 6 ? 7 : 11}" transform="rotate(${k * 5} 100 100)"/>`).join('')}</svg>`);
+    el('div', 'scross', sc); const hud = el('div', 'shud mono', sh, esc(c.hud || 'LIVE · TRACKING')); hud.style.top = (top - 70) + 'px'; K.vis(hud, a, b);
+    tl.fromTo(ring, { rotation: 0 }, { rotation: 40, duration: b - a, ease: 'none', immediateRender: false }, a);
+    if ((c.enter || 'none') === 'iris') { tl.fromTo(sc, { scale: .2, opacity: 0 }, { scale: 1, opacity: 1, duration: .35, ease: 'back.out(1.4)', immediateRender: false }, a); sfx(a, 'whoosh_fast/crisp', -12); }
+    phone = sc; c.wordsY = c.wordsY || (top + sz + 170);
+  }
   const frame = el('div', 'pframe', host); let m;
   if (/\.(mp4|webm|mov)$/i.test(c.src)) { m = el('video', 'pimg', frame); m.src = c.src; m.muted = true; m.dataset.start = a; m.dataset.duration = b - a; m.dataset.mediaStart = c.mediaStart || 0; }
   else { m = el('img', 'pimg', frame); m.src = c.src; }
@@ -399,7 +410,7 @@ BL.Logo = (box, c, T, S) => {
   const ln = el('div', 'lline', sh); ln.style.background = ink; tl.fromTo(ln, { scaleX: 0 }, { scaleX: 1, duration: .2, ease: 'expo.out', immediateRender: false }, a);
   const sl = el('div', 'lslash', sh); tl.fromTo(sl, { scaleY: 0 }, { scaleY: 1, duration: .14, ease: 'power4.out', immediateRender: false }, a + .12); K.fx(a + .14, 'hit'); sfx(a + .14, 'sub_drop/808', -9);
   tl.to([ln, sl], { opacity: 0, duration: .2 }, a + .5);
-  if (c.mark) { const mk = el('div', 'lmark', sh, c.mark); const parts = mk.querySelectorAll('path, circle, rect, polygon');
+  if (c.mark) { const mk = el('div', 'lmark', sh, c.mark); if (c.markSize) { const im = mk.querySelector('svg, img'); if (im) { im.style.width = c.markSize + 'px'; im.style.height = 'auto'; } } const parts = mk.querySelectorAll('path, circle, rect, polygon');
     if (parts.length > 1) parts.forEach((p, i) => tl.fromTo(p, { y: -300, opacity: 0 }, { y: 0, opacity: 1, duration: .25, ease: 'back.out(2)', immediateRender: false }, a + .4 + i * .05));
     else tl.fromTo(mk, { y: -400, opacity: 0, rotation: -40 }, { y: 0, opacity: 1, rotation: 0, duration: .35, ease: 'back.out(1.8)', immediateRender: false }, a + .4);
     sfx(a + .45, 'pro_pop_in/deep', -12); }
