@@ -334,6 +334,19 @@ BL.Picture = (box, c, T, S) => {
     tl.to(phone, { rotation: 1.5, y: -14, duration: Math.max(.3, b - a - .4), ease: 'sine.inOut' }, a + (en === 'keep' || en === 'none' ? 0 : .42));
     if (en !== 'keep' && en !== 'none') sfx(a, 'whoosh_fast/sleeve', -13);
   }
+  // device: "browser" puts the clip in a browser window: tabs dot row, a URL pill (`url`), a soft reflection under it
+  if (c.device === 'browser') {
+    const bg = el('div', 'pbgblur', sh); if (c.poster) bg.style.backgroundImage = `url(${c.poster})`;
+    const pw = c.playerWidth || 1000, ph = Math.round(pw / (c.aspect || 16 / 9)), top = c.playerTop ?? 380;
+    const win = el('div', 'bwin', sh); win.style.width = pw + 'px'; win.style.left = Math.round((W - pw) / 2) + 'px'; win.style.top = top + 'px';
+    el('div', 'bbar', win, `<i></i><i></i><i></i><span class="mono">${esc(c.url || 'localhost')}</span>`);
+    const scr = el('div', 'plscreen', win); scr.style.height = ph + 'px'; host = scr;
+    const en = c.enter || 'none';
+    if (en === 'tilt') { tl.fromTo(win, { rotationX: 38, rotationZ: -6, y: 260, opacity: 0 }, { rotationX: 8, rotationZ: 0, y: 0, opacity: 1, duration: .45, ease: 'power4.out', immediateRender: false }, a); sfx(a, 'whoosh_fast/heavy', -12); }
+    else tl.set(win, { rotationX: 8 }, a);
+    tl.to(win, { rotationX: 2, rotationY: -4, duration: b - a, ease: 'sine.inOut' }, a + (en === 'tilt' ? .45 : 0));
+    phone = win; c.wordsY = c.wordsY || (top + ph + 260);
+  }
   // device: "player" puts the clip in a desktop video-player window (title bar, controls, a progress bar that runs)
   if (c.device === 'player') {
     const bg = el('div', 'pbgblur', sh); bg.style.backgroundImage = `url(${c.poster || c.src})`;
