@@ -323,7 +323,7 @@ class Film:
             A(f'tl.to("#{p}", {{ opacity: 0, scale: 0.9, filter: "blur(12px)", duration: 0.16, ease: "power2.in" }}, {r3(en - 0.16)});')
     # "sfx_set" in the script swaps the cut sounds for a whole reel, so reels don't all sound alike:
     # classic (default) | cinema (paper, film shutter, blade, tape) | soft (sleeves, bamboo, mirror shutter) | digital (zips, blips, glitch)
-    # | arena (heavy: big thumps, metal hits, blasts, sub sinks; for rivalry and launch reels)
+    # | arena (weighty but smooth: airy thumps, heavy whooshes, air impacts, sub sinks; no drum hits)
     SFX_SETS = {
         "classic": {},
         "cinema": {"zoom": [("swipe/paper", -14, 0)], "whip": [("swish/blade", -12, -0.04)],
@@ -332,8 +332,8 @@ class Film:
         "soft": {"zoom": [("whoosh_fast/sleeve", -15, 0)], "whip": [("fit/whoosh.short/bamboo_swish", -13, -0.04)],
                  "flash": [("shutter/mirror", -13, 0)], "impact": [("cut_hit/sub", -11, 0)], "glitch": [("glitch/mid", -14, 0)],
                  "dip": [("reverse_swell/breath", -17, -0.2)], "slide": [("swipe/velvet", -17, 0)]},
-        "arena": {"zoom": [("whoosh_big/thump", -14, 0)], "whip": [("whoosh_fast/heavy", -12, -0.04)],
-                  "flash": [("shutter/dslr", -12, 0), ("impact/metal", -17, 0)], "impact": [("impact/blast", -11, 0)],
+        "arena": {"zoom": [("whoosh_big/thump_airy", -14, 0)], "whip": [("whoosh_fast/heavy", -12, -0.04)],
+                  "flash": [("shutter/dslr", -12, 0)], "impact": [("pro_impact/air", -11, 0)],
                   "glitch": [("pro_glitch/crunchy", -13, 0)], "dip": [("downlifter/sub_sink", -15, 0)], "slide": [("swish/cane", -15, 0)]},
         "digital": {"zoom": [("pro_zip/up", -15, 0)], "whip": [("whoosh_fast/tight", -12, -0.04)],
                     "flash": [("glitch/chirp", -13, 0), ("pro_sub_drop/quick", -18, 0)], "impact": [("sub_drop/punch", -11, 0)],
