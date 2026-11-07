@@ -420,9 +420,10 @@ BL.Picture = (box, c, T, S) => {
 // ================================================================== Logo: a line, a slash and a hit, the mark drops in, the name types
 BL.Logo = (box, c, T, S) => {
   const a = S.start, b = S.end, g = c.ground || 'bg'; K.ground(a, g); const sh = layer(box, a, b); const ink = readable(g);
-  const ln = el('div', 'lline', sh); ln.style.background = ink; tl.fromTo(ln, { scaleX: 0 }, { scaleX: 1, duration: .2, ease: 'expo.out', immediateRender: false }, a);
-  const sl = el('div', 'lslash', sh); tl.fromTo(sl, { scaleY: 0 }, { scaleY: 1, duration: .14, ease: 'power4.out', immediateRender: false }, a + .12); K.fx(a + .14, 'hit'); sfx(a + .14, 'sub_drop/808', -9);
-  tl.to([ln, sl], { opacity: 0, duration: .2 }, a + .5);
+  if (c.line !== false) {   // line: false drops the opening line and slash (the mark and name land on a clean ground)
+    const ln = el('div', 'lline', sh); ln.style.background = ink; tl.fromTo(ln, { scaleX: 0 }, { scaleX: 1, duration: .2, ease: 'expo.out', immediateRender: false }, a);
+    const sl = el('div', 'lslash', sh); tl.fromTo(sl, { scaleY: 0 }, { scaleY: 1, duration: .14, ease: 'power4.out', immediateRender: false }, a + .12); K.fx(a + .14, 'hit'); sfx(a + .14, 'sub_drop/808', -9);
+    tl.to([ln, sl], { opacity: 0, duration: .2 }, a + .5); }
   if (c.mark) { const mk = el('div', 'lmark', sh, c.mark); if (c.markSize) { const im = mk.querySelector('svg, img'); if (im) { im.style.width = c.markSize + 'px'; im.style.height = 'auto'; } } const parts = mk.querySelectorAll('path, circle, rect, polygon');
     if (parts.length > 1) parts.forEach((p, i) => tl.fromTo(p, { y: -300, opacity: 0 }, { y: 0, opacity: 1, duration: .25, ease: 'back.out(2)', immediateRender: false }, a + .4 + i * .05));
     else tl.fromTo(mk, { y: -400, opacity: 0, rotation: -40 }, { y: 0, opacity: 1, rotation: 0, duration: .35, ease: 'back.out(1.8)', immediateRender: false }, a + .4);
