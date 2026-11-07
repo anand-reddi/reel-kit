@@ -179,7 +179,8 @@ BL.Prompt = (box, c, T, S) => {
   const lab = el('div', 'plab mono', world, esc(c.label || 'BRIEF.md')); lab.style.color = ink;
   const txt = el('div', 'ptxt mono', world); txt.style.color = ink; const spans = []; const kws = [];
   (c.text || []).forEach(([s, kw]) => { const holder = kw ? el('span', 'pkw', txt) : txt; if (kw) { el('b', '', holder); kws.push(holder); }
-    s.split(/( )/).forEach(tok => { if (!tok) return; const wd = el('span', 'pw', holder); [...tok].forEach(ch => { const x = el('span', '', wd); x.textContent = ch === ' ' ? ' ' : ch; x.style.opacity = 0; spans.push(x); }); }); });
+    s.split(/( )/).forEach(tok => { if (!tok) return; if (tok === ' ') { holder.appendChild(document.createTextNode(' ')); return; }   // a plain space: lines never start with one
+    const wd = el('span', 'pw', holder); [...tok].forEach(ch => { const x = el('span', '', wd); x.textContent = ch === ' ' ? ' ' : ch; x.style.opacity = 0; spans.push(x); }); }); });
   const caret = el('i', 'pcaret', txt);
   const t0 = a + B * 1.2, t1 = Math.max(t0 + .5, b - B * 2.2), per = (t1 - t0) / Math.max(1, spans.length);
   K.typeIn(spans, t0, per); sfx(t0, 'pro_typing_run/standard', -15, { dur: +(t1 - t0).toFixed(2), align: 'start' });
