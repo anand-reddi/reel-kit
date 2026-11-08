@@ -21,3 +21,9 @@ html, body { margin: 0; background: #e6e2db; }
 .label span { display: block; font-family: "IBM Plex Mono", monospace; font-size: 23px; color: #6a6760; margin-top: 2px; }
 .cap { position: absolute; left: 50%; top: 1500px; transform: translateX(-50%); width: max-content; max-width: 900px; background: #17181b; border-radius: 22px; padding: 18px 30px; font-size: 54px; font-weight: 700; letter-spacing: -1px; color: #8e8f94; text-align: center; opacity: 0; line-height: 1.15; box-shadow: 0 10px 30px rgba(0,0,0,.18); }
 .cap i { font-style: normal; }
+/* look: dark (product showcase) */
+body.look-dark, .look-dark #root { background: #0b0b0b; }
+.look-dark .title b { color: #f2f1ee; } .look-dark .title span { color: #b9b7b2; }
+.look-dark .slabel { color: #f2f1ee; } .look-dark .tag { color: #d8d6d0; background: rgba(20,20,20,.8); border-color: #3a3a3a; }
+.look-dark .label { background: rgba(14,14,14,.82); box-shadow: 0 8px 24px rgba(0,0,0,.5); }
+.look-dark .label b { color: #f2f1ee; } .look-dark .label span { color: #a9a7a2; }

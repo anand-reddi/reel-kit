@@ -18,20 +18,21 @@ def _at(spec, timing):
 
 def build(script, timing, work, sdir):
     out = os.path.join(work, "film"); a = os.path.join(out, "assets"); os.makedirs(a, exist_ok=True)
-    for f in ["three.module.min.js", "RoundedBoxGeometry.js"]: shutil.copy(os.path.join(KIT, "assets", "vendor", f), a)
+    for f in ["three.module.min.js", "RoundedBoxGeometry.js", "RoomEnvironment.js"]: shutil.copy(os.path.join(KIT, "assets", "vendor", f), a)
     for f in ["inter-500.woff2", "inter-600.woff2", "inter-700.woff2", "plex-500.woff2"]: shutil.copy(os.path.join(KIT, "assets", "fonts", f), a)
     shutil.copy(os.path.join(HERE, "studio.js"), a); shutil.copy(os.path.join(KIT, "assets", "gsap.min.js"), out)
     src = script["scene"]; src = src if os.path.isabs(src) else os.path.join(sdir, src)
     shutil.copy(src, os.path.join(a, "scene.js"))
     dur = timing["duration"]
     cfg = dict(id="reel", width=1080, height=1920, timing=timing, states=script.get("states", []), tag=script.get("tag", ""),
-               titles=script.get("titles", []), fov=script.get("fov", 30), drift=script.get("drift", 0.03))
+               titles=script.get("titles", []), fov=script.get("fov", 30), drift=script.get("drift", 0.03),
+               look=script.get("look", "studio"), fog=script.get("fog"), scale=script.get("scale", 1))
     css = open(os.path.join(HERE, "style.css")).read()
     html = f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"/><title>{script.get("title", "reel")}</title><style>{css}</style>
 <script type="importmap">{{ "imports": {{ "three": "./assets/three.module.min.js" }} }}</script>
 <script src="gsap.min.js"></script></head>
-<body>
+<body class="look-{script.get("look", "studio")}">
 <div id="root" data-composition-id="reel" data-start="0" data-duration="{dur}" data-width="1080" data-height="1920" data-fps="{script.get("fps", 30)}">
  <div id="stage3d" class="clip" data-start="0" data-duration="{dur}" data-track-index="1"><canvas id="gl" width="1080" height="1920"></canvas><svg id="leaders"></svg><div id="ov"></div></div>
 </div>

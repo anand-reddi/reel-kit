@@ -56,3 +56,25 @@ the subject.
 ## Performance
 Software WebGL renders about 15 s of wall time per video second at 1080×1920 (shadows on). Use `--quality draft`
 while iterating; keep meshes under ~5k and shadow-casting lights to one.
+
+## Look: "dark" (product showcase, exploded views)
+`"look": "dark"` swaps the warm studio for a near-black showcase: dark floor with a fading grid, warm key + cool rim
+light, room reflections, fog at `"fog": [near, far]` (default [9, 18]; world units are metres, scooter-sized).
+Overlays switch to white titles and dark glass labels. Extra API on this look (works on both):
+
+| API | what it does |
+|---|---|
+| `S.paint(color, {rough, metal, coat, emissive, glow})` | clearcoat car-paint material (use `emissive` + `glow` for lamps) |
+| `S.explode([{obj, off:[x,y,z]}], {at, back, dur, stagger, backDur})` | parts fly out at `at` (staggered), snap back at `back` with overshoot |
+
+Example: `examples/scooter.json` + `examples/scooter.scene.js` (8 s): an original retro Indian scooter, three-quarter
+orbit, exploded view with labels, reassembly. Build objects from simple solids; never copy a real product's design
+or a brand's model — make an original one that reads as the category.
+
+## When to suggest it (ask first)
+3D is slower to render (~15 s per video second) and is a big visual change, so never switch to it on your own.
+While planning any reel, look for a scene where 3D explains better than flat cards, and offer it to the user as an
+option for that scene, with one line on why. Good fits: how a physical thing works or is built (exploded view of a
+device, vehicle, gadget), what is inside something, a mechanism that moves (gears, hinges, springs, light paths),
+scale or layout in space (a chip, a room, a city block), and a product hero shot for a launch. Poor fits: app UIs,
+lists, quotes, code, anything that is mainly text. Use it only after the user approves.

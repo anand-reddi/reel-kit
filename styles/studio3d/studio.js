@@ -3,6 +3,7 @@
 // Everything is a pure function of timeline time, so HyperFrames can seek any frame.
 import * as THREE from "three";
 import { RoundedBoxGeometry } from "./RoundedBoxGeometry.js";
+import { RoomEnvironment } from "./RoomEnvironment.js";
 
 export const C = { floor: "#e6e2db", grid: "#d6d1c8", charcoal: "#55595f", dark: "#2b2d31", ink: "#141518", white: "#f4f2ee",
   glass: "#cfe3ea", orange: "#e0731f", red: "#d93a2b", blue: "#2457e6", green: "#1f9d6b" };
@@ -14,16 +15,32 @@ export function boot(cfg, build) {
   r.setPixelRatio(1); r.setSize(W, H, false);
   r.shadowMap.enabled = true; r.shadowMap.type = THREE.PCFSoftShadowMap;
   r.toneMapping = THREE.ACESFilmicToneMapping; r.toneMappingExposure = 1.05; r.outputColorSpace = THREE.SRGBColorSpace;
-  const scene = new THREE.Scene(); scene.background = new THREE.Color(C.floor); scene.fog = new THREE.Fog(C.floor, 18, 46);
-  const cam = new THREE.PerspectiveCamera(cfg.fov || 30, W / H, 0.05, 200);
-  scene.add(new THREE.HemisphereLight("#ffffff", "#c9c2b6", 1.5));
-  const sun = new THREE.DirectionalLight("#ffffff", 2.3); sun.position.set(-6, 14, 8); sun.castShadow = true;
-  sun.shadow.mapSize.set(2048, 2048); Object.assign(sun.shadow.camera, { left: -10, right: 10, top: 10, bottom: -10, near: 1, far: 40 });
-  sun.shadow.radius = 5; sun.shadow.bias = -0.0004; scene.add(sun);
-  const fill = new THREE.DirectionalLight("#fff6ea", 0.5); fill.position.set(8, 5, -4); scene.add(fill);
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshStandardMaterial({ color: C.floor, roughness: 1 }));
-  floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
-  const grid = new THREE.GridHelper(120, 60, C.grid, C.grid); grid.position.y = 0.003; grid.material.transparent = true; grid.material.opacity = 0.55; scene.add(grid);
+  const DARK = cfg.look === "dark";   // "dark": a product-showcase studio (near-black floor, fading grid, reflections, clearcoat paint)
+  const scene = new THREE.Scene(); const cam = new THREE.PerspectiveCamera(cfg.fov || 30, W / H, 0.05, 200);
+  const fog = cfg.fog || (DARK ? [9, 18] : [18, 46]);
+  if (!DARK) {
+    scene.background = new THREE.Color(C.floor); scene.fog = new THREE.Fog(C.floor, fog[0], fog[1]);
+    scene.add(new THREE.HemisphereLight("#ffffff", "#c9c2b6", 1.5));
+    const sun = new THREE.DirectionalLight("#ffffff", 2.3); sun.position.set(-6, 14, 8); sun.castShadow = true;
+    sun.shadow.mapSize.set(2048, 2048); Object.assign(sun.shadow.camera, { left: -10, right: 10, top: 10, bottom: -10, near: 1, far: 40 });
+    sun.shadow.radius = 5; sun.shadow.bias = -0.0004; scene.add(sun);
+    const fill = new THREE.DirectionalLight("#fff6ea", 0.5); fill.position.set(8, 5, -4); scene.add(fill);
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshStandardMaterial({ color: C.floor, roughness: 1 }));
+    floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
+    const grid = new THREE.GridHelper(120, 60, C.grid, C.grid); grid.position.y = 0.003; grid.material.transparent = true; grid.material.opacity = 0.55; scene.add(grid);
+  } else {
+    const k = cfg.scale || 1;   // world scale: 1 = a 2 m object
+    scene.background = new THREE.Color("#0b0b0b"); scene.fog = new THREE.Fog("#0b0b0b", fog[0], fog[1]);
+    r.toneMappingExposure = 1.0;
+    scene.environment = new THREE.PMREMGenerator(r).fromScene(new RoomEnvironment(), 0.04).texture;
+    const key = new THREE.DirectionalLight("#fff1e0", 2.6); key.position.set(3 * k, 5 * k, 4 * k); key.castShadow = true; key.shadow.mapSize.set(2048, 2048);
+    Object.assign(key.shadow.camera, { left: -3 * k, right: 3 * k, top: 3 * k, bottom: -3 * k, near: .1, far: 20 * k }); key.shadow.bias = -0.0004; scene.add(key);
+    const rim = new THREE.DirectionalLight("#e8eeff", 1.8); rim.position.set(-4 * k, 3 * k, -4 * k); scene.add(rim);
+    scene.add(new THREE.HemisphereLight("#ffffff", "#101010", 0.35));
+    const floor = new THREE.Mesh(new THREE.CircleGeometry(40 * k, 64), new THREE.MeshStandardMaterial({ color: "#0b0b0b", roughness: 1, envMapIntensity: .04 }));
+    floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
+    const grid = new THREE.GridHelper(24 * k, 96, "#2c2c2c", "#1c1c1c"); grid.position.y = 0.002 * k; scene.add(grid);
+  }
 
   // ---------- time grammar: seconds | "start" | "end" | "line:N" | "line:N:end" | "word:text" (+/- offset)
   const words = lines.flatMap((l) => l.words);
@@ -68,6 +85,13 @@ export function boot(cfg, build) {
       return { g, body, screen, bump };
     },
     onFrame: (fn) => S.frames.push(fn),
+    // car-paint: clearcoat physical material (looks best on the dark look, which has reflections)
+    paint: (color, o = {}) => new THREE.MeshPhysicalMaterial({ color, roughness: o.rough ?? .28, metalness: o.metal ?? .15, clearcoat: o.coat ?? 1, clearcoatRoughness: .08, emissive: o.emissive || "#000000", emissiveIntensity: o.glow ?? 1 }),
+    // exploded view: items [{obj, off:[x,y,z]}] fly out from `at` (staggered) and snap back at `back` with a little overshoot
+    explode: (items, o = {}) => { const a = at(o.at), dur = o.dur ?? 1.1, st = o.stagger ?? .04;
+      items.forEach((it, i) => { const p0 = it.obj.position.clone();
+        S.tl.to(it.obj.position, { x: p0.x + it.off[0], y: p0.y + it.off[1], z: p0.z + it.off[2], duration: dur, ease: "power3.inOut" }, a + i * st);
+        if (o.back != null) S.tl.to(it.obj.position, { x: p0.x, y: p0.y, z: p0.z, duration: o.backDur ?? .9, ease: "back.out(1.6)" }, at(o.back) + i * st * .5); }); },
   };
 
   // ---------- camera rig: keys [{at, pos:[x,y,z], look:[x,y,z], ease}] tweened in order, plus a tiny handheld drift

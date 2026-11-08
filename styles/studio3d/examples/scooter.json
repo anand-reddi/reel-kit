@@ -1,0 +1,9 @@
+{
+  "style": "studio3d", "title": "Indian scooter", "scene": "scooter.scene.js", "look": "dark", "fov": 34, "drift": 0.0,
+  "voice": { "name": "am_puck", "speed": 0.94 },
+  "music": { "style": "beat", "bpm": 110, "key": "minor" }, "levels": { "music": -33, "sfx": -23 },
+  "titles": [ { "text": "The Indian scooter", "sub": "every part, in 3D", "at": "start+0.2", "until": "line:1" },
+              { "text": "Every part. One icon.", "at": "line:2:end+0.4", "until": "end" } ],
+  "sfx": [ { "at": "word:apart", "id": "whoosh_big/thump_airy", "gain": -10 }, { "at": "line:2:end+0.3", "id": "pro_impact/air", "gain": -9 } ],
+  "scenes": [ { "lines": ["This is the classic Indian scooter.", "Pull it apart, and it's just a handful of parts.", "A two-stroke engine, a steel body shell, and ten-inch wheels."] } ]
+}

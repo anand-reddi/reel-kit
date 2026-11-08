@@ -63,8 +63,11 @@ def check(work, out_dir=None):
         pts.append((ln["scene"], ln["line"], round(ln["end"] - 0.05, 2)))
     probs, shots, fix, lim = [], [], {}, {}
     with sync_playwright() as p:
-        b = p.chromium.launch(); pg = b.new_page(viewport={"width": 1080, "height": 1920})
-        pg.goto("file://" + film); pg.wait_for_timeout(1500)
+        b = p.chromium.launch(args=["--allow-file-access-from-files"]); pg = b.new_page(viewport={"width": 1080, "height": 1920})   # module pages (studio3d) load from file://
+        pg.goto("file://" + film)
+        try: pg.wait_for_function("window.__timelines && window.__timelines.reel", timeout=30000)   # 3D scenes can take a few seconds to build
+        except Exception: pass
+        pg.wait_for_timeout(300)
         pg.evaluate("document.fonts ? document.fonts.ready : null")
         for k, (sc, li, t) in enumerate(pts):
             m = pg.evaluate(JS, t)
