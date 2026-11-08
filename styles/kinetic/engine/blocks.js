@@ -310,14 +310,14 @@ BL.StyleList = (box, c, T, S) => {
   const items = c.items || []; const ts = items.map((it, i) => it.at != null ? T(it.at) : a + .4 + i * (b - a - .6) / Math.max(1, items.length));
   const [w1, w2] = c.title || ['Viral', 'Videos'];
   const ti = el('div', 'sltitle', sh, `<span style="color:${col('accent')}">${esc(w1)}</span> ${esc(w2 || '')}`); ti.style.color = ink;
-  tl.fromTo(ti, { y: -60, opacity: 0 }, { y: 0, opacity: 1, duration: .35, ease: 'back.out(1.8)', immediateRender: false }, a);
+  if (c.enter !== false) tl.fromTo(ti, { y: -60, opacity: 0 }, { y: 0, opacity: 1, duration: .35, ease: 'back.out(1.8)', immediateRender: false }, a);
   if (c.sub) { const sb = el('div', 'slsub', sh); sb.style.color = ink; el('span', '', sb, esc(c.sub));
     (c.marks || []).forEach((m, k) => { if (k) el('span', 'sland', sb, '&amp;'); el('span', 'slbrand', sb, m + (c.names && c.names[k] ? `<b>${esc(c.names[k])}</b>` : '')); });
-    tl.fromTo(sb, { opacity: 0 }, { opacity: 1, duration: .3, immediateRender: false }, a + .12); }
+    if (c.enter !== false) tl.fromTo(sb, { opacity: 0 }, { opacity: 1, duration: .3, immediateRender: false }, a + .12); }
   const list = el('div', 'sllist', sh); const rows = items.map((it, i) => { const r = el('div', 'slrow', list); r.style.color = ink;
     el('span', 'slnum mono', r, (i + 1) + ')'); const nm = el('span', 'slname', r, esc(it.name)); nm.style.opacity = 0; return [r, nm]; });
-  tl.fromTo(list.children, { x: -40, opacity: 0 }, { x: 0, opacity: 1, duration: .25, stagger: .025, ease: 'power3.out', immediateRender: false }, a + .1);
-  const card = el('div', 'slcard', sh); tl.fromTo(card, { x: 300, rotation: 8, opacity: 0 }, { x: 0, rotation: 0, opacity: 1, duration: .45, ease: 'back.out(1.4)', immediateRender: false }, a + .05);
+  if (c.enter !== false) tl.fromTo(list.children, { x: -40, opacity: 0 }, { x: 0, opacity: 1, duration: .25, stagger: .025, ease: 'power3.out', immediateRender: false }, a + .1);
+  const card = el('div', 'slcard', sh); if (c.enter !== false) tl.fromTo(card, { x: 300, rotation: 8, opacity: 0 }, { x: 0, rotation: 0, opacity: 1, duration: .45, ease: 'back.out(1.4)', immediateRender: false }, a + .05);
   // intro: images flashed through the card before the first item lands (the hook line plays over it)
   if (c.intro && c.intro.length && ts.length) { const n = c.intro.length, d = Math.max(.08, (ts[0] - a - .15) / n);
     c.intro.forEach((src, k) => { const t0 = a + .15 + k * d; if (t0 >= ts[0]) return; const m = el('img', 'slmedia', card); m.src = src; K.vis(m, t0, Math.min(ts[0], t0 + d));
