@@ -6,10 +6,11 @@ import json, os, re, shutil, subprocess, sys
 HERE = os.path.dirname(os.path.abspath(__file__)); KIT = os.path.dirname(os.path.dirname(HERE))
 W, H = 1080, 1920
 PALETTE = {"bg": "#0b0b0b", "paper": "#f2f1ee", "accent": "#e5372d", "hot": "#ff8a3d", "ink": "#0b0b0b"}
-BLOCKS = ["Words", "Strike", "Graph", "Hero", "Prompt", "Stretch", "Fly", "Notes", "Counters", "Progress", "Chain", "Rewind", "Picture", "Logo"]
+BLOCKS = ["Words", "Strike", "Graph", "Hero", "Prompt", "Stretch", "Fly", "Notes", "Counters", "Progress", "Chain", "Rewind", "Picture", "Logo", "StyleList"]
 CARDS = {b: "see STYLE.md" for b in BLOCKS}
 TIME = re.compile(r"^(start|end|line:\d+(:end)?|word:[^+\-]+|-?\d+(\.\d+)?s)([+-]\d*\.?\d+)?$")
 ASSET_KEYS = {"src"}
+ASSET_LISTS = {"intro"}   # lists of image paths
 
 def scene_times(script, timing):
     """[(start, end)] per scene: from the voice lines (a scene starts 0.12 s before its first line), or from
@@ -83,7 +84,7 @@ def build(script, timing, work, sdir):
         def assets_in(d):
             if isinstance(d, dict):
                 return {k: (asset(x) if k in ASSET_KEYS and isinstance(x, str) and not x.startswith("http") else
-                            mark(x) if k in ("mark", "mark2") else [mark(y) for y in x] if k == "marks" and isinstance(x, list) else assets_in(x)) for k, x in d.items()}
+                            [asset(y) for y in x] if k in ASSET_LISTS and isinstance(x, list) else mark(x) if k in ("mark", "mark2") else [mark(y) for y in x] if k == "marks" and isinstance(x, list) else assets_in(x)) for k, x in d.items()}
             if isinstance(d, list): return [assets_in(x) for x in d]
             return d
         blk = assets_in(blk)

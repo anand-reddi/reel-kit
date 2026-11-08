@@ -302,6 +302,39 @@ BL.Chain = (box, c, T, S) => {
   tl.to(world, { y: '-=60', duration: Math.max(.2, b - ts[ts.length - 1]), ease: 'none' }, ts[ts.length - 1] + .05);
 };
 
+// ================================================================== StyleList: "N styles, one prompt" — a numbered list fills in while a framed card plays each one
+// items: [{name, src (clip or image), at, mediaStart}]; title: [word, word] (first word in accent); sub + marks: the tools it works in;
+// pin: {src, handle, text} a pinned-comment bar at the bottom (the call to action stays on screen the whole time).
+BL.StyleList = (box, c, T, S) => {
+  const a = S.start, b = S.end, g = c.ground || 'bg'; K.ground(a, g); const sh = layer(box, a, b); const ink = readable(g);
+  const items = c.items || []; const ts = items.map((it, i) => it.at != null ? T(it.at) : a + .4 + i * (b - a - .6) / Math.max(1, items.length));
+  const [w1, w2] = c.title || ['Viral', 'Videos'];
+  const ti = el('div', 'sltitle', sh, `<span style="color:${col('accent')}">${esc(w1)}</span> ${esc(w2 || '')}`); ti.style.color = ink;
+  tl.fromTo(ti, { y: -60, opacity: 0 }, { y: 0, opacity: 1, duration: .35, ease: 'back.out(1.8)', immediateRender: false }, a);
+  if (c.sub) { const sb = el('div', 'slsub', sh); sb.style.color = ink; el('span', '', sb, esc(c.sub));
+    (c.marks || []).forEach((m, k) => { if (k) el('span', 'sland', sb, '&amp;'); el('span', 'slbrand', sb, m + (c.names && c.names[k] ? `<b>${esc(c.names[k])}</b>` : '')); });
+    tl.fromTo(sb, { opacity: 0 }, { opacity: 1, duration: .3, immediateRender: false }, a + .12); }
+  const list = el('div', 'sllist', sh); const rows = items.map((it, i) => { const r = el('div', 'slrow', list); r.style.color = ink;
+    el('span', 'slnum mono', r, (i + 1) + ')'); const nm = el('span', 'slname', r, esc(it.name)); nm.style.opacity = 0; return [r, nm]; });
+  tl.fromTo(list.children, { x: -40, opacity: 0 }, { x: 0, opacity: 1, duration: .25, stagger: .025, ease: 'power3.out', immediateRender: false }, a + .1);
+  const card = el('div', 'slcard', sh); tl.fromTo(card, { x: 300, rotation: 8, opacity: 0 }, { x: 0, rotation: 0, opacity: 1, duration: .45, ease: 'back.out(1.4)', immediateRender: false }, a + .05);
+  // intro: images flashed through the card before the first item lands (the hook line plays over it)
+  if (c.intro && c.intro.length && ts.length) { const n = c.intro.length, d = Math.max(.08, (ts[0] - a - .15) / n);
+    c.intro.forEach((src, k) => { const t0 = a + .15 + k * d; if (t0 >= ts[0]) return; const m = el('img', 'slmedia', card); m.src = src; K.vis(m, t0, Math.min(ts[0], t0 + d));
+      tl.fromTo(m, { scale: 1.12 }, { scale: 1, duration: d, ease: 'power2.out', immediateRender: false }, t0); if (k % 2 === 0) sfx(t0, 'pro_pop/tink', -20); }); }
+  items.forEach((it, i) => { const t0 = ts[i], t1 = i + 1 < items.length ? ts[i + 1] : b; let m;
+    if (/\.(mp4|webm|mov)$/i.test(it.src)) { m = el('video', 'slmedia', card); m.src = it.src; m.muted = true; m.dataset.start = t0; m.dataset.duration = t1 - t0; m.dataset.mediaStart = it.mediaStart || 0; }
+    else { m = el('img', 'slmedia', card); m.src = it.src; K.vis(m, t0, t1); }
+    tl.fromTo(m, { scale: 1.18, filter: 'brightness(2)' }, { scale: 1, filter: 'brightness(1)', duration: .3, ease: 'expo.out', immediateRender: false }, t0);
+    const [r, nm] = rows[i]; tl.set(nm, { opacity: 1 }, t0); tl.set(r, { color: col('accent') }, t0); if (i + 1 < items.length) tl.set(r, { color: ink }, ts[i + 1]);
+    tl.fromTo(nm, { x: -30 }, { x: 0, duration: .22, ease: 'power3.out', immediateRender: false }, t0);
+    tl.fromTo(card, { rotationY: i % 2 ? -14 : 14 }, { rotationY: 0, duration: .32, ease: 'back.out(2)', immediateRender: false }, t0);
+    sfx(t0, ['swish/soft', 'pro_pop/thup', 'whoosh_fast/crisp', 'pro_pop/boop'][i % 4], -15); });
+  if (c.pin) { const pb = el('div', 'slpin', sh); if (c.pin.src) el('img', '', pb).src = c.pin.src;
+    el('span', 'slpinh', pb, esc(c.pin.handle || '')); el('span', 'slpint', pb, c.pin.text || ''); el('span', 'slpinb mono', pb, esc(c.pin.badge || 'pinned'));
+    tl.fromTo(pb, { y: 120, opacity: 0 }, { y: 0, opacity: 1, duration: .35, ease: 'back.out(1.6)', immediateRender: false }, a + .3); }
+};
+
 // ================================================================== Rewind: the film so far plays backwards in a tilting window
 // The window's contents are composited at render time (compose.py) from the frames already rendered.
 BL.Rewind = (box, c, T, S) => {
