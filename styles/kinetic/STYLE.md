@@ -83,3 +83,14 @@ line typed under the word); `dy` (nudge).
 - Words are measured and fitted to the frame after the fonts load (the page waits for them).
 - Headless capture: no `mix-blend-mode` layers (they stall Chromium's capture with 3D type on the page), and
   `window.seek` style helpers must not return the timeline object (serialising it hangs the capture).
+
+## Clean explainer blocks (Remotion / GSAP-skill looks)
+Minimal, grey-on-black chapters for tool rundowns and data beats. All seekable, all on the dotted paper backdrop.
+- `StyleList` — "N styles, one prompt": title + brand row, a numbered list that fills in while a framed card plays
+  each item (`items: [{name, src, at, mediaStart}]`, `marks`, `names`, `enter: false` for a full first frame).
+- `Route` — a dark world map (`src: assets/maps/world.svg`), city dots pop and red arcs draw leg by leg with a
+  travelling glow (`view: [lonW, latN, lonE, latS]`, `cities: [[name, lon, lat]]`, `route`, `legs`, `label`, `title`).
+- `SkillCard` — chapter card: icon, "02 / 03 ——— SKILL" rule, a huge name and one line (`mark, index, kicker, title, sub`).
+- `TypeOn` — one word types in with an accent underline (`text, sub, color`).
+- `Steps` — line-icon boxes joined by drawn arrows (`steps: [[svg, label, at]]`), then optionally a bar chart with a
+  trend line and a bold/light title (`chart: {at, bars: [[label, value]], title: [bold, light]}`).

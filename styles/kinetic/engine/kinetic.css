@@ -149,18 +149,56 @@ html, body { margin: 0; background: #000; }
 .bbar span { margin-left: 22px; flex: 1; height: 40px; border-radius: 20px; background: #fff; color: #555; font-size: 24px; display: flex; align-items: center; padding: 0 22px; }
 
 /* StyleList */
-.sltitle { position: absolute; left: 0; right: 0; top: 150px; text-align: center; font: 900 128px/1 AR, sans-serif; letter-spacing: -4px; }
-.slsub { position: absolute; left: 0; right: 0; top: 300px; display: flex; justify-content: center; align-items: center; gap: 14px; font: 600 40px/1 AR, sans-serif; opacity: .9; }
+.sltitle { position: absolute; left: 0; right: 0; top: 150px; text-align: center; font: 900 128px/1 AV, sans-serif; letter-spacing: -4px; }
+.slsub { position: absolute; left: 0; right: 0; top: 300px; display: flex; justify-content: center; align-items: center; gap: 14px; font: 600 40px/1 AV, sans-serif; opacity: .9; }
 .slbrand { display: inline-flex; align-items: center; gap: 8px; } .slbrand svg, .slbrand img { width: 46px; height: 46px; } .slbrand b { font-weight: 800; }
 .sland { opacity: .7; }
 .sllist { position: absolute; left: 40px; top: 450px; width: 400px; }
-.slrow { display: flex; align-items: baseline; gap: 12px; height: 96px; font: 800 39px/1 AR, sans-serif; letter-spacing: -1px; white-space: nowrap; }
+.slrow { display: flex; align-items: baseline; gap: 12px; height: 96px; font: 800 39px/1 AV, sans-serif; letter-spacing: -1px; white-space: nowrap; }
 .slnum { font-size: 28px; opacity: .6; width: 54px; text-align: right; }
 .slcard { position: absolute; left: 470px; top: 440px; width: 560px; height: 996px; border-radius: 30px; overflow: hidden; background: #000;
   box-shadow: 0 40px 90px #000c, 0 0 0 3px #ffffff26; transform-origin: 50% 50%; transform: perspective(1400px); }
 .slmedia { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .slpin { position: absolute; left: 50px; right: 50px; top: 1555px; height: 112px; border-radius: 28px; background: #ffffff14; border: 2px solid #ffffff22;
-  display: flex; align-items: center; gap: 18px; padding: 0 26px; color: #fff; font: 700 36px/1.1 AR, sans-serif; backdrop-filter: blur(6px); }
+  display: flex; align-items: center; gap: 18px; padding: 0 26px; color: #fff; font: 700 36px/1.1 AV, sans-serif; backdrop-filter: blur(6px); }
 .slpin img { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; flex: none; }
 .slpinh { opacity: .65; font-size: 24px; flex: none; } .slpint { flex: 1; white-space: nowrap; font-size: 33px; } .slpint b { color: var(--accent, #e5372d); }
 .slpinb { font-size: 22px; opacity: .6; flex: none; }
+
+/* Route (world map) */
+.rmap { position: absolute; left: 0; top: 0; }
+.rsvg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.rgrid { stroke: #ffffff10; stroke-width: 1.2; }
+.rdot { fill: #f2f1ee; } .rring { fill: none; stroke: #f2f1ee66; stroke-width: 1.5; }
+.rname { fill: #f2f1ee; font-family: MO, monospace; letter-spacing: .12em; opacity: .85; }
+.rarc { fill: none; stroke: #e5372d; stroke-linecap: round; filter: drop-shadow(0 0 6px #e5372d); }
+.rglow { fill: #fff; filter: drop-shadow(0 0 8px #fff) drop-shadow(0 0 16px #e5372d); }
+.rlabel { position: absolute; left: 70px; top: 520px; font-size: 24px; letter-spacing: .3em; color: #f2f1ee; text-transform: uppercase; }
+.rtitle { position: absolute; left: 70px; right: 70px; top: 1300px; color: #f2f1ee; font: 800 64px/1.05 AV, sans-serif; letter-spacing: -2px; }
+.rtitle span { color: #e5372d; }
+/* SkillCard */
+.skc { position: absolute; left: 90px; right: 90px; top: 700px; }
+.skmark svg, .skmark img { width: 120px; height: 120px; }
+.skrow { display: flex; align-items: center; gap: 18px; margin-top: 70px; font-size: 24px; letter-spacing: .2em; text-transform: uppercase; }
+.skrule { flex: 1; height: 3px; background: currentColor; opacity: .55; transform-origin: 0 50%; display: block; }
+.skname { font: 900 150px/1 AV, sans-serif; letter-spacing: -5px; margin-top: 34px; }
+.sksub { font: 500 40px/1.2 AV, sans-serif; margin-top: 18px; }
+/* TypeOn */
+.tyo { position: absolute; left: 0; right: 0; top: 860px; text-align: center; font: 900 130px/1 AV, sans-serif; letter-spacing: -4px; }
+.tyo span { display: inline-block; } .tyul { display: block; height: 12px; width: 70%; margin: 26px auto 0; transform-origin: 0 50%; border-radius: 6px; }
+.tyosub { position: absolute; left: 0; right: 0; top: 1080px; text-align: center; font-size: 28px; letter-spacing: .3em; text-transform: uppercase; }
+/* Steps */
+.stp { position: absolute; left: 150px; top: 560px; }
+.stprow { display: flex; align-items: center; gap: 36px; }
+.stpbox { width: 190px; height: 150px; border: 4px solid currentColor; border-radius: 26px; display: flex; align-items: center; justify-content: center; }
+.stpbox svg, .stpbox img { width: 96px; height: 96px; }
+.stplab { font: 800 60px/1 AV, sans-serif; letter-spacing: -1px; }
+.stparrow { width: 4px; height: 90px; margin: 14px 0 14px 93px; background: currentColor; transform-origin: 50% 0; position: relative; }
+.stparrow::after { content: ""; position: absolute; left: -11px; bottom: -4px; border: 13px solid transparent; border-top: 18px solid currentColor; border-bottom: 0; }
+.stpchart { position: absolute; left: 140px; top: 640px; width: 800px; height: 700px; }
+.stpsvg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.stpbar { position: absolute; bottom: calc(100% - 640px / 700 * 100%); bottom: 8.57%; background: #8a8a8a; border: 3px solid #d8d8d8; transform-origin: 50% 100%; box-sizing: border-box; }
+.stpbase { position: absolute; left: 0; right: 0; top: 91.4%; height: 4px; background: currentColor; transform-origin: 0 50%; display: block; }
+.stpblab { position: absolute; top: 94%; transform: translateX(-50%); font-size: 26px; letter-spacing: .2em; text-transform: uppercase; }
+.stpline { fill: none; stroke: currentColor; stroke-width: 4; } .stpdot { fill: currentColor; }
+.stptitle { position: absolute; left: 140px; top: 360px; } .stptitle b { display: block; font: 900 104px/1 AV, sans-serif; letter-spacing: -3px; } .stptitle span { display: block; font: 500 58px/1.1 AV, sans-serif; margin-top: 8px; }

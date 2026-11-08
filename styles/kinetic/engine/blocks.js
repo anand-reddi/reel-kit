@@ -335,6 +335,90 @@ BL.StyleList = (box, c, T, S) => {
     tl.fromTo(pb, { y: 120, opacity: 0 }, { y: 0, opacity: 1, duration: .35, ease: 'back.out(1.6)', immediateRender: false }, a + .3); }
 };
 
+// ================================================================== Route: a dark world map; city dots pop, arcs draw leg by leg with a travelling glow
+// src: world map svg (equirectangular, lat 80..-58, 2000 px wide); view: [lonW, latN, lonE, latS] region to frame;
+// cities: [[name, lon, lat]]; route: names in order; legs: times per leg (default spread); label: small mono tag top-left.
+BL.Route = (box, c, T, S) => {
+  const a = S.start, b = S.end; K.ground(a, c.ground || 'bg'); const sh = layer(box, a, b); const MW = 2000, MH = 767;
+  const X = lon => (lon + 180) / 360 * MW, Y = lat => (80 - lat) / 360 * MW;
+  const [w0, n0, e0, s0] = c.view || [-20, 60, 140, 0]; const vx = X(w0), vy = Y(n0), vw = X(e0) - vx, vh = Y(s0) - vy;
+  const sc = 1000 / vw, cy = c.y || 900;   // view fills 1000 px wide, centred at y = cy
+  const map = el('div', 'rmap', sh); map.style.width = MW + 'px'; map.style.height = MH + 'px';
+  const img = el('img', '', map); img.src = c.src; img.style.width = '100%'; img.style.opacity = .9;
+  const NS = 'http://www.w3.org/2000/svg'; const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('viewBox', `0 0 ${MW} ${MH}`); svg.setAttribute('class', 'rsvg'); map.appendChild(svg);
+  for (let lo = -180; lo <= 180; lo += 15) { const l = document.createElementNS(NS, 'line'); l.setAttribute('x1', X(lo)); l.setAttribute('x2', X(lo)); l.setAttribute('y1', 0); l.setAttribute('y2', MH); l.setAttribute('class', 'rgrid'); svg.appendChild(l); }
+  for (let la = -45; la <= 75; la += 15) { const l = document.createElementNS(NS, 'line'); l.setAttribute('x1', 0); l.setAttribute('x2', MW); l.setAttribute('y1', Y(la)); l.setAttribute('y2', Y(la)); l.setAttribute('class', 'rgrid'); svg.appendChild(l); }
+  const pos = (s0x) => `translate(${540 - (vx + vw / 2) * s0x}px, ${cy - (vy + vh / 2) * s0x}px) scale(${s0x})`;
+  map.style.transformOrigin = '0 0';
+  tl.fromTo(map, { transform: pos(sc * .82), opacity: 0 }, { transform: pos(sc), opacity: 1, duration: Math.min(1.2, b - a), ease: 'power3.out', immediateRender: false }, a);
+  tl.to(map, { transform: pos(sc * 1.06), duration: Math.max(.1, b - a - 1.2), ease: 'none' }, a + 1.2);
+  const cities = {}; (c.cities || []).forEach(([n, lo, la], i) => { const g = document.createElementNS(NS, 'g'); svg.appendChild(g);
+    const ring = document.createElementNS(NS, 'circle'); ring.setAttribute('cx', X(lo)); ring.setAttribute('cy', Y(la)); ring.setAttribute('r', 9 / sc); ring.setAttribute('class', 'rring'); g.appendChild(ring);
+    const dot = document.createElementNS(NS, 'circle'); dot.setAttribute('cx', X(lo)); dot.setAttribute('cy', Y(la)); dot.setAttribute('r', 4.5 / sc); dot.setAttribute('class', 'rdot'); g.appendChild(dot);
+    const t = document.createElementNS(NS, 'text'); const rgt = X(lo) > vx + vw * .78; t.setAttribute('x', X(lo) + (rgt ? -12 : 12) / sc); t.setAttribute('y', Y(la) - 10 / sc); if (rgt) t.setAttribute('text-anchor', 'end'); t.setAttribute('class', 'rname'); t.setAttribute('font-size', 22 / sc); t.textContent = n.toUpperCase(); g.appendChild(t);
+    cities[n] = [X(lo), Y(la)]; tl.fromTo(g, { opacity: 0 }, { opacity: 1, duration: .25, immediateRender: false }, a + .5 + i * .08); });
+  const route = c.route || []; const nl = Math.max(1, route.length - 1); const t0 = a + .9, span = b - t0 - .4;
+  for (let i = 0; i < route.length - 1; i++) { const [x1, y1] = cities[route[i]], [x2, y2] = cities[route[i + 1]];
+    const mx = (x1 + x2) / 2, my = (y1 + y2) / 2, d = Math.hypot(x2 - x1, y2 - y1); const qx = mx, qy = my - d * .32;
+    const pth = document.createElementNS(NS, 'path'); pth.setAttribute('d', `M${x1} ${y1} Q${qx} ${qy} ${x2} ${y2}`); pth.setAttribute('class', 'rarc'); pth.setAttribute('stroke-width', 4 / sc); svg.appendChild(pth);
+    const L = pth.getTotalLength(); pth.style.strokeDasharray = L; pth.style.strokeDashoffset = L;
+    const glow = document.createElementNS(NS, 'circle'); glow.setAttribute('r', 9 / sc); glow.setAttribute('class', 'rglow'); svg.appendChild(glow); glow.style.opacity = 0;
+    const ta = c.legs && c.legs[i] != null ? T(c.legs[i]) : t0 + i * span / nl, du = Math.min(1.1, span / nl * .85); const pr = { v: 0 };
+    tl.to(pth, { strokeDashoffset: 0, duration: du, ease: 'power2.inOut' }, ta);
+    tl.fromTo(pr, { v: 0 }, { v: 1, duration: du, ease: 'power2.inOut', immediateRender: false, onUpdate: () => { const p = pth.getPointAtLength(pr.v * L); glow.setAttribute('cx', p.x); glow.setAttribute('cy', p.y); glow.style.opacity = pr.v > 0 && pr.v < 1 ? 1 : 0; } }, ta);
+    sfx(ta, 'whoosh_fast/sleeve', -18); sfx(ta + du, 'pro_pop/tink', -16); }
+  if (c.label) { const lb = el('div', 'rlabel mono', sh, esc(c.label)); tl.fromTo(lb, { opacity: 0 }, { opacity: .7, duration: .3, immediateRender: false }, a + .2); }
+  if (c.title) { const tt = el('div', 'rtitle', sh, c.title); tl.fromTo(tt, { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: .4, ease: 'power3.out', immediateRender: false }, c.titleAt ? T(c.titleAt) : a + .3); }
+};
+// ================================================================== SkillCard: icon, "02 / 03 ———— SKILL" rule, a big name and one line (a clean chapter card)
+BL.SkillCard = (box, c, T, S) => {
+  const a = S.start, b = S.end; K.ground(a, c.ground || 'bg'); const sh = layer(box, a, b); const ink = readable(c.ground || 'bg');
+  const w = el('div', 'skc', sh); w.style.color = ink;
+  if (c.mark) { const m = el('div', 'skmark', w, c.mark); tl.fromTo(m, { scale: .6, opacity: 0 }, { scale: 1, opacity: 1, duration: .35, ease: 'back.out(2)', immediateRender: false }, a); }
+  const row = el('div', 'skrow mono', w); el('span', '', row, esc(c.index || '')); const rl = el('i', 'skrule', row); el('span', '', row, esc(c.kicker || ''));
+  tl.fromTo(row, { opacity: 0 }, { opacity: .75, duration: .3, immediateRender: false }, a + .15); tl.fromTo(rl, { scaleX: 0 }, { scaleX: 1, duration: .7, ease: 'power3.inOut', immediateRender: false }, a + .2);
+  const nm = el('div', 'skname', w, esc(c.title || '')); const sb = el('div', 'sksub', w, esc(c.sub || ''));
+  tl.fromTo(nm, { y: 60, opacity: 0, clipPath: 'inset(0 0 100% 0)' }, { y: 0, opacity: 1, clipPath: 'inset(0 0 0% 0)', duration: .45, ease: 'power4.out', immediateRender: false }, a + .3);
+  tl.fromTo(sb, { opacity: 0, y: 14 }, { opacity: .8, y: 0, duration: .35, immediateRender: false }, a + .6); sfx(a + .3, 'swish/soft', -16);
+};
+// ================================================================== TypeOn: one word types in letter by letter, an underline draws under it
+BL.TypeOn = (box, c, T, S) => {
+  const a = S.start, b = S.end; K.ground(a, c.ground || 'bg'); const sh = layer(box, a, b); const ink = readable(c.ground || 'bg');
+  const wr = el('div', 'tyo', sh); wr.style.color = ink; const tx = String(c.text || ''); const sp = [...tx].map(ch => el('span', '', wr, ch === ' ' ? '&nbsp;' : esc(ch)));
+  const per = Math.min(.07, (b - a - .6) / Math.max(1, sp.length)); sp.forEach((s1, i) => { tl.fromTo(s1, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: .08, immediateRender: false }, a + .1 + i * per); if (i % 2 === 0) sfx(a + .1 + i * per, 'pro_pop/tink', -24); });
+  const ul = el('i', 'tyul', wr); ul.style.background = col(c.color || 'accent'); tl.fromTo(ul, { scaleX: 0 }, { scaleX: 1, duration: .35, ease: 'power3.out', immediateRender: false }, a + .15 + sp.length * per);
+  if (c.sub) { const sb = el('div', 'tyosub mono', sh, esc(c.sub)); sb.style.color = ink; tl.fromTo(sb, { opacity: 0 }, { opacity: .6, duration: .3, immediateRender: false }, a + .3 + sp.length * per); }
+};
+// ================================================================== Steps: line-icon boxes joined by drawn arrows, then (optional) they turn into a bar chart with a trend line
+// steps: [[icon svg, label, at?]]; chart: {at, bars: [[label, value]], title: [bold, light]}
+BL.Steps = (box, c, T, S) => {
+  const a = S.start, b = S.end; K.ground(a, c.ground || 'bg'); const sh = layer(box, a, b); const ink = readable(c.ground || 'bg');
+  const steps = c.steps || []; const wrap = el('div', 'stp', sh); wrap.style.color = ink; const ca = c.chart && c.chart.at ? T(c.chart.at) : b + 1;
+  steps.forEach(([ic, lab, at1], i) => { const t = at1 != null ? T(at1) : a + .2 + i * .6;
+    if (i) { const ar = el('div', 'stparrow', wrap); tl.fromTo(ar, { scaleY: 0 }, { scaleY: 1, duration: .25, ease: 'power2.out', immediateRender: false }, t - .25); }
+    const r = el('div', 'stprow', wrap); const bx = el('div', 'stpbox', r, ic); el('div', 'stplab', r, esc(lab));
+    tl.fromTo(r, { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: .3, ease: 'power3.out', immediateRender: false }, t); tl.fromTo(bx, { scale: .7 }, { scale: 1, duration: .35, ease: 'back.out(2.2)', immediateRender: false }, t);
+    sfx(t, 'pro_pop_in/round', -15); });
+  if (!c.chart) return;
+  tl.to(wrap, { opacity: 0, x: -60, duration: .3, ease: 'power2.in' }, ca - .3);
+  const ch = el('div', 'stpchart', sh); ch.style.color = ink; K.vis(ch, ca, b); const bars = c.chart.bars || []; const mx = Math.max(...bars.map(x => x[1]));
+  const NS = 'http://www.w3.org/2000/svg'; const sv = document.createElementNS(NS, 'svg'); sv.setAttribute('viewBox', '0 0 800 700'); sv.setAttribute('class', 'stpsvg'); ch.appendChild(sv);
+  const base = el('i', 'stpbase', ch); tl.fromTo(base, { scaleX: 0 }, { scaleX: 1, duration: .35, ease: 'power3.out', immediateRender: false }, ca);
+  const bw = 150, gap = (800 - bars.length * bw) / (bars.length + 1); const tops = [];
+  bars.forEach(([lab, v], i) => { const x = gap + i * (bw + gap), h = 600 * v / mx; tops.push([x + bw / 2, 640 - h]);
+    const bar = el('div', 'stpbar', ch); bar.style.left = (x / 800 * 100) + '%'; bar.style.width = (bw / 800 * 100) + '%'; bar.style.height = (h / 700 * 100) + '%';
+    const lb = el('div', 'stpblab mono', ch, esc(lab)); lb.style.left = ((x + bw / 2) / 800 * 100) + '%';
+    tl.fromTo(bar, { scaleY: 0 }, { scaleY: 1, duration: .5, ease: 'power3.out', immediateRender: false }, ca + .25 + i * .18); tl.fromTo(lb, { opacity: 0 }, { opacity: .7, duration: .2, immediateRender: false }, ca + .3 + i * .18);
+    sfx(ca + .3 + i * .18, 'pro_pop/thup', -16); });
+  const pl = document.createElementNS(NS, 'polyline'); pl.setAttribute('points', tops.map(p => p.join(',')).join(' ')); pl.setAttribute('class', 'stpline'); sv.appendChild(pl);
+  const L = tops.reduce((s1, p, i) => i ? s1 + Math.hypot(p[0] - tops[i - 1][0], p[1] - tops[i - 1][1]) : 0, 0); pl.style.strokeDasharray = L; pl.style.strokeDashoffset = L;
+  const lt = ca + .35 + bars.length * .18; tl.to(pl, { strokeDashoffset: 0, duration: .6, ease: 'power2.inOut' }, lt);
+  tops.forEach(([x, y], i) => { const d = document.createElementNS(NS, 'circle'); d.setAttribute('cx', x); d.setAttribute('cy', y); d.setAttribute('r', 9); d.setAttribute('class', 'stpdot'); sv.appendChild(d);
+    tl.fromTo(d, { opacity: 0 }, { opacity: 1, duration: .1, immediateRender: false }, lt + i * .6 / Math.max(1, tops.length - 1)); });
+  if (c.chart.title) { const [b1, l1] = c.chart.title; const tt = el('div', 'stptitle', sh, `<b>${esc(b1)}</b><span>${esc(l1 || '')}</span>`); tt.style.color = ink; K.vis(tt, ca, b);
+    tl.fromTo(tt, { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: .4, ease: 'power3.out', immediateRender: false }, ca + .1); }
+};
+
 // ================================================================== Rewind: the film so far plays backwards in a tilting window
 // The window's contents are composited at render time (compose.py) from the frames already rendered.
 BL.Rewind = (box, c, T, S) => {
