@@ -92,5 +92,11 @@ Minimal, grey-on-black chapters for tool rundowns and data beats. All seekable, 
   travelling glow (`view: [lonW, latN, lonE, latS]`, `cities: [[name, lon, lat]]`, `route`, `legs`, `label`, `title`).
 - `SkillCard` — chapter card: icon, "02 / 03 ——— SKILL" rule, a huge name and one line (`mark, index, kicker, title, sub`).
 - `TypeOn` — one word types in with an accent underline (`text, sub, color`).
+- `Dupes` — a photo-library window: a storage bar runs hot, copies light up with COPY badges, a scan line, `clear` sweeps the copies away and the bar drops
+  (`tiles: [{src}]`, `groups: [{at, idx}]`, `storage: {pct, from, label, warn}`, `scan`, `clear: {at, pct, label}`, `stamp: {at, out, text}`, `enter: false`).
+- `Copies` — one photo card multiplies into a fan of copies with file names and a ×N tag (`src`, `names`, `ats`, `tag`).
+- `Files` — a file-list window, rows drop in (optional size bars, hot rows in red), then an empty folder (`rows: [[icon svg, name, size, bar, hot]]`, `bars`, `empty: {at, name, note, icon}`).
+- `Match` — two pictures (or two audio files with `wave: true`) side by side, scan lines, a % ticking up, a stamp (`left/right: {src, name, res, wm, css, crop}`, `pct`, `label`, `stamp`, `stampAt`).
+- `ToolGrid` — icon tiles fill a grid fast, then a big number slams over them (`items: [[icon svg, label]]`, `per`, `number`, `label`, `numAt`).
 - `Steps` — line-icon boxes joined by drawn arrows (`steps: [[svg, label, at]]`), then optionally a bar chart with a
   trend line and a bold/light title (`chart: {at, bars: [[label, value]], title: [bold, light]}`).

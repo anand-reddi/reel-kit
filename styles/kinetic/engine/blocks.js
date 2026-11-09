@@ -419,6 +419,108 @@ BL.Steps = (box, c, T, S) => {
     tl.fromTo(tt, { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: .4, ease: 'power3.out', immediateRender: false }, ca + .1); }
 };
 
+// ================================================================== Dupes: a photo library window; copies light up with COPY badges, a storage bar runs hot, `clear` sweeps them away
+// tiles: [{src, pos, filter}]; groups: [{at, idx: [..]}] (first index of each group is kept on clear); storage: {pct, from, label}; scan: at (a scan line sweeps the grid);
+// clear: {at, pct, label}; stamp: {at, text}; enter: false = on screen from frame 1 (a hook)
+BL.Dupes = (box, c, T, S) => {
+  const a = S.start, b = S.end; K.ground(a, c.ground || 'bg'); const sh = layer(box, a, b);
+  const win = el('div', 'dpwin', sh); el('div', 'mbar mono', win, `<i></i><i></i><i></i><span>${esc(c.title || 'Photos')}</span><em>${esc(c.count || '')}</em>`);
+  const st = c.storage || {}; const sb = el('div', 'dpstore mono', win); const lab = el('span', 'dplabs', sb); const l1 = el('em', '', lab, esc(st.label || 'STORAGE')); const pc = el('b', '', sb);
+  const tr = el('div', 'dptrack', sb); const fill = el('i', '', tr); const v = { p: st.from ?? st.pct ?? 97 };
+  const upd = () => { fill.style.width = v.p + '%'; pc.textContent = Math.round(v.p) + '%'; const hot = v.p > 80; fill.style.background = hot ? col('accent') : '#3ddc84'; pc.style.color = hot ? col('accent') : '#3ddc84'; };
+  upd(); if (st.from != null) tl.fromTo(v, { p: st.from }, { p: st.pct, duration: 1.1, ease: 'power2.out', onUpdate: upd, immediateRender: false }, a + .1);
+  const grid = el('div', 'dpgrid', win); grid.style.gridTemplateColumns = `repeat(${c.cols || 4}, 1fr)`;
+  const cells = (c.tiles || []).map((t, i) => { const d = el('div', 'dpcell', grid); const im = el('img', '', d); im.src = t.src; if (t.pos) im.style.objectPosition = t.pos; if (t.filter) im.style.filter = t.filter; if (t.zoom) im.style.transform = `scale(${t.zoom})`;
+    const bd = el('div', 'dpbadge mono', d, 'COPY'); bd.style.opacity = 0; return [d, bd]; });
+  if (c.enter !== false) tl.fromTo(cells.map(x => x[0]), { scale: .4, opacity: 0 }, { scale: 1, opacity: 1, duration: .3, stagger: .025, ease: 'back.out(1.8)', immediateRender: false }, a);
+  if (c.enter !== false) sfx(a, 'pro_pop_in/airy', -15);
+  tl.fromTo(win, { scale: c.enter === false ? 1 : .94 }, { scale: 1.04, duration: b - a, ease: 'none', immediateRender: false }, a);
+  if (st.warn !== false && v.p > 80) for (let t = a + .2; t < (c.clear ? T(c.clear.at) : b) - .1; t += .5) { tl.set(fill, { opacity: .45 }, t); tl.set(fill, { opacity: 1 }, t + .25); }
+  if (c.scan != null) { const ln = el('i', 'dpscan', grid); const t0 = T(c.scan); K.vis(ln, t0, t0 + .9); tl.fromTo(ln, { top: '0%' }, { top: '100%', duration: .9, ease: 'power1.inOut', immediateRender: false }, t0); sfx(t0, 'whoosh_fast/sleeve', -17); }
+  const lit = [];
+  (c.groups || []).forEach((g, k) => { const t = T(g.at); g.idx.forEach((ix, j) => { const [d, bd] = cells[ix]; if (j) lit.push(d);
+      tl.set(d, { boxShadow: `0 0 0 6px ${col(j ? 'accent' : 'hot')}` }, t + j * .06); if (j) tl.fromTo(bd, { opacity: 0, scale: 1.8 }, { opacity: 1, scale: 1, duration: .18, ease: 'back.out(2)', immediateRender: false }, t + j * .06);
+      tl.fromTo(d, { scale: 1.1 }, { scale: 1, duration: .25, ease: 'power3.out', immediateRender: false }, t + j * .06); });
+    sfx(t, k % 2 ? 'pro_pop/boop' : 'pro_pop/thup', -14); });
+  if (c.stamp) { const sp = el('div', 'dpstamp', sh, esc(c.stamp.text)); const t = T(c.stamp.at); K.vis(sp, t, c.stamp.out ? T(c.stamp.out) : b);
+    tl.fromTo(sp, { scale: 2.6, opacity: 0, rotation: -14 }, { scale: 1, opacity: 1, rotation: -7, duration: .2, ease: 'power4.out', immediateRender: false }, t); K.fx(t, 'hit'); }
+  if (c.clear) { const t = T(c.clear.at); tl.to(lit, { scale: 0, opacity: 0, duration: .3, stagger: .03, ease: 'back.in(1.6)' }, t);
+    tl.to(v, { p: c.clear.pct ?? 40, duration: .9, ease: 'power3.inOut', onUpdate: upd }, t + .1); const l2 = el('em', '', lab, esc(c.clear.label || 'FREED UP')); K.vis(l1, a, t + .1); K.vis(l2, t + .1, b);
+    sfx(t, 'swish/blade', -14); sfx(t + .5, 'pro_pop_in/round', -15); }
+};
+
+// ================================================================== Copies: one photo card multiplies into a fan of copies, each with its file name, then a ×N tag
+// src (one picture), names: [file names], ats: [when each copy appears], tag
+BL.Copies = (box, c, T, S) => {
+  const a = S.start, b = S.end; K.ground(a, c.ground || 'bg'); const sh = layer(box, a, b); const names = c.names || ['IMG.jpg']; const n = names.length;
+  const stage = el('div', 'cpstage', sh); const ats = names.map((_, i) => c.ats && c.ats[i] != null ? T(c.ats[i]) : a + .1 + i * .45);
+  const cards = names.map((nm, i) => { const d = el('div', 'cpcard', stage); const im = el('img', '', d); im.src = c.src; el('div', 'cpname mono', d, esc(nm)); d.style.zIndex = n - i; return d; });
+  const off = i => (i - (n - 1) / 2);
+  cards.forEach((d, i) => { const t = ats[i];
+    if (!i) tl.fromTo(d, { y: 260, rotation: 0, opacity: 0, scale: .9 }, { y: 0, opacity: 1, scale: 1, duration: .35, ease: 'back.out(1.6)', immediateRender: false }, t);
+    else K.vis(d, t, b);
+    sfx(t, i ? 'shutter/film' : 'swish/soft', -14);
+    // after each copy lands, everyone already shown re-fans
+    const shown = i + 1; cards.slice(0, shown).forEach((e, j) => tl.to(e, { x: (j - (shown - 1) / 2) * 225, rotation: (j - (shown - 1) / 2) * 7, y: Math.abs(j - (shown - 1) / 2) * 30, duration: .32, ease: 'back.out(1.5)' }, t + .02)); });
+  tl.fromTo(stage, { scale: 1 }, { scale: 1.06, duration: b - a, ease: 'none', immediateRender: false }, a);
+  if (c.tag) { const tg = el('div', 'cptag', sh, esc(c.tag)); const t = ats[n - 1] + .25; K.vis(tg, t, b);
+    tl.fromTo(tg, { scale: 2.4, opacity: 0, rotation: -12 }, { scale: 1, opacity: 1, rotation: -6, duration: .22, ease: 'power4.out', immediateRender: false }, t); K.fx(t, 'hit'); }
+};
+
+// ================================================================== Files: a file-list window (rows drop in, optional size bars), then an empty folder
+// title, rows: [[icon svg, name, size, bar 0..1, hot]], at (rows start), bars: true; empty: {at, name, note, icon}
+BL.Files = (box, c, T, S) => {
+  const a = S.start, b = S.end; K.ground(a, c.ground || 'bg'); const sh = layer(box, a, b); const ea = c.empty ? T(c.empty.at) : b + 1;
+  const win = el('div', 'flwin', sh); el('div', 'mbar mono', win, `<i></i><i></i><i></i><span>${esc(c.title || 'Downloads')}</span><em>${esc(c.count || '')}</em>`);
+  const list = el('div', 'fllist', win); const t0 = c.at != null ? T(c.at) : a + .1; const rows = c.rows || []; const per = Math.min(.14, (ea - t0 - .3) / Math.max(1, rows.length));
+  tl.fromTo(win, { y: 120, opacity: 0, rotationX: 18 }, { y: 0, opacity: 1, rotationX: 0, duration: .4, ease: 'power3.out', immediateRender: false }, a);
+  rows.forEach(([ic, nm, sz, bar, hot], i) => { const r = el('div', 'flrow', list); el('span', 'flic', r, ic || ''); const tx = el('div', 'fltx', r); el('span', 'flnm', tx, esc(nm));
+    if (c.bars) { const tk = el('div', 'flbar', tx); const f = el('i', '', tk); f.style.background = hot ? col('accent') : '#8a8a92'; tl.fromTo(f, { width: '0%' }, { width: (bar * 100) + '%', duration: .5, ease: 'power3.out', immediateRender: false }, t0 + i * per + .1); }
+    const s = el('span', 'flsz mono', r, esc(sz || '')); if (hot) s.style.color = col('accent');
+    tl.fromTo(r, { x: -80, opacity: 0 }, { x: 0, opacity: 1, duration: .25, ease: 'power3.out', immediateRender: false }, t0 + i * per); if (i % 2 === 0) sfx(t0 + i * per, 'pro_pop/tink', -20); });
+  tl.to(list, { y: -40, duration: Math.max(.1, ea - t0), ease: 'none' }, t0);
+  if (!c.empty) return;
+  tl.to(win, { x: -1100, rotation: -6, duration: .35, ease: 'power3.in' }, ea - .3); sfx(ea - .3, 'whoosh_fast/crisp', -15);
+  const em = el('div', 'flempty', sh); K.vis(em, ea, b); const fo = el('div', 'flfold', em, c.empty.icon || ''); el('div', 'flename', em, esc(c.empty.name || 'New Folder'));
+  const nt = el('div', 'flenote mono', em, esc(c.empty.note || '0 items')); nt.style.color = col('accent');
+  tl.fromTo(fo, { scale: .3, rotation: -20, opacity: 0 }, { scale: 1, rotation: 0, opacity: 1, duration: .4, ease: 'back.out(2)', immediateRender: false }, ea);
+  tl.fromTo(nt, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: .25, immediateRender: false }, ea + .25); tl.to(fo, { y: -14, duration: .5, yoyo: true, repeat: 5, ease: 'sine.inOut' }, ea + .4);
+  sfx(ea, 'pro_pop_in/round', -14);
+};
+
+// ================================================================== Match: two pictures side by side; scan lines run down both, a percentage ticks up, a stamp lands
+// left / right: {src, name, css (a CSS filter), crop (zoom), wave: true (an audio file: waveform instead of a picture)}; pct, at (scan start), stamp, label
+BL.Match = (box, c, T, S) => {
+  const a = S.start, b = S.end; K.ground(a, c.ground || 'bg'); const sh = layer(box, a, b); const t0 = c.at != null ? T(c.at) : a + .35;
+  const mk = (o, k) => { const d = el('div', 'mtcard ' + (k ? 'mtr' : 'mtl'), sh); const fr = el('div', 'mtpic', d);
+    if (o.wave) { fr.classList.add('mtwave'); el('div', 'mtnote', fr, o.icon || ''); const wv = el('div', 'mtbars', fr); const r = rng(7); for (let i = 0; i < 28; i++) { const bb = el('i', '', wv); bb.style.height = (18 + r() * 82) + '%'; } }
+    else { const im = el('img', '', fr); im.src = o.src; if (o.css) im.style.filter = o.css; if (o.crop) { im.style.transform = `scale(${o.crop})`; im.style.transformOrigin = o.origin || '50% 40%'; } if (o.wm) el('div', 'mtwm', fr, esc(o.wm)); if (o.res) el('div', 'mtres mono', fr, esc(o.res)); }
+    el('div', 'mtname mono', d, esc(o.name || '')); const sc = el('i', 'mtscan', fr); K.vis(sc, t0, t0 + 1); tl.fromTo(sc, { top: '0%' }, { top: '100%', duration: 1, ease: 'power1.inOut', immediateRender: false }, t0);
+    tl.fromTo(d, { x: k ? 600 : -600, rotation: k ? 10 : -10 }, { x: 0, rotation: k ? 3 : -3, duration: .4, ease: 'back.out(1.4)', immediateRender: false }, a + k * .08); return d; };
+  const L = mk(c.left || {}, 0), R = mk(c.right || {}, 1); sfx(a, 'swish/cane', -15); sfx(t0, 'whoosh_fast/sleeve', -18);
+  const link = el('i', 'mtlink', sh); tl.fromTo(link, { scaleX: 0 }, { scaleX: 1, duration: .5, ease: 'power3.inOut', immediateRender: false }, t0 + .2);
+  const pc = el('div', 'mtpct', sh); const v = { p: 0 }; const goal = c.pct ?? 96; const upd = () => { pc.innerHTML = `${Math.round(v.p)}<small>%</small> <span>${esc(c.label || 'MATCH')}</span>`; }; upd();
+  tl.fromTo(pc, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: .25, immediateRender: false }, t0 + .1);
+  tl.fromTo(v, { p: 0 }, { p: goal, duration: 1, ease: 'power2.out', onUpdate: upd, immediateRender: false }, t0 + .15);
+  for (let k = 0; k < 6; k++) sfx(t0 + .15 + k * .14, 'pro_pop/tink', -24);
+  if (c.stamp) { const sp = el('div', 'dpstamp mtstamp', sh, esc(c.stamp)); const t = c.stampAt != null ? T(c.stampAt) : t0 + 1.2; K.vis(sp, t, b);
+    tl.fromTo(sp, { scale: 2.6, opacity: 0, rotation: -14 }, { scale: 1, opacity: 1, rotation: -7, duration: .2, ease: 'power4.out', immediateRender: false }, t);
+    tl.set([L, R], { boxShadow: `0 0 0 6px ${col('accent')}, 0 40px 100px rgba(0,0,0,.6)` }, t); K.fx(t, 'hit'); }
+  tl.to([L, R], { y: -24, duration: Math.max(.2, b - a - .4), ease: 'none' }, a + .4);
+};
+
+// ================================================================== ToolGrid: icon tiles fill a grid fast, then a big number slams over them
+// items: [[icon svg, label]], at (fill start), per (seconds per tile), number, label, numAt
+BL.ToolGrid = (box, c, T, S) => {
+  const a = S.start, b = S.end; K.ground(a, c.ground || 'bg'); const sh = layer(box, a, b); const it = c.items || []; const t0 = c.at != null ? T(c.at) : a + .05; const per = c.per || .05;
+  const g = el('div', 'tggrid', sh); const tiles = it.map(([ic, lb]) => { const d = el('div', 'tgtile', g); el('div', 'tgic', d, ic); el('div', 'tglb mono', d, esc(lb)); return d; });
+  tl.fromTo(tiles, { scale: 0, opacity: 0, rotation: -12 }, { scale: 1, opacity: 1, rotation: 0, duration: .25, stagger: per, ease: 'back.out(2)', immediateRender: false }, t0);
+  tiles.forEach((_, i) => { if (i % 3 === 0) sfx(t0 + i * per, 'pro_pop/tink', -21); });
+  tl.fromTo(g, { scale: 1.08 }, { scale: .96, duration: b - a, ease: 'none', immediateRender: false }, a);
+  if (c.number != null) { const na = c.numAt != null ? T(c.numAt) : t0 + it.length * per + .1; const nb = el('div', 'tgnum', sh, `${esc(String(c.number))}<span>${esc(c.label || '')}</span>`); K.vis(nb, na, b);
+    tl.to(tiles, { opacity: .22, duration: .2 }, na); tl.fromTo(nb, { scale: 2.8, opacity: 0 }, { scale: 1, opacity: 1, duration: .2, ease: 'power4.out', immediateRender: false }, na); K.fx(na, 'punch'); }
+};
+
 // ================================================================== Rewind: the film so far plays backwards in a tilting window
 // The window's contents are composited at render time (compose.py) from the frames already rendered.
 BL.Rewind = (box, c, T, S) => {

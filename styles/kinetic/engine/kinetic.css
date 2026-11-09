@@ -202,3 +202,54 @@ html, body { margin: 0; background: #000; }
 .stpblab { position: absolute; top: 94%; transform: translateX(-50%); font-size: 26px; letter-spacing: .2em; text-transform: uppercase; }
 .stpline { fill: none; stroke: currentColor; stroke-width: 4; } .stpdot { fill: currentColor; }
 .stptitle { position: absolute; left: 140px; top: 360px; } .stptitle b { display: block; font: 900 104px/1 AV, sans-serif; letter-spacing: -3px; } .stptitle span { display: block; font: 500 58px/1.1 AV, sans-serif; margin-top: 8px; }
+/* Dupes */
+.dpwin { position: absolute; left: 70px; top: 300px; width: 940px; border-radius: 26px; overflow: hidden; background: #161618; box-shadow: 0 50px 140px rgba(0,0,0,.75), 0 0 0 2px rgba(255,255,255,.1); }
+.dpstore { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding: 22px 28px 18px; color: #c9c9cf; font-size: 26px; letter-spacing: .12em; }
+.dpstore span { flex: 1; } .dpstore b { font: 900 40px/1 AV, sans-serif; letter-spacing: 0; }
+.dptrack { flex-basis: 100%; height: 22px; border-radius: 11px; background: #2b2b2f; overflow: hidden; } .dptrack i { display: block; height: 100%; border-radius: 11px; }
+.dpgrid { position: relative; display: grid; gap: 14px; padding: 8px 24px 26px; }
+.dpcell { position: relative; aspect-ratio: 1; border-radius: 14px; overflow: hidden; background: #000; }
+.dpcell img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.dpbadge { position: absolute; right: 8px; bottom: 8px; padding: 5px 10px; border-radius: 8px; background: {accent}; color: #fff; font-size: 20px; font-weight: 700; letter-spacing: .08em; }
+.dpscan { position: absolute; left: 0; right: 0; height: 6px; background: {accent}; box-shadow: 0 0 30px 8px {accent}; z-index: 3; }
+.dpstamp { position: absolute; left: 50%; top: 860px; translate: -50% -50%; padding: 14px 34px; border: 8px solid {accent}; border-radius: 16px; color: {accent}; background: rgba(11,11,11,.82);
+  font: 900 92px/1 AV, sans-serif; font-variation-settings: "wdth" 112; letter-spacing: 2px; white-space: nowrap; z-index: 5; }
+/* Copies */
+.cpstage { position: absolute; left: 0; right: 0; top: 0; bottom: 0; }
+.cpcard { position: absolute; left: 320px; top: 440px; width: 440px; height: 680px; border-radius: 22px; background: #f2f1ee; padding: 18px 18px 0; box-shadow: 0 40px 100px rgba(0,0,0,.65); }
+.cpcard img { width: 100%; height: 570px; object-fit: cover; border-radius: 10px; display: block; }
+.cpname { text-align: center; color: #1a1a1a; font-size: 27px; line-height: 84px; white-space: nowrap; }
+.cptag { position: absolute; right: 60px; top: 300px; padding: 6px 30px; border-radius: 20px; background: {accent}; color: #fff; font: 900 120px/1 AV, sans-serif; z-index: 9; }
+/* Files */
+.flwin { position: absolute; left: 70px; top: 330px; width: 940px; height: 1060px; border-radius: 26px; overflow: hidden; background: #161618; box-shadow: 0 50px 140px rgba(0,0,0,.75), 0 0 0 2px rgba(255,255,255,.1); }
+.fllist { padding: 14px 26px; }
+.flrow { display: flex; align-items: center; gap: 22px; padding: 18px 8px; border-bottom: 2px solid #26262a; color: #ececf0; }
+.flic { width: 64px; height: 64px; flex: none; color: #b8b8c0; } .flic svg { width: 64px; height: 64px; }
+.fltx { flex: 1; min-width: 0; } .flnm { display: block; font: 600 36px/1.15 AV, sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.flbar { height: 14px; margin-top: 12px; border-radius: 7px; background: #2b2b2f; overflow: hidden; } .flbar i { display: block; height: 100%; border-radius: 7px; }
+.flsz { color: #9a9aa2; font-size: 28px; white-space: nowrap; }
+.flempty { position: absolute; left: 0; right: 0; top: 430px; text-align: center; color: #f2f1ee; }
+.flfold { width: 520px; height: 520px; margin: 0 auto; color: #f2f1ee; } .flfold svg { width: 100%; height: 100%; }
+.flename { font: 800 64px/1.2 AV, sans-serif; margin-top: 10px; } .flenote { font-size: 36px; margin-top: 14px; letter-spacing: .1em; }
+/* Match */
+.mtcard { position: absolute; top: 620px; width: 450px; border-radius: 22px; background: #f2f1ee; padding: 16px 16px 0; box-shadow: 0 40px 100px rgba(0,0,0,.6); }
+.mtl { left: 55px; } .mtr { right: 55px; }
+.mtpic { position: relative; height: 560px; border-radius: 10px; overflow: hidden; background: #000; } .mtpic img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mtwave { background: #1b1b1f; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 40px; }
+.mtnote { width: 170px; height: 170px; color: {hot}; } .mtnote svg { width: 100%; height: 100%; }
+.mtbars { display: flex; align-items: center; gap: 6px; height: 160px; } .mtbars i { width: 8px; border-radius: 4px; background: #f2f1ee; }
+.mtname { text-align: center; color: #1a1a1a; font-size: 26px; line-height: 76px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mtscan { position: absolute; left: 0; right: 0; height: 6px; background: {accent}; box-shadow: 0 0 30px 8px {accent}; }
+.mtlink { position: absolute; left: 470px; top: 900px; width: 140px; height: 8px; background: {accent}; border-radius: 4px; z-index: 4; }
+.mtpct { position: absolute; left: 0; right: 0; top: 280px; text-align: center; color: #f2f1ee; font: 900 170px/1 AV, sans-serif; letter-spacing: -4px; }
+.mtpct small { font-size: 90px; } .mtpct span { display: block; font: 500 34px/1.6 MO, monospace; letter-spacing: .3em; color: {accent}; }
+.mtstamp { top: 1300px; }
+/* ToolGrid */
+.tggrid { position: absolute; left: 60px; right: 60px; top: 330px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+.tgtile { height: 200px; border-radius: 22px; background: #1b1b1f; box-shadow: 0 0 0 2px rgba(255,255,255,.08); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; color: #f2f1ee; }
+.tgic { width: 84px; height: 84px; } .tgic svg { width: 100%; height: 100%; } .tglb { font-size: 21px; color: #b8b8c0; text-align: center; padding: 0 8px; line-height: 1.2; }
+.tgnum { position: absolute; left: 0; right: 0; top: 560px; text-align: center; color: #f2f1ee; font: 900 520px/1 AV, sans-serif; letter-spacing: -20px; text-shadow: 0 30px 80px rgba(0,0,0,.8); z-index: 4; }
+.tgnum span { display: block; font: 900 96px/1.1 AV, sans-serif; letter-spacing: 0; color: {accent}; }
+.mtwm { position: absolute; right: 18px; bottom: 16px; color: rgba(255,255,255,.75); font: 800 34px/1 AV, sans-serif; letter-spacing: 1px; text-shadow: 0 2px 6px rgba(0,0,0,.5); }
+.mtres { position: absolute; left: 12px; top: 12px; padding: 4px 10px; border-radius: 8px; background: rgba(0,0,0,.6); color: #fff; font-size: 20px; }
+.dplabs { flex: 1; } .dplabs em { font-style: normal; }
