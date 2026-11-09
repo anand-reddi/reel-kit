@@ -142,7 +142,7 @@ export function boot(cfg, build) {
     return L;
   };
   // caption pill: one line at a time, words grey until spoken
-  lines.forEach((l, i) => {
+  if (cfg.captions !== false) lines.forEach((l, i) => {
     const pill = el("cap", l.words.map((w) => `<i>${w.w}</i>`).join(" "));
     const a = Math.max(0, l.start - 0.08), b = i + 1 < lines.length ? lines[i + 1].start - 0.08 : Math.min(T.duration, l.end + 0.7);
     tl.set(pill, { opacity: 1 }, a); if (b < T.duration) tl.to(pill, { opacity: 0, duration: i + 1 < lines.length ? 0.01 : 0.25 }, b);

@@ -601,7 +601,7 @@ BL.Picture = (box, c, T, S) => {
   if (c.fit === 'contain') m.style.objectFit = 'contain';
   const tint = el('div', 'ptint', frame); tint.style.background = phone ? 'none' : `linear-gradient(transparent 35%, rgba(0,0,0,${c.tint ?? .55}))`;
   if (phone) tl.fromTo(frame, { scale: c.zoom || 1.04 }, { scale: (c.zoom || 1.04) + .06, duration: b - a, ease: 'none', immediateRender: false }, a);   // a slow push on the screen
-  else tl.fromTo(frame, { scale: 1.02, x: -20 }, { scale: 1.16, x: 30, duration: b - a, ease: 'none', immediateRender: false }, a);   // push + pan
+  else if (c.push !== false) tl.fromTo(frame, { scale: 1.02, x: -20 }, { scale: 1.16, x: 30, duration: b - a, ease: 'none', immediateRender: false }, a);   // push + pan (push: false for a clip with its own camera move)
   // blur: [px, at] starts out of focus (a backdrop for an overlay) and snaps into focus at `at`
   if (c.blur) { const [px, k] = c.blur, t = T(k); tl.set(m, { filter: `blur(${px}px) brightness(.55)` }, a);
     tl.to(m, { filter: 'blur(0px) brightness(1)', duration: .22, ease: 'power3.out' }, t); K.flash(t, '#fff', .06, .25); sfx(t, 'whoosh_fast/crisp', -12); }

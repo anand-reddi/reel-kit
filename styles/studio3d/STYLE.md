@@ -78,3 +78,11 @@ option for that scene, with one line on why. Good fits: how a physical thing wor
 device, vehicle, gadget), what is inside something, a mechanism that moves (gears, hinges, springs, light paths),
 scale or layout in space (a chip, a room, a city block), and a product hero shot for a launch. Poor fits: app UIs,
 lists, quotes, code, anything that is mainly text. Use it only after the user approves.
+
+## 3D inserts inside other styles (laptop with a live screen)
+`"captions": false` turns off the caption pill so a 3D take can be cut into a paper or kinetic reel. Example:
+`examples/laptop.scene.js` + `examples/laptop_render.py` (Czkawka reel): an original laptop whose screen is a canvas
+texture redrawn every frame (photo library, file lists, a web page), with things flying out of the screen in 3D (a
+stamp, photo cards, a folder, cleared tiles). Times are absolute reel seconds; the render script seeks the film and
+captures only the time ranges it needs (`RANGES`), and each range becomes an mp4 the kinetic `Picture` block plays
+with `push: false` (the 3D camera already moves). Keep the laptop between y≈700 and y≈1520; words go above it.

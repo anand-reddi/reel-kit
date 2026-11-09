@@ -26,7 +26,7 @@ def build(script, timing, work, sdir):
     dur = timing["duration"]
     cfg = dict(id="reel", width=1080, height=1920, timing=timing, states=script.get("states", []), tag=script.get("tag", ""),
                titles=script.get("titles", []), fov=script.get("fov", 30), drift=script.get("drift", 0.03),
-               look=script.get("look", "studio"), fog=script.get("fog"), scale=script.get("scale", 1))
+               look=script.get("look", "studio"), fog=script.get("fog"), scale=script.get("scale", 1), captions=script.get("captions", True))
     css = open(os.path.join(HERE, "style.css")).read()
     html = f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"/><title>{script.get("title", "reel")}</title><style>{css}</style>
