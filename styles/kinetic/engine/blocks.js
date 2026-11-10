@@ -521,6 +521,79 @@ BL.ToolGrid = (box, c, T, S) => {
     tl.to(tiles, { opacity: .22, duration: .2 }, na); tl.fromTo(nb, { scale: 2.8, opacity: 0 }, { scale: 1, opacity: 1, duration: .2, ease: 'power4.out', immediateRender: false }, na); K.fx(na, 'punch'); }
 };
 
+// ================================================================== Duo: two tall cards (two products, two models) land one by one, then a link joins them
+// cards: [{logo (svg), title, sub, chip, chipIcon (svg), at, color}], link: {text, at}
+BL.Duo = (box, c, T, S) => {
+  const a = S.start, b = S.end; K.ground(a, c.ground || 'bg'); const sh = layer(box, a, b); const cs = c.cards || [];
+  cs.forEach((o, k) => { const d = el('div', 'duocard ' + (k ? 'duor' : 'duol'), sh); if (o.color) d.style.setProperty('--dc', o.color);
+    el('div', 'duologo', d, o.logo || ''); el('div', 'duotitle', d, esc(o.title || '')); el('div', 'duosub', d, esc(o.sub || ''));
+    const ch = el('div', 'duochip mono', d, (o.chipIcon || '') + `<span>${esc(o.chip || '')}</span>`);
+    const t = o.at != null ? T(o.at) : a + .1 + k * .5;
+    tl.fromTo(d, { y: 900, rotation: k ? 14 : -14, opacity: 0 }, { y: 0, rotation: k ? 4 : -4, opacity: 1, duration: .5, ease: 'back.out(1.5)', immediateRender: false }, t);
+    tl.fromTo(ch, { scale: 0 }, { scale: 1, duration: .25, ease: 'back.out(2.4)', immediateRender: false }, t + .35);
+    tl.to(d, { y: -18, duration: Math.max(.3, b - t - .5), ease: 'sine.inOut' }, t + .5);
+    sfx(t, k ? 'swish/cane' : 'swish/soft', -13); sfx(t + .35, 'pro_pop/boop', -18); });
+  if (c.link) { const t = T(c.link.at); const ln = el('div', 'duolink mono', sh, `<i></i><span>${esc(c.link.text)}</span><i></i>`); K.vis(ln, t, b);
+    tl.fromTo(ln, { scaleX: 0 }, { scaleX: 1, duration: .35, ease: 'power3.out', immediateRender: false }, t); sfx(t, 'whoosh_fast/crisp', -15); }
+};
+
+// ================================================================== Race: two step lines race across a chart (a progress-over-time chart); end labels land
+// title, sub, xmax, xunit, ticks: [x], series: [{name, color, logo, pts: [[x, y 0..1]], end}], at, dur, mark: {x, label} (a dashed line)
+BL.Race = (box, c, T, S) => {
+  const a = S.start, b = S.end; K.ground(a, c.ground || 'bg'); const sh = layer(box, a, b);
+  const ox = 130, oy = 1330, w = 830, h = 720, X = x => ox + w * x / (c.xmax || 1), Y = y => oy - h * y;
+  el('div', 'rctitle', sh, esc(c.title || '')); el('div', 'rcsub mono', sh, esc(c.sub || ''));
+  const t0 = c.at != null ? T(c.at) : a + .3, dur = c.dur || Math.max(.8, b - t0 - .6);
+  const ns = 'http://www.w3.org/2000/svg'; const svg = document.createElementNS(ns, 'svg'); svg.setAttribute('class', 'rcsvg'); svg.setAttribute('viewBox', `0 0 ${W} ${H}`); sh.appendChild(svg);
+  const mk = (tag, at) => { const e = document.createElementNS(ns, tag); for (const k in at) e.setAttribute(k, at[k]); svg.appendChild(e); return e; };
+  [0, .25, .5, .75, 1].forEach(v => { mk('line', { x1: ox, x2: ox + w, y1: Y(v), y2: Y(v), stroke: '#ffffff1c', 'stroke-width': 2 }); const lb = el('div', 'rcy mono', sh, Math.round(v * 100) + '%'); lb.style.top = (Y(v) - 16) + 'px'; });
+  (c.ticks || []).forEach(x => { const lb = el('div', 'rcx mono', sh, esc(String(x))); lb.style.left = (X(x) - 40) + 'px'; });
+  el('div', 'rcxu mono', sh, esc(c.xunit || ''));
+  mk('line', { x1: ox, x2: ox + w, y1: oy, y2: oy, stroke: '#f2f1ee', 'stroke-width': 4 });
+  const clock = el('div', 'rcclock', sh); const cv = { x: 0 }; const upd = () => { clock.innerHTML = `${Math.round(cv.x)}<small> ${esc(c.xunit || '')}</small>`; }; upd();
+  tl.fromTo(cv, { x: 0 }, { x: c.xmax || 1, duration: dur, ease: 'none', onUpdate: upd, immediateRender: false }, t0);
+  if (c.mark) { const l = mk('line', { x1: X(c.mark.x), x2: X(c.mark.x), y1: oy, y2: oy - h - 20, stroke: '#ffffff66', 'stroke-width': 3, 'stroke-dasharray': '10 10' }); }
+  (c.series || []).forEach((s, k) => { const pts = s.pts; let d = `M${X(0)} ${Y(0)}`; let py = 0; pts.forEach(([x, y]) => { d += ` L${X(x)} ${Y(py)} L${X(x)} ${Y(y)}`; py = y; }); d += ` L${X(c.xmax)} ${Y(py)}`;
+    const p = mk('path', { d, fill: 'none', stroke: s.color, 'stroke-width': 12, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }); const L = p.getTotalLength();
+    p.style.strokeDasharray = L; tl.fromTo(p, { strokeDashoffset: L }, { strokeDashoffset: 0, duration: dur, ease: 'none', immediateRender: false }, t0);
+    const dot = mk('circle', { r: 20, fill: s.color, stroke: '#0b0b0b', 'stroke-width': 5 }); const o = { u: 0 };
+    tl.fromTo(o, { u: 0 }, { u: 1, duration: dur, ease: 'none', immediateRender: false, onUpdate: () => { const q = p.getPointAtLength(L * o.u); dot.setAttribute('cx', q.x); dot.setAttribute('cy', q.y); } }, t0);
+    const lg = el('div', 'rcleg', sh, `${s.logo || ''}<span>${esc(s.name)}</span>`); lg.style.top = (320 + k * 64) + 'px'; lg.style.setProperty('--sc', s.color);
+    if (s.end) { const e = el('div', 'rcend', sh, esc(s.end)); e.style.left = (X(c.xmax) - 250) + 'px'; e.style.top = (Y(py) + (py > .5 ? 30 : -150)) + 'px'; e.style.color = s.color;
+      const te = s.endAt != null ? T(s.endAt) : t0 + dur; K.vis(e, te, b); tl.fromTo(e, { scale: 2.4, opacity: 0 }, { scale: 1, opacity: 1, duration: .2, ease: 'power4.out', immediateRender: false }, te); K.fx(te, 'hit'); } });
+  sfx(t0, 'pro_riser/air_gate', -16, { dur: +dur.toFixed(2) });
+};
+
+// ================================================================== Bars: a ranked bar chart; bars grow and their numbers count up, the winner glows
+// title, sub, rows: [[logo svg, name, value, color, win]], max, at, stagger, unit
+BL.Bars = (box, c, T, S) => {
+  const a = S.start, b = S.end; K.ground(a, c.ground || 'bg'); const sh = layer(box, a, b);
+  el('div', 'rctitle', sh, esc(c.title || '')); el('div', 'rcsub mono', sh, esc(c.sub || ''));
+  const t0 = c.at != null ? T(c.at) : a + .2, st = c.stagger ?? .18, mx = c.max || 100;
+  (c.rows || []).forEach(([lg, nm, v, colr, win], k) => { const r = el('div', 'brow' + (win ? ' bwin' : ''), sh); r.style.top = (430 + k * 220) + 'px';
+    el('div', 'blogo', r, lg || ''); el('div', 'bname', r, esc(nm)); const tr = el('div', 'btrack', r); const f = el('i', '', tr); f.style.background = colr;
+    const num = el('div', 'bnum', r); const o = { v: 0 }; const upd = () => { num.textContent = o.v.toFixed(1) + (c.unit ?? '%'); }; upd(); const t = t0 + k * st;
+    tl.fromTo(r, { x: -200, opacity: 0 }, { x: 0, opacity: 1, duration: .3, ease: 'power3.out', immediateRender: false }, t);
+    tl.fromTo(f, { width: '0%' }, { width: (v / mx * 100) + '%', duration: .8, ease: 'power3.out', immediateRender: false }, t + .1);
+    tl.fromTo(o, { v: 0 }, { v, duration: .8, ease: 'power3.out', onUpdate: upd, immediateRender: false }, t + .1); sfx(t, 'pro_pop/tink', -18);
+    if (win) { tl.fromTo(r, { scale: 1 }, { scale: 1.05, duration: .25, yoyo: true, repeat: 1, ease: 'power2.out', immediateRender: false }, t0 + (c.rows.length) * st + .7); K.fx(t0 + c.rows.length * st + .7, 'hit'); } });
+  if (c.badge) { const bd = el('div', 'bbadge', sh, esc(c.badge.text)); const t = T(c.badge.at); K.vis(bd, t, b); tl.fromTo(bd, { scale: 2.4, opacity: 0, rotation: -12 }, { scale: 1, opacity: 1, rotation: -5, duration: .22, ease: 'power4.out', immediateRender: false }, t); K.fx(t, 'hit'); }
+};
+
+// ================================================================== Price: old prices get struck through and the new ones slam in, then a discount tag
+// title, rows: [[label, old, new]], unit, at, tag, tagAt
+BL.Price = (box, c, T, S) => {
+  const a = S.start, b = S.end; K.ground(a, c.ground || 'bg'); const sh = layer(box, a, b); const t0 = c.at != null ? T(c.at) : a + .2;
+  const card = el('div', 'prcard', sh); el('div', 'prhead', card, (c.logo || '') + `<span>${esc(c.title || '')}</span>`);
+  tl.fromTo(card, { y: 500, opacity: 0, rotation: -5 }, { y: 0, opacity: 1, rotation: -1.5, duration: .45, ease: 'back.out(1.4)', immediateRender: false }, a); sfx(a, 'swish/soft', -14);
+  (c.rows || []).forEach(([lb, o, n], k) => { const r = el('div', 'prrow', card); el('div', 'prlab mono', r, esc(lb)); const od = el('div', 'prold', r, esc(o)); const ln = el('i', 'prline', od); const nw = el('div', 'prnew', r, esc(n));
+    const t = t0 + .3 + k * .35; tl.fromTo(ln, { scaleX: 0 }, { scaleX: 1, duration: .2, ease: 'power3.out', immediateRender: false }, t); tl.to(od, { opacity: .45, duration: .2 }, t + .1);
+    tl.fromTo(nw, { scale: 2.2, opacity: 0 }, { scale: 1, opacity: 1, duration: .22, ease: 'power4.out', immediateRender: false }, t + .15); sfx(t, 'swish/blade', -15); sfx(t + .15, 'pro_pop/thup', -15); });
+  el('div', 'prunit mono', card, esc(c.unit || ''));
+  if (c.tag) { const tg = el('div', 'prtag', sh, esc(c.tag)); const t = c.tagAt != null ? T(c.tagAt) : t0 + 1.2; K.vis(tg, t, b);
+    tl.fromTo(tg, { scale: 2.6, opacity: 0, rotation: 14 }, { scale: 1, opacity: 1, rotation: 8, duration: .22, ease: 'power4.out', immediateRender: false }, t); K.fx(t, 'punch'); }
+};
+
 // ================================================================== Rewind: the film so far plays backwards in a tilting window
 // The window's contents are composited at render time (compose.py) from the frames already rendered.
 BL.Rewind = (box, c, T, S) => {

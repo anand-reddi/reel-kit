@@ -98,5 +98,9 @@ Minimal, grey-on-black chapters for tool rundowns and data beats. All seekable, 
 - `Files` — a file-list window, rows drop in (optional size bars, hot rows in red), then an empty folder (`rows: [[icon svg, name, size, bar, hot]]`, `bars`, `empty: {at, name, note, icon}`).
 - `Match` — two pictures (or two audio files with `wave: true`) side by side, scan lines, a % ticking up, a stamp (`left/right: {src, name, res, wm, css, crop}`, `pct`, `label`, `stamp`, `stampAt`).
 - `ToolGrid` — icon tiles fill a grid fast, then a big number slams over them (`items: [[icon svg, label]]`, `per`, `number`, `label`, `numAt`).
+- `Duo` — two tall cards (two products or models) land one by one with a chip each, then a link line joins them (`cards: [{logo, title, sub, chip, chipIcon, color, at}]`, `link: {text, at}`).
+- `Race` — two step lines race across a progress-over-time chart, a clock counts the x axis, end labels slam in (`series: [{name, color, logo, pts, end, endAt}]`, `xmax`, `xunit`, `ticks`, `mark`, `at`, `dur`).
+- `Bars` — a ranked bar chart with brand logos; bars grow, numbers count up, the winner glows, a badge lands (`rows: [[logo, name, value, color, win]]`, `max`, `badge: {text, at}`).
+- `Price` — a price card: old prices struck through, new ones slam in, a discount tag (`rows: [[label, old, new]]`, `unit`, `tag`, `tagAt`).
 - `Steps` — line-icon boxes joined by drawn arrows (`steps: [[svg, label, at]]`), then optionally a bar chart with a
   trend line and a bold/light title (`chart: {at, bars: [[label, value]], title: [bold, light]}`).
