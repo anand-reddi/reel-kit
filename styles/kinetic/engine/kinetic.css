@@ -289,3 +289,4 @@ html, body { margin: 0; background: #000; }
 .prline { position: absolute; left: -8px; right: -8px; top: 50%; height: 10px; background: #e5372d; transform-origin: 0 50%; border-radius: 5px; }
 .prnew { font: 900 120px/1 AV, sans-serif; color: #141414; } .prunit { font-size: 26px; color: #6a6a70; letter-spacing: .1em; margin-top: 18px; }
 .prtag { position: absolute; right: 70px; top: 330px; padding: 14px 34px; border-radius: 24px; background: #e5372d; color: #fff; font: 900 120px/1 AV, sans-serif; box-shadow: 0 20px 60px rgba(0,0,0,.6); }
+.btrack i { width: 0; }

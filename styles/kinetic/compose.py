@@ -65,7 +65,7 @@ def build(script, timing, work, sdir):
         if not os.path.exists(src): raise SystemExit(f"missing file {p}")
         name = used.setdefault(src, f"a{len(used)}_{os.path.basename(src)}"); shutil.copy(src, os.path.join(out, "assets", name)); return "assets/" + name
     def mark(v):          # a logo mark: an inline SVG file, an icon from the library ("set:name"), or an image
-        if not isinstance(v, str): return v
+        if not isinstance(v, str) or v.lstrip().startswith("<svg"): return v   # already an inline svg (e.g. an icon in a brand colour)
         if v.endswith(".svg"): return open(v if os.path.isabs(v) else os.path.join(sdir, v)).read()
         if ":" in v and not os.path.exists(os.path.join(sdir, v)):
             sys.path.insert(0, KIT); from core import icons; return icons.svg(v, 280)
