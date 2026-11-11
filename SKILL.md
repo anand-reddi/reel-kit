@@ -61,6 +61,17 @@ paper, one red accent) with an original black cat that reacts with expressions. 
 flies through, slot counters, comets; 14 blocks on the beat grid, with or without a voice (`styles/kinetic/STYLE.md`).
 `python3 reel.py styles` lists what the repo has now.
 
+## Visual variety (owner rule, every video)
+Every beat gets its own visual; no line sits on a plain card or a static frame for long. Mix the visual tools:
+- kinetic blocks (`styles/kinetic`), paper cards, the presenter only where his clip matches the line;
+- **Hairline figures** for quick beats (`tools/hairline_clip.py`: padlock, vault, loupe, sieve, terminal, laptop,
+  router, lockers… 33 in all), timed to the voice by moving a pointer along keys; play them through a kinetic
+  `Picture` with `push: false` and words on top;
+- **3D** (`styles/studio3d`, e.g. `examples/laptop.scene.js` with a live screen) for a hero shot (ask first);
+- **Anatomy** isometric machines (wheresryan22/anatomy) for one "how it works" hero scene, captured on a virtual clock;
+- **html-anime** shots (anthropic-skills:html-anime) for an anime hook or a reaction beat.
+Plan which tool carries each line in the options step and say so in the plan.
+
 ## 2. Adding a new style from a reference video
 When the user shares a reference video and wants "videos like this":
 1. Analyse it: `python3 reel.py analyze ref.mp4 --out refs/<name>` (crops phone-recording UI and letterbox, then

@@ -57,3 +57,5 @@ The black cat in `styles/sketchbook/app/cat.tsx` is original to reel-kit.
   (github.com/arhamhi/hooksmith), MIT License, Copyright (c) 2026 Hooksmith contributors.
 - The retention spine, three failure modes and named-persona send rules are adapted from Vyral's content-skills
   (github.com/vyralcontent/content-skills), MIT License. Their product-promotion sections are not included.
+
+- Hairline figures (`assets/vendor/hairline/hairline.js`) from @lucasmarkes/hairline 0.5.1 (github.com/lucasmarkes/hairline), MIT License; licence text in `assets/vendor/hairline/LICENSE`.
