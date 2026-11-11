@@ -521,6 +521,22 @@ BL.ToolGrid = (box, c, T, S) => {
     tl.to(tiles, { opacity: .22, duration: .2 }, na); tl.fromTo(nb, { scale: 2.8, opacity: 0 }, { scale: 1, opacity: 1, duration: .2, ease: 'power4.out', immediateRender: false }, na); K.fx(na, 'punch'); }
 };
 
+// ================================================================== Stack: full-width cards drop in one per name (works-with lists), a heading on top
+// head, sub, items: [{mark (svg), title, sub, at, color}]; each card lands at its own `at`, earlier cards dim a little
+BL.Stack = (box, c, T, S) => {
+  const a = S.start, b = S.end; K.ground(a, c.ground || 'bg'); const sh = layer(box, a, b); const it = c.items || [];
+  const hd = el('div', 'stkhead', sh, `<b>${esc(c.head || '')}</b><span class="mono">${esc(c.sub || '')}</span>`);
+  tl.fromTo(hd, { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: .25, ease: 'power3.out', immediateRender: false }, a);
+  const h = c.h || 370, gap = 50, top0 = c.top ?? 560;
+  const cards = it.map((o, k) => { const d = el('div', 'stkcard', sh); d.style.top = (top0 + k * (h + gap)) + 'px'; d.style.height = h + 'px'; if (o.color) d.style.setProperty('--sc', o.color);
+    el('div', 'stkmk', d, o.mark || ''); el('div', 'stktx', d, `<b>${esc(o.title)}</b><span class="mono">${esc(o.sub || '')}</span>`); el('div', 'stkok', d, c.check || '');
+    const t = o.at != null ? T(o.at) : a + .1 + k * .3; tl.set(d, { x: k % 2 ? 1100 : -1100 }, a);
+    tl.fromTo(d, { x: k % 2 ? 1100 : -1100, rotation: k % 2 ? 6 : -6, opacity: 1 }, { x: 0, rotation: 0, duration: .32, ease: 'back.out(1.4)', immediateRender: false }, t);
+    tl.fromTo(d.querySelector('.stkok'), { scale: 0 }, { scale: 1, duration: .2, ease: 'back.out(3)', immediateRender: false }, t + .3);
+    sfx(t, 'whoosh_fast/crisp', -14); sfx(t + .3, 'pro_pop/thup', -14); return [d, t]; });
+  cards.forEach(([d], k) => { if (k + 1 < cards.length) tl.to(d, { opacity: .45, duration: .2 }, cards[k + 1][1]); });
+};
+
 // ================================================================== Duo: two tall cards (two products, two models) land one by one, then a link joins them
 // cards: [{logo (svg), title, sub, chip, chipIcon (svg), at, color}], link: {text, at}
 BL.Duo = (box, c, T, S) => {
@@ -568,9 +584,10 @@ BL.Race = (box, c, T, S) => {
 // title, sub, rows: [[logo svg, name, value, color, win]], max, at, stagger, unit
 BL.Bars = (box, c, T, S) => {
   const a = S.start, b = S.end; K.ground(a, c.ground || 'bg'); const sh = layer(box, a, b);
+  if (c.ghost) { const gh = el('div', 'bghost', sh, esc(c.ghost)); tl.fromTo(gh, { scale: 1.15, opacity: 0 }, { scale: 1, opacity: 1, duration: .6, ease: 'power3.out', immediateRender: false }, a); }
   el('div', 'rctitle', sh, esc(c.title || '')); el('div', 'rcsub mono', sh, esc(c.sub || ''));
   const t0 = c.at != null ? T(c.at) : a + .2, st = c.stagger ?? .18, mx = c.max || 100;
-  (c.rows || []).forEach(([lg, nm, v, colr, win], k) => { const r = el('div', 'brow' + (win ? ' bwin' : ''), sh); r.style.top = (430 + k * 220) + 'px';
+  (c.rows || []).forEach(([lg, nm, v, colr, win], k) => { const r = el('div', 'brow' + (win ? ' bwin' : ''), sh); r.style.top = ((c.top || 430) + k * (c.gap || 220)) + 'px';
     el('div', 'blogo', r, lg || ''); el('div', 'bname', r, esc(nm)); const tr = el('div', 'btrack', r); const f = el('i', '', tr); f.style.background = colr;
     const num = el('div', 'bnum', r); const o = { v: 0 }; const upd = () => { num.textContent = o.v.toFixed(1) + (c.unit ?? '%'); }; upd(); const t = t0 + k * st;
     tl.fromTo(r, { x: -200, opacity: 0 }, { x: 0, opacity: 1, duration: .3, ease: 'power3.out', immediateRender: false }, t);
@@ -684,6 +701,9 @@ BL.Picture = (box, c, T, S) => {
     tl.fromTo(ov, { scale: 1.18, opacity: rv0(c) ? 1 : 0 }, { scale: 1, opacity: 1, duration: .16, ease: 'power4.out', immediateRender: false }, a);
     tl.to(ov, { scale: 1.06, rotation: -2, duration: Math.max(.1, t2 - a - .1), ease: 'none' }, a + .16);
     tl.to(ov, { scale: 2.4, opacity: 0, duration: .12, ease: 'power3.in' }, t2); tl.set(ov, { visibility: 'hidden' }, t2 + .12); sfx(t2, 'whoosh_fast/sleeve', -11); }
+  // head: {text, sub, top} a heading in the empty top of a landscape clip
+  if (c.head) { const hh = el('div', 'stkhead', sh, `<b>${esc(c.head.text)}</b><span class="mono">${esc(c.head.sub || '')}</span>`); hh.style.top = (c.head.top ?? 170) + 'px';
+    tl.fromTo(hh, { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: .25, ease: 'power3.out', immediateRender: false }, a + .05); }
   // tag: a small mono label under the words (a place, a source), types in after the reveal
   if (c.tag) { const g = el('div', 'ptag mono', sh, esc(c.tag)); g.style.top = ((c.wordsY || (phone ? 1680 : 1450)) + 150) + 'px';
     tl.fromTo(g, { opacity: 0, y: 14 }, { opacity: .9, y: 0, duration: .18, ease: 'power3.out', immediateRender: false }, a + .12); }

@@ -5,7 +5,9 @@ the clip is frame-accurate at any render speed.
 
 usage: python3 tools/hairline_clip.py spec.json out.mp4
 spec:  {"fig": "padlock", "dur": 2.5, "fps": 30, "keys": [[0, null], [0.4, 200, 120], [1.2, 230, 90]],
-        "play": false, "y": 330, "width": 1540, "accent": "#e5372d"}
+        "play": false, "y": 330, "width": 1540, "accent": "#e5372d",
+        "plate": {"label": "fig. 02 / sieve", "tag": "skillspector", "note": "31,132 skills", "mark": "scan"}}
+plate: an optional technical-plate frame (dotted grid, red corner brackets, mono labels) so the figure fills the frame.
 keys:  [t, x, y] moves the pointer there (eased from the previous key); [t, null] takes the pointer away.
        Leave keys out and set "play": true to use the figure's own built-in loop instead.
 figures: basket branches cabinet dish drawer elevator exploded format hub keyboard laptop lockers loupe padlock patch
@@ -28,7 +30,15 @@ INIT = r"""
 PAGE = """<!doctype html><html><head><meta charset="utf-8"><style>
 html,body{margin:0;width:1080px;height:1920px;background:transparent;overflow:hidden}
 #fig{position:absolute;left:LEFTpx;top:TOPpx;width:WIDTHpx;--hl-sw:3.2px;--hl-edge:#f2f1ee;--hl-mid:#b4b4ba;--hl-lo:#5e5e66;--hl-hi:ACCENT;--hl-plate:#151518}
-</style></head><body><div id="fig"></div>
+#plate{position:absolute;inset:44px;border:2px solid #2a2a30;border-radius:28px;
+  background:radial-gradient(circle,#26262c 2px,transparent 2.4px) 0 0/44px 44px}
+#plate i{position:absolute;width:54px;height:54px;border-color:#e5372d;border-style:solid}
+#plate .a{left:-2px;top:-2px;border-width:6px 0 0 6px;border-radius:28px 0 0 0}#plate .b{right:-2px;top:-2px;border-width:6px 6px 0 0;border-radius:0 28px 0 0}
+#plate .c{left:-2px;bottom:-2px;border-width:0 0 6px 6px;border-radius:0 0 0 28px}#plate .d{right:-2px;bottom:-2px;border-width:0 6px 6px 0;border-radius:0 0 28px 0}
+#plate span{position:absolute;font:500 28px/1 'IBM Plex Mono',monospace;letter-spacing:.14em;color:#8a8a92;text-transform:uppercase}
+#plate .l{left:44px;top:44px;color:#f2f1ee}#plate .r{right:44px;top:44px}#plate .n{left:44px;bottom:44px}#plate .m{right:44px;bottom:44px;color:#e5372d}
+#plate .rule{position:absolute;left:44px;right:44px;top:96px;height:2px;background:#2a2a30}
+</style></head><body>PLATE<div id="fig"></div>
 <script type="module">import * as H from "./hairline.js"; window.__fig = H["FIG"](document.getElementById("fig"), { theme: "dark", play: PLAY, intensity: 1 }); window.__ready = 1;</script>
 </body></html>"""
 def ease(k): return k * k * (3 - 2 * k)
@@ -45,7 +55,10 @@ def pointer(keys, t):
 def render(spec, out):
     w = spec.get('width', 1540); left = (1080 - w) / 2; top = spec.get('y', 330); h = w * 320 / 400
     tmp = tempfile.mkdtemp(); shutil.copy(os.path.join(KIT, 'assets/vendor/hairline/hairline.js'), tmp)
-    page = PAGE.replace('LEFT', str(left)).replace('TOP', str(top)).replace('WIDTH', str(w)).replace('ACCENT', spec.get('accent', '#e5372d')) \
+    pl = spec.get('plate')
+    plate = '' if not pl else ('<div id="plate"><i class="a"></i><i class="b"></i><i class="c"></i><i class="d"></i><div class="rule"></div>'
+        + ''.join(f'<span class="{k}">{pl[n]}</span>' for k, n in (('l', 'label'), ('r', 'tag'), ('n', 'note'), ('m', 'mark')) if pl.get(n)) + '</div>')
+    page = PAGE.replace('PLATE', plate).replace('LEFT', str(left)).replace('TOP', str(top)).replace('WIDTH', str(w)).replace('ACCENT', spec.get('accent', '#e5372d')) \
                .replace('FIG', spec['fig']).replace('PLAY', 'true' if spec.get('play') else 'false')
     open(os.path.join(tmp, 'index.html'), 'w').write(page); fd = os.path.join(tmp, 'f'); os.makedirs(fd)
     fps = spec.get('fps', 30); n = int(round(spec['dur'] * fps)); keys = spec.get('keys', [])

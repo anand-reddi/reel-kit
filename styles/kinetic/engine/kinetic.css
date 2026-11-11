@@ -290,3 +290,17 @@ html, body { margin: 0; background: #000; }
 .prnew { font: 900 120px/1 AV, sans-serif; color: #141414; } .prunit { font-size: 26px; color: #6a6a70; letter-spacing: .1em; margin-top: 18px; }
 .prtag { position: absolute; right: 70px; top: 330px; padding: 14px 34px; border-radius: 24px; background: #e5372d; color: #fff; font: 900 120px/1 AV, sans-serif; box-shadow: 0 20px 60px rgba(0,0,0,.6); }
 .btrack i { width: 0; }
+.bghost { position: absolute; left: 0; right: 0; top: 1420px; text-align: center; font: 900 230px/1 AV, sans-serif; letter-spacing: -6px; color: transparent; -webkit-text-stroke: 4px #2c2c32; white-space: nowrap; }
+
+/* Stack: works-with cards */
+.stkhead { position: absolute; left: 60px; right: 60px; top: 200px; z-index: 5; }
+.stkhead b { display: block; font: 900 104px/1 AV, sans-serif; color: #fff; letter-spacing: -2px; }
+.stkhead span { display: block; margin-top: 18px; font-size: 30px; letter-spacing: 6px; color: var(--accent, #ff3b30); text-transform: uppercase; }
+.stkcard { --sc: #fff; position: absolute; left: 60px; right: 60px; height: 330px; border-radius: 34px; background: rgba(22,22,22,.92); border: 2px solid rgba(255,255,255,.1); display: flex; align-items: center; gap: 46px; padding: 0 56px; box-shadow: 0 30px 60px rgba(0,0,0,.5); }
+.stkcard::before { content: ''; position: absolute; left: 0; top: 40px; bottom: 40px; width: 10px; border-radius: 0 8px 8px 0; background: var(--sc); }
+.stkmk { width: 170px; height: 170px; flex: none; display: grid; place-items: center; border-radius: 34px; background: rgba(255,255,255,.05); }
+.stkmk svg { width: 120px; height: 120px; }
+.stktx { flex: 1; }   .stktx b { display: block; white-space: nowrap; font: 900 72px/1 AV, sans-serif; color: #fff; letter-spacing: -1px; }
+.stktx span { display: block; margin-top: 14px; font-size: 28px; letter-spacing: 4px; color: rgba(255,255,255,.55); text-transform: uppercase; }
+.stkok { width: 92px; height: 92px; flex: none; display: grid; place-items: center; border-radius: 50%; background: var(--accent, #ff3b30); }
+.stkok svg { width: 56px; height: 56px; }
