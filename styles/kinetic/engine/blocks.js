@@ -561,6 +561,73 @@ BL.TaskMgr = (box, c, T, S) => {
   if (c.badge) { const bd = el('div', 'bbadge', sh, esc(c.badge.text)); bd.style.top = '1610px'; const t = T(c.badge.at); K.vis(bd, t, b); tl.fromTo(bd, { scale: 2.4, opacity: 0, rotation: -12 }, { scale: 1, opacity: 1, rotation: -5, duration: .22, ease: 'power4.out', immediateRender: false }, t); K.fx(t, 'hit'); }
 };
 
+// ================================================================== Shot: a screenshot in a window; the camera zooms to one area at a time, a ring draws round it, a cursor taps
+// src, iw, ih (the image's pixel size), logo (svg) + brand (text) above the window, view: {top, height},
+// steps: [{at, rect: [x, y, w, h] (image px; omit for the whole image), ring: true, tap: true, label}]
+BL.Shot = (box, c, T, S) => {
+  const a = S.start, b = S.end; K.ground(a, c.ground || 'bg'); const sh = layer(box, a, b);
+  const vw = 1000, vt = c.view?.top ?? 330, vh = c.view?.height ?? 1080, iw = c.iw, ih = c.ih;
+  if (c.logo || c.brand) { const hd = el('div', 'shbrand', sh, `${c.logo || ''}<b>${esc(c.brand || '')}</b>`); hd.style.top = (vt - 190) + 'px';
+    tl.fromTo(hd, { opacity: 0, y: -24 }, { opacity: 1, y: 0, duration: .25, ease: 'power3.out', immediateRender: false }, a); }
+  const view = el('div', 'shview', sh); view.style.top = vt + 'px'; view.style.height = vh + 'px';
+  const cam = el('div', 'shcam', view); cam.style.width = iw + 'px'; cam.style.height = ih + 'px';
+  const im = el('img', '', cam); im.src = c.src; im.style.width = iw + 'px'; im.style.height = ih + 'px';
+  const fit = r => { const [x, y, w, h] = r || [0, 0, iw, ih]; const sc = Math.min(vw * .92 / w, vh * .8 / h, c.maxZoom || 2.4); return { scale: sc, x: vw / 2 - (x + w / 2) * sc, y: vh / 2 - (y + h / 2) * sc }; };
+  const f0 = fit(null); gsap.set(cam, { transformOrigin: '0 0', ...f0 });
+  tl.fromTo(view, { y: 140, opacity: 0, scale: .95 }, { y: 0, opacity: 1, scale: 1, duration: .35, ease: 'power3.out', immediateRender: false }, a);
+  const cur = el('div', 'shcur', cam, '<svg viewBox="0 0 24 24"><path d="M4 2 L4 19 L8.5 15 L11.5 22 L14.5 20.6 L11.6 14 L18 14 Z" fill="#fff" stroke="#0b0b0b" stroke-width="1.4" stroke-linejoin="round"/></svg>');
+  let cx = iw * .7, cy = ih * .8; gsap.set(cur, { x: cx, y: cy, opacity: 0 });
+  const sts = c.steps || []; sts.forEach((st, k) => { if (st.until == null && sts[k + 1] && sts[k + 1].at != null) st.until = sts[k + 1].at; });
+  sts.forEach(st => { const t = st.at != null ? T(st.at) : a; const f = fit(st.rect);
+    tl.to(cam, { ...f, duration: .5, ease: 'power3.inOut' }, t); sfx(t, 'swish/soft', -17);
+    if (st.rect && st.ring) { const [x, y, w, h] = st.rect, rg = el('div', 'shring', cam); const p = 10 / f.scale * 2;
+      Object.assign(rg.style, { left: (x - p) + 'px', top: (y - p) + 'px', width: (w + 2 * p) + 'px', height: (h + 2 * p) + 'px', borderWidth: (6 / f.scale) + 'px', borderRadius: (14 / f.scale) + 'px' });
+      tl.fromTo(rg, { opacity: 0, scale: 1.3 }, { opacity: 1, scale: 1, duration: .25, ease: 'back.out(2)', immediateRender: false }, t + .45);
+      tl.to(rg, { opacity: 0, duration: .15 }, st.until != null ? T(st.until) : t + 2.2); }
+    if (st.rect && st.tap) { const [x, y, w, h] = st.rect; const tx = x + w / 2, ty = y + h / 2; const cs = 1 / f.scale * 2.2;
+      tl.set(cur, { opacity: 1 }, t); tl.fromTo(cur, { x: cx, y: cy, scale: cs }, { x: tx, y: ty, scale: cs, duration: .45, ease: 'power2.inOut', immediateRender: false }, t + .2);
+      tl.to(cur, { scale: cs * .8, duration: .08, yoyo: true, repeat: 1 }, t + .68); cx = tx; cy = ty;
+      const rp = el('div', 'shrip', cam); Object.assign(rp.style, { left: tx + 'px', top: ty + 'px' });
+      tl.fromTo(rp, { scale: 0, opacity: .8 }, { scale: 3 / f.scale * 2, opacity: 0, duration: .45, ease: 'power2.out', immediateRender: false }, t + .7); sfx(t + .7, 'pro_pop/thup', -13); }
+    if (st.label) { const lb = el('div', 'shlabel', sh, esc(st.label)); lb.style.top = (vt + vh + 60) + 'px'; K.vis(lb, t + .3, st.until != null ? T(st.until) : b);
+      tl.fromTo(lb, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: .2, immediateRender: false }, t + .3); } });
+};
+
+// ================================================================== Usage: a usage-limits panel; bars sit full, then each one empties at its own time (a reset)
+// title, plan, rows: [{name, sub, pct, at (when it empties), num: false hides the % text}], button: {label, sub, at (pressed)}, stamp: {text, at}
+BL.Usage = (box, c, T, S) => {
+  const a = S.start, b = S.end; K.ground(a, c.ground || 'bg'); const sh = layer(box, a, b);
+  if (c.head) { const hd = el('div', 'stkhead', sh, `<b>${esc(c.head)}</b><span class="mono">${esc(c.sub || '')}</span>`); tl.fromTo(hd, { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: .25, ease: 'power3.out', immediateRender: false }, a); }
+  const p = el('div', 'uspanel', sh); p.style.top = (c.top ?? 330) + 'px'; el('div', 'ushead', p, `<b>${esc(c.title || 'Your usage limits')}</b><span>${esc(c.plan || '')}</span>`);
+  tl.fromTo(p, { y: 140, opacity: 0 }, { y: 0, opacity: 1, duration: .35, ease: 'power3.out', immediateRender: false }, a);
+  (c.rows || []).forEach(r => { const row = el('div', 'usrow', p); el('div', 'usnm', row, `<b>${esc(r.name)}</b><span>${esc(r.sub || '')}</span>`);
+    const tr = el('div', 'ustr', row); const f = el('i', '', tr); const num = el('div', 'usnum', row); const o = { v: r.pct };
+    const up = () => { f.style.width = o.v + '%'; num.textContent = r.num === false ? '' : Math.round(o.v) + '% used'; f.style.background = o.v > 90 ? '#e5372d' : '#2c84db'; }; up();
+    tl.fromTo(o, { v: r.from ?? r.pct }, { v: r.pct, duration: .6, ease: 'power2.out', onUpdate: up, immediateRender: false }, a + .2);
+    if (r.at != null) { const t = T(r.at); tl.to(o, { v: 0, duration: .55, ease: 'power3.inOut', onUpdate: up }, t); sfx(t, 'pro_riser/air_gate', -20); sfx(t + .5, 'pro_pop/tink', -16); } });
+  if (c.button) { const bt = c.button, row = el('div', 'usbtnrow', p); el('div', 'usnm', row, `<b>${esc(bt.label || 'Full reset')}</b><span>${esc(bt.sub || '')}</span>`); const btn = el('div', 'usbtn', row, 'Reset for free');
+    if (bt.at != null) { const t = T(bt.at); tl.to(btn, { scale: .9, duration: .08, yoyo: true, repeat: 1 }, t); tl.to(btn, { backgroundColor: '#3ddc84', color: '#0b0b0b', duration: .15 }, t + .1); sfx(t, 'pro_pop/thup', -12); K.fx(t, 'hit'); } }
+  if (c.stamp) { const sp = el('div', 'bbadge', sh, esc(c.stamp.text)); sp.style.top = (c.stamp.top ?? 1560) + 'px'; sp.style.borderColor = '#3ddc84'; sp.style.color = '#3ddc84'; const t = T(c.stamp.at); K.vis(sp, t, b);
+    tl.fromTo(sp, { scale: 2.4, opacity: 0, rotation: -12 }, { scale: 1, opacity: 1, rotation: -4, duration: .22, ease: 'power4.out', immediateRender: false }, t); K.fx(t, 'hit'); }
+};
+
+// ================================================================== Week: seven day tiles; one is the weekly refill day; marks land under days (bad / good)
+// head, sub, refill (day index 0-6), refillLabel, marks: [{day, at, kind: 'bad'|'good', text}]
+BL.Week = (box, c, T, S) => {
+  const a = S.start, b = S.end; K.ground(a, c.ground || 'bg'); const sh = layer(box, a, b); const days = c.days || ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+  const hd = el('div', 'stkhead', sh, `<b>${esc(c.head || '')}</b><span class="mono">${esc(c.sub || '')}</span>`);
+  tl.fromTo(hd, { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: .25, ease: 'power3.out', immediateRender: false }, a);
+  const row = el('div', 'wkrow', sh); const tiles = days.map((d, k) => { const t = el('div', 'wkday' + (k === c.refill ? ' wkref' : ''), row, `<b>${d}</b>`);
+    tl.fromTo(t, { y: 80, opacity: 0 }, { y: 0, opacity: 1, duration: .25, ease: 'back.out(1.6)', immediateRender: false }, a + .1 + k * .05); return t; });
+  if (c.refill != null) { const rl = el('div', 'wkreflbl mono', sh, esc(c.refillLabel || 'week refills')); const tr = tiles[c.refill]; rl.style.left = (60 + c.refill * 140 + 62) + 'px';
+    tl.fromTo(rl, { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: .25, immediateRender: false }, a + .5); }
+  if (c.note) { const nt = el('div', 'wknote', sh, esc(c.note.text)); const t = T(c.note.at); K.vis(nt, t, b); tl.fromTo(nt, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: .25, ease: 'power3.out', immediateRender: false }, t); }
+  (c.marks || []).forEach(m => { const t = T(m.at); const tile = tiles[m.day]; const ok = m.kind === 'good';
+    const pin = el('div', 'wkpin ' + (ok ? 'ok' : 'bad'), sh, `<i>${ok ? '✓' : '✕'}</i><b>${esc(m.text || '')}</b>`); pin.style.left = (60 + m.day * 140 + 62) + 'px';
+    K.vis(pin, t, b); tl.fromTo(pin, { y: 60, opacity: 0, scale: .6 }, { y: 0, opacity: 1, scale: 1, duration: .3, ease: 'back.out(2)', immediateRender: false }, t);
+    tl.to(tile, { backgroundColor: ok ? 'rgba(61,220,132,.25)' : 'rgba(229,55,45,.3)', borderColor: ok ? '#3ddc84' : '#e5372d', duration: .2 }, t); sfx(t, ok ? 'pro_pop/tink' : 'pro_impact/air', -13); });
+};
+
 // ================================================================== Duo: two tall cards (two products, two models) land one by one, then a link joins them
 // cards: [{logo (svg), title, sub, chip, chipIcon (svg), at, color}], link: {text, at}
 BL.Duo = (box, c, T, S) => {

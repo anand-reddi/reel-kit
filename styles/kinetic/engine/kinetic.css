@@ -318,3 +318,32 @@ html, body { margin: 0; background: #000; }
 .tmcl { font-size: 28px; letter-spacing: 4px; color: rgba(255,255,255,.6); text-transform: uppercase; margin-bottom: 14px; }
 .tmtr { position: relative; height: 96px; border-radius: 20px; background: rgba(255,255,255,.06); overflow: hidden; } .tmtr i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; border-radius: 20px; }
 .tmtr b { position: absolute; left: 30px; top: 50%; transform: translateY(-50%); font: 900 52px/1 AV, sans-serif; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,.4); }
+
+/* Shot: screenshot camera */
+.shbrand { position: absolute; left: 0; right: 0; display: flex; align-items: center; justify-content: center; gap: 26px; z-index: 6; }
+.shbrand svg { width: 110px; height: 110px; } .shbrand b { font: 900 96px/1 AV, sans-serif; color: #fff; letter-spacing: -3px; }
+.shview { position: absolute; left: 40px; width: 1000px; border-radius: 34px; overflow: hidden; background: #1f1f1e; border: 2px solid rgba(255,255,255,.12); box-shadow: 0 40px 90px rgba(0,0,0,.6); }
+.shcam { position: absolute; left: 0; top: 0; } .shcam img { display: block; }
+.shring { position: absolute; border-style: solid; border-color: #e5372d; box-shadow: 0 0 0 9999px rgba(0,0,0,.35); pointer-events: none; }
+.shcur { position: absolute; left: 0; top: 0; width: 24px; height: 24px; z-index: 4; transform-origin: 0 0; } .shcur svg { width: 24px; height: 24px; display: block; }
+.shrip { position: absolute; width: 20px; height: 20px; margin: -10px 0 0 -10px; border-radius: 50%; border: 3px solid #fff; }
+.shlabel { position: absolute; left: 60px; right: 60px; text-align: center; font: 900 78px/1.05 AV, sans-serif; color: #fff; letter-spacing: -2px; }
+/* Usage: rebuilt usage-limits panel */
+.uspanel { position: absolute; left: 50px; right: 50px; border-radius: 34px; background: #262624; border: 2px solid rgba(255,255,255,.1); padding: 40px 44px 30px; box-shadow: 0 40px 90px rgba(0,0,0,.6); font-family: IN, Inter, sans-serif; }
+.ushead { display: flex; align-items: baseline; gap: 18px; margin-bottom: 26px; } .ushead b { font: 800 56px/1 IN, Inter, sans-serif; color: #f2f1ee; } .ushead span { font: 600 32px IN, Inter, sans-serif; color: #9a9a96; }
+.usrow, .usbtnrow { display: grid; grid-template-columns: 320px 1fr 210px; align-items: center; gap: 24px; padding: 70px 0; border-top: 2px solid rgba(255,255,255,.06); }
+.usbtnrow { grid-template-columns: 1fr auto; }
+.usnm b { display: block; font: 700 44px/1.1 IN, Inter, sans-serif; color: #f2f1ee; } .usnm span { display: block; margin-top: 10px; font: 500 30px IN, Inter, sans-serif; color: #9a9a96; }
+.ustr { height: 30px; border-radius: 15px; background: #3a3a37; overflow: hidden; } .ustr i { display: block; height: 100%; border-radius: 9px; background: #2c84db; }
+.usnum { text-align: right; font: 700 38px IN, Inter, sans-serif; color: #c9c9c5; }
+.usbtn { padding: 24px 38px; border-radius: 18px; background: #3a3a37; color: #f2f1ee; font: 700 40px IN, Inter, sans-serif; border: 2px solid rgba(255,255,255,.12); }
+/* Week: seven day tiles */
+.wkrow { position: absolute; left: 60px; right: 60px; top: 700px; display: flex; gap: 16px; }
+.wkday { width: 124px; height: 280px; border-radius: 24px; background: rgba(255,255,255,.05); border: 3px solid rgba(255,255,255,.12); display: grid; place-items: center; }
+.wkday b { font: 900 34px/1 AV, sans-serif; color: #f2f1ee; } .wkref { border-color: #2c84db; background: rgba(44,132,219,.22); }
+.wkreflbl { position: absolute; top: 630px; translate: -50% 0; font-size: 26px; letter-spacing: 3px; color: #6fb3f5; text-transform: uppercase; white-space: nowrap; }
+.wkpin { position: absolute; top: 1030px; translate: -50% 0; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.wkpin i { width: 96px; height: 96px; border-radius: 50%; display: grid; place-items: center; font: 900 54px/1 AV, sans-serif; font-style: normal; color: #0b0b0b; }
+.wkpin.ok i { background: #3ddc84; } .wkpin.bad i { background: #e5372d; color: #fff; }
+.wkpin b { font: 900 44px/1 AV, sans-serif; white-space: nowrap; } .wkpin.ok b { color: #3ddc84; } .wkpin.bad b { color: #ff6b5e; }
+.wknote { position: absolute; left: 60px; right: 60px; top: 1330px; padding: 40px 44px; border-radius: 30px; background: rgba(61,220,132,.12); border: 3px solid #3ddc84; font: 900 64px/1.1 AV, sans-serif; color: #fff; letter-spacing: -1px; }
