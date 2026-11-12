@@ -537,6 +537,30 @@ BL.Stack = (box, c, T, S) => {
   cards.forEach(([d], k) => { if (k + 1 < cards.length) tl.to(d, { opacity: .45, duration: .2 }, cards[k + 1][1]); });
 };
 
+// ================================================================== TaskMgr: a task-manager window; one process row lands and its memory counts up over a live graph, then a compare strip and a badge
+// title, row: {mark (svg), name, mem (MB), sub, subAt}, at, compare: {at, rows: [[label, value, color, text]], max}, badge: {text, at}
+BL.TaskMgr = (box, c, T, S) => {
+  const a = S.start, b = S.end; K.ground(a, c.ground || 'bg'); const sh = layer(box, a, b); const t0 = c.at != null ? T(c.at) : a + .15; const rw = c.row || {};
+  const win = el('div', 'tmwin', sh); el('div', 'mbar mono', win, `<i></i><i></i><i></i><span>${esc(c.title || 'Task Manager')}</span><em>Processes</em>`);
+  el('div', 'tmhead mono', win, '<span>Name</span><span>Memory</span>');
+  const r = el('div', 'tmrow', win); el('div', 'tmmk', r, rw.mark || ''); const nm = el('div', 'tmnm', r, `<b>${esc(rw.name || '')}</b><span class="mono">${esc(rw.sub || '')}</span>`);
+  const mem = el('div', 'tmmem', r); const o = { v: 0 }; const up = () => { mem.textContent = o.v.toFixed(1) + ' MB'; }; up();
+  tl.fromTo(win, { y: 120, opacity: 0, scale: .94 }, { y: 0, opacity: 1, scale: 1, duration: .35, ease: 'power3.out', immediateRender: false }, a);
+  tl.fromTo(r, { x: -160, opacity: 0 }, { x: 0, opacity: 1, duration: .3, ease: 'back.out(1.5)', immediateRender: false }, t0); sfx(t0, 'pro_pop_in/deep', -13);
+  tl.fromTo(o, { v: 0 }, { v: rw.mem || 0, duration: 1.0, ease: 'power3.out', onUpdate: up, immediateRender: false }, t0 + .1); sfx(t0 + .1, 'pro_typing_run/blip', -17);
+  const sb = nm.querySelector('span'); if (rw.subAt) { K.vis(sb, T(rw.subAt), b); tl.fromTo(sb, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: .25, immediateRender: false }, T(rw.subAt)); sfx(T(rw.subAt), 'pro_pop/thup', -14); }
+  // live memory graph: a flat line that draws across
+  const gw = el('div', 'tmgraph', win); const pts = []; for (let i = 0; i <= 40; i++) pts.push(`${i * 22},${150 - 30 - 12 * Math.sin(i * .9) - (i % 7 === 0 ? 10 : 0)}`);
+  gw.innerHTML = `<svg viewBox="0 0 880 200" preserveAspectRatio="none"><polyline points="${pts.join(' ')}" fill="none" stroke="var(--accent,#e5372d)" stroke-width="5"/><polyline points="0,200 ${pts.join(' ')} 880,200" fill="rgba(229,55,45,.15)" stroke="none"/></svg><span class="mono">memory · live</span>`;
+  const pl = gw.querySelector('polyline'); const L = 1400; pl.style.strokeDasharray = L; tl.fromTo(pl, { strokeDashoffset: L }, { strokeDashoffset: 0, duration: 1.6, ease: 'none', immediateRender: false }, t0);
+  if (c.compare) { const cp = c.compare, ct = T(cp.at), mx = cp.max || 1;
+    (cp.rows || []).forEach(([lb, v, col, tx], k) => { const rr = el('div', 'tmcmp', sh); rr.style.top = (1180 + k * 190) + 'px';
+      el('div', 'tmcl mono', rr, esc(lb)); const tr = el('div', 'tmtr', rr); const f = el('i', '', tr); f.style.background = col; el('b', '', tr, esc(tx));
+      const t = ct + k * .25; tl.fromTo(rr, { opacity: 0, x: -120 }, { opacity: 1, x: 0, duration: .25, ease: 'power3.out', immediateRender: false }, t);
+      tl.fromTo(f, { width: '0%' }, { width: (v / mx * 100) + '%', duration: .6, ease: 'power3.out', immediateRender: false }, t + .05); sfx(t, 'swish/soft', -16); }); }
+  if (c.badge) { const bd = el('div', 'bbadge', sh, esc(c.badge.text)); bd.style.top = '1610px'; const t = T(c.badge.at); K.vis(bd, t, b); tl.fromTo(bd, { scale: 2.4, opacity: 0, rotation: -12 }, { scale: 1, opacity: 1, rotation: -5, duration: .22, ease: 'power4.out', immediateRender: false }, t); K.fx(t, 'hit'); }
+};
+
 // ================================================================== Duo: two tall cards (two products, two models) land one by one, then a link joins them
 // cards: [{logo (svg), title, sub, chip, chipIcon (svg), at, color}], link: {text, at}
 BL.Duo = (box, c, T, S) => {

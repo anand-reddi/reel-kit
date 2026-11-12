@@ -6,7 +6,7 @@ import json, os, re, shutil, subprocess, sys
 HERE = os.path.dirname(os.path.abspath(__file__)); KIT = os.path.dirname(os.path.dirname(HERE))
 W, H = 1080, 1920
 PALETTE = {"bg": "#0b0b0b", "paper": "#f2f1ee", "accent": "#e5372d", "hot": "#ff8a3d", "ink": "#0b0b0b"}
-BLOCKS = ["Words", "Strike", "Graph", "Hero", "Prompt", "Stretch", "Fly", "Notes", "Counters", "Progress", "Chain", "Rewind", "Picture", "Logo", "StyleList", "Route", "SkillCard", "TypeOn", "Steps", "Dupes", "Copies", "Files", "Match", "ToolGrid", "Duo", "Race", "Bars", "Price", "Stack"]
+BLOCKS = ["Words", "Strike", "Graph", "Hero", "Prompt", "Stretch", "Fly", "Notes", "Counters", "Progress", "Chain", "Rewind", "Picture", "Logo", "StyleList", "Route", "SkillCard", "TypeOn", "Steps", "Dupes", "Copies", "Files", "Match", "ToolGrid", "Duo", "Race", "Bars", "Price", "Stack", "TaskMgr"]
 CARDS = {b: "see STYLE.md" for b in BLOCKS}
 TIME = re.compile(r"^(start|end|line:\d+(:end)?|word:[^+\-]+|-?\d+(\.\d+)?s)([+-]\d*\.?\d+)?$")
 ASSET_KEYS = {"src"}
