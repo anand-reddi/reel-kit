@@ -72,30 +72,70 @@ def icon(name, size=120, color="#111"):
     return icons.svg(name, size, color)
 
 
+TIME_LISTS = ("ticks", "hiAt", "ringAt", "ats")
+TIME_ONE = ("rightAt", "dropAt")
+
+
+def blocks(tm, max_words=7):
+    """caption phrase blocks: a script line split into runs of <= max_words, breaking after punctuation when it can."""
+    out = []
+    for l in tm["lines"]:
+        ws = [{"w": w["w"], "t": w["t"], "it": bool(w.get("italic"))} for w in l["words"]]; cur = []
+        for k, w in enumerate(ws):
+            cur.append(w); left = len(ws) - k - 1
+            punct = w["w"].rstrip("\"'").endswith((",", ".", "?", "!", ":", ";", "—"))
+            if left and (len(cur) >= max_words or (punct and len(cur) >= 3 and left >= 2)):
+                out.append(cur); cur = []
+        if cur: out.append(cur)
+    return [{"start": c[0]["t"], "words": c} for c in out]
+
+
 def build(sc, tm, work):
-    bounds = beat_bounds(sc, tm); dur = tm["duration"]; items, beats, cues = [], [], []
+    bounds = beat_bounds(sc, tm); dur = tm["duration"]; items, beats, cues, cams, reacts = [], [], [], [], []
+
+    def prep(h, i, t0, until, top):
+        o = dict(h); o["at"] = r3(at_time(h.get("at"), tm, i, t0))
+        if until is not None: o["until"] = until
+        elif "until" in h: o["until"] = r3(at_time(h["until"], tm, i, t0))
+        for k in TIME_LISTS:
+            if k in o: o[k] = [r3(at_time(x, tm, i, t0)) for x in o[k]]
+        for k in TIME_ONE:
+            if k in o: o[k] = r3(at_time(o[k], tm, i, t0))
+        for k in ("src", "img"):
+            if o.get(k) and not o[k].startswith(("http", "data:")):
+                src = o[k] if os.path.isabs(o[k]) else os.path.join(sc["_dir"], o[k])
+                dst = "assets/" + os.path.basename(src); shutil.copy(src, os.path.join(work, "page", dst)); o[k] = dst
+        if o.get("icon"): o["svg"] = icon(o["icon"], 160, o.get("color", "#111"))
+        if o.get("tiles"): o["tiles"] = [dict(x, svg=icon(x["icon"], 160, x.get("color", "#111")) if x.get("icon") else "") for x in o["tiles"]]
+        sid, g = POP.get(o["type"], ("pro_pop/thup", -19))
+        if h.get("sfx", True): cues.append([o["at"], h.get("sfx_id", sid), g])
+        for a_ in o.get("ats", [])[1:]: cues.append([a_, "pro_pop/thup", -19])
+        for a_ in o.get("ticks", []): cues.append([a_, "pro_pop/tink", -18])
+        if "dropAt" in o: cues.append([o["dropAt"], "whoosh_fast/crisp", -17])
+        if o.get("children"): o["children"] = [prep(c, i, t0, None, False) for c in o["children"]]
+        return o
+
     for i, (b, (t0, t1)) in enumerate(zip(sc["beats"], bounds)):
         beats.append({"t0": t0, "t1": t1, "slug": b.get("slug", f"{i + 1:02d}"), "count": b.get("count"), "bg": b.get("bg"), "wipe": b.get("wipe", False)})
-        hs = b.get("hero", [])
-        for h in (hs if isinstance(hs, list) else [hs]):
-            o = dict(h); o["at"] = r3(at_time(h.get("at"), tm, i, t0))
-            keep = h.get("keep", 0); o["until"] = r3(bounds[min(i + keep, len(bounds) - 1)][1])
-            for k in ("ticks", "hiAt", "ringAt"):
-                if k in o: o[k] = [r3(at_time(x, tm, i, t0)) for x in o[k]]
-            if "rightAt" in o: o["rightAt"] = r3(at_time(o["rightAt"], tm, i, t0))
-            for k in ("src", "img"):
-                if o.get(k) and not o[k].startswith(("http", "data:")):
-                    src = o[k] if os.path.isabs(o[k]) else os.path.join(sc["_dir"], o[k])
-                    dst = "assets/" + os.path.basename(src); shutil.copy(src, os.path.join(work, "page", dst)); o[k] = dst
-            if o.get("icon"): o["svg"] = icon(o["icon"], 120, o.get("color", "#111"))
+        hs = b.get("hero", []); hs = hs if isinstance(hs, list) else [hs]
+        for h in hs:
+            keep = h.get("keep", 0); until = r3(bounds[min(i + keep, len(bounds) - 1)][1])
+            o = prep(h, i, t0, until, True)
+            if "until" in h: o["until"] = r3(at_time(h["until"], tm, i, t0))
             items.append(o)
-            sid, g = POP.get(o["type"], ("pro_pop/thup", -19))
-            if h.get("sfx", True): cues.append([o["at"], h.get("sfx_id", sid), g])
+        if b.get("cam") == "big":
+            first = min([at_time(h.get("at"), tm, i, t0) for h in hs] or [t1])
+            cams.append({"t0": t0, "t1": r3(first) if first < t1 - .05 else None, "scale": b.get("camScale", 1.35), "y": b.get("camY", -150)})
+        rs = b.get("react", []); rs = rs if isinstance(rs, list) else [rs]
+        for x in rs:
+            t = r3(at_time(x, tm, i, t0)); reacts.append(t); cues.append([t, "pro_impact/air", -16])
         if i: cues.append([t0, "swish/soft", -22])
-        for s in b.get("sfx", []):   # extra sounds: [time|word:xyz, id, gain]
-            cues.append([r3(at_time(s[0], tm, i, t0)), s[1], s[2] if len(s) > 2 else -16])
-    lines = [{"start": l["start"], "words": [{"w": w["w"], "t": w["t"], "it": bool(w.get("italic"))} for w in l["words"]]} for l in tm["lines"]]
-    reel = {"dur": dur, "theme": sc.get("theme", "paper"), "counter": sc.get("counter"), "beats": beats, "items": items, "lines": lines}
+        for s_ in b.get("sfx", []):   # extra sounds: [time|word:xyz, id, gain]
+            cues.append([r3(at_time(s_[0], tm, i, t0)), s_[1], s_[2] if len(s_) > 2 else -16])
+    lines = blocks(tm, sc.get("caption_words", 7))
+    cdir = sc.get("character", os.path.join(KIT, "characters", "otaku")); cj = json.load(open(os.path.join(cdir, "character.json")))
+    reel = {"dur": dur, "theme": sc.get("theme", "paper"), "counter": sc.get("counter"), "beats": beats, "items": items, "lines": lines,
+            "cams": cams, "reacts": reacts, "presenter": {"headX": cj.get("head_x", .517), "headY": cj.get("head_y", .31)}}
     return reel, bounds, cues
 
 

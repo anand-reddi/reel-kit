@@ -16,23 +16,31 @@ Every frame has the same four layers, top to bottom:
 1. **Meta row** (y≈82): tiny mono slug on the left, `// 03 — the catch`, changes every beat. A running counter on
    the right, `LIABILITY $53,000` / `RESETS 1` / `FOLLOWERS 40K`, whose value (in the accent colour) changes when the
    story moves it. The counter is the video's spine: pick one number the story is about.
-2. **Karaoke caption** (top-left, y≈170): one script line at a time, 2 lines max, bold grotesk. Words not yet
-   spoken sit in light grey and slightly blurred; each turns ink as it is said. **One or two key words per line are
-   set in red italic serif** (`_word_` in the script). Never a centred caption, never at the bottom.
-3. **Hero** (middle, y≈600–1100): exactly **one idea per beat**, shown literally. A new beat = a new object that
-   springs in (back-out pop, small tilt), floats slightly, and leaves when the beat ends. Objects carry a
-   **halftone dot drop-shadow**. What the references use, roughly in order of frequency:
-   UI cards and screenshots with a red ring on the one thing that matters · a huge red number that counts ·
-   condensed black/red sticker labels (`ONE RULE`, `THE EASY PART`) · red outlined stamps (`SEALED`, `TUNED`) ·
-   phones · terminals typing · checklists that tick on the word · a grid of people with one highlighted ·
-   ✕ vs ✓ comparison cards · calendar pages · the comment-bubble CTA with the keyword huge.
-4. **Presenter** (bottom, chest-up, centred): the avatar changes gesture on every beat to match the line
-   (point up for a reveal, shrug for "but", shh for a secret, facepalm for a mistake, count for numbers).
+2. **Caption** (top-left, y≈170): short phrase blocks (≤7 words, split after punctuation), bold grotesk.
+   **Nothing is shown before it is said**: each word fades in grey (with a little blur and lift) on its time and
+   turns ink ~0.1 s later. When the next block starts, the old one slides up and fades in ~0.1 s. **One or two key
+   words per line are red italic serif** (`_word_` in the script). Never centred, never at the bottom.
+3. **Hero** (middle, y≈450–1150): one idea at a time, shown literally, and it **builds up on the words**: an idea
+   usually lives 2–4 s as a big panel or object, and pieces land inside it as they are named (a pin drops on
+   "you are here", a curve draws, a stamp slams on the verdict word, a label counts up). When the idea changes the
+   whole thing leaves upward fast and the next one pops in. Objects carry a **halftone dot drop-shadow** and sit
+   close to the presenter's head (they may overlap it slightly). What the references use, most common first:
+   UI cards / browser windows / screenshots with a red ring on the one thing that matters · a huge red number that
+   **rolls like an odometer** (digits blur and settle left to right) · condensed black/red sticker labels
+   (`ONE RULE`, `WIDE OPEN`) · red outlined stamps (`SEALED`, `SETTLED`) · phones · terminals typing · checklists
+   that tick on the word · rows of icon tiles landing one per word · grids (people, files) that assemble, highlight
+   one, or fall away · ✕ vs ✓ cards · calendar pages · text that decodes from noise · the comment-bubble CTA.
+4. **Presenter** (bottom, chest-up, head ≈ y 1180–1650): **rises in from below in the first 0.5 s**, and in the
+   reference openings is **big and centred for ~1–1.5 s** before the first hero lands (`"cam": "big"`), then
+   settles low. Gesture changes every beat to match the line (point up for a reveal, shrug for "but", shh for a
+   secret, shocked for a twist, count for numbers), with a small bounce on each beat change. On a surprise it
+   **reacts with burst lines** around the head (`"react": "word:x"`).
 
-Rhythm: a beat is one short line (5–10 words, ~1.5–3.5 s). 15–25 beats per video. Voice only, **no music bed**;
-soft pops when objects land, a swish on beat changes, an impact on stamps. Accents: a beat can flood the page red
-or black for the punchline (`"bg": "red" | "black"`), and a halftone dot wipe can mark a chapter change
-(`"wipe": true`). The last beat is always the CTA (comment a keyword / send to a friend / follow).
+Rhythm: hero changes every ~2–3 s (median 2.1 s across the 25), 15–25 beats per minute-long video; a 25 s video is
+7–9 beats. Voice only, **no music bed** (measured: the non-voice stem sits ~30 dB under the voice); soft pops
+when things land, a swish on beat changes, impacts on stamps and reactions. Accents: a beat can flood red or black
+for the punchline (`"bg": "red" | "black"`), a halftone dot wipe marks a chapter change (`"wipe": true`). The last
+beat is always the CTA (comment a keyword / send to a friend / follow).
 
 Themes: `paper` (off-white #efece6, ink, red #e8452c — most references), `ink` (dark navy, agents/dashboards),
 `neon` (near-black, lime #c8f53c + pink glow, launches/AI video tools). The illustrated desk-room look seen in
@@ -68,28 +76,37 @@ two references is not built yet.
 }
 ```
 
-Beat keys: `slug`, `lines` (usually one; `_x_` = red italic serif), `pose` (presenter clip: talk, explain, calm,
+Top-level keys: `name`, `theme`, `counter` {label, start}, `voice` (reel-kit voice block), `presenter` {width, x, y},
+`caption_words` (block size, default 7), `intro`, `sfx_level`, `character` (folder; default reel-kit's otaku).
+
+Beat keys: `slug`, `lines` (usually one; `_x_` = red italic serif), `cam` ("big" = presenter starts large until
+the beat's first hero lands), `react` (word or list of words: burst lines + impact), `pose` (presenter clip: talk, explain, calm,
 laugh, hi, shrug, smile, think, clasp, wait, ok, shh, arms_crossed, facepalm, excited, stressed, shocked, angry,
 sad, cry, panic, nervous, thumbs_up, point_up, point_side, count, wave, bored), `count` (new counter value),
 `bg`, `wipe`, `pause_before`, `sfx` ([[time|"word:x", id, gain]]), `hero` (one item or a list).
 
 Every hero item: `type`, `at` (`"word:xyz"`, `"word:xyz#2"`, `"word:xyz+0.2"`, seconds into the beat, or omitted =
-beat start), `keep` (stay N more beats), `x`, `y` (centre, px), `rot`, `z`, `sfx` (false = silent),
-`sfx_id`, `float` (false = no drift), `exit` ("cut" = no fade).
+beat start), `until` (a word: leave early), `keep` (stay N more beats), `x`, `y` (centre, px), `rot`, `z`,
+`scale`, `sfx` (false = silent), `sfx_id`, `float` (false = no drift), `exit` ("cut" = no fade). Any item can take
+`icon` (+ `color`) where it shows one.
 
 | type | keys |
 |---|---|
-| `card` | label, title (html ok), text, img, w |
-| `num` | value, from, prefix, suffix, decimals, label, count (seconds) |
-| `sticker` | lines [..], red, redLine, or text |
-| `stamp` | text |
+| `card` | label, icon, title (html ok), text, img, w |
+| `panel` | w, h, label, children [items placed in panel px, each with its own `at`] |
+| `browser` | tab, url, icon, title, text, w, h, incognito |
+| `num` | value, from, prefix, suffix, decimals, label, count (seconds), size — rolls like an odometer |
+| `scramble` | text, red, size, decode (seconds), label — decodes from noise |
+| `sticker` | lines [..], red, redLine, or text, size |
+| `stamp` | text, size |
 | `shot` | src, label, w, rings [[x%, y%, w%, h%]], ringAt [times] |
 | `phone` | src or title, scale |
 | `term` | title, lines [..] (types out; `$ ` turns accent), type (seconds) |
 | `logo` | icon (e.g. simple-icons:claude), color, name |
-| `list` | title, items [..], ticks [times] |
-| `grid` | n, cols, hi [indexes], hiAt [times] |
-| `compare` | left {title, text}, right {title, text}, rightAt |
+| `list` | title, items [..], ticks [times], mark ("x" for crosses), w |
+| `row` | tiles [{icon, label}], ats [times] — icon tiles landing one per word |
+| `grid` | n, cols, shape ("doc" for files), hi [indexes], hiAt [times], dropAt (all fall away) |
+| `compare` | left {title, text}, right {title, text}, rightAt, swap (left is the ✓ side) |
 | `comment` | who, keyword |
 | `date` | month, day |
 | `image` | src, w, radius, shadow |
@@ -101,7 +118,7 @@ beat start), `keep` (stay N more beats), `x`, `y` (centre, px), `rot`, `z`, `sfx
 timeline, seek-safe), `engine/style.css` (themes + components), `engine/fonts/` (Space Grotesk, Instrument Serif
 italic, JetBrains Mono, Archivo variable for stickers). Lives in reel-kit/beatreel/ and uses the parent reel-kit (or `$REELKIT`)
 for voice, sound and the character; HyperFrames + a headless Chromium (`HYPERFRAMES_BROWSER_PATH`).
-Example: `examples/claude-reset/`.
+Examples: `examples/incognito/` (24 s, every v2 feature) and `examples/claude-reset/`.
 
 ## Adding a hero type
 

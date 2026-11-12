@@ -1,0 +1,247 @@
+{
+ "name": "incognito",
+ "theme": "paper",
+ "counter": {
+  "label": "WATCHING YOU",
+  "start": "0"
+ },
+ "voice": {
+  "name": "am_puck",
+  "speed": 1.1
+ },
+ "beats": [
+  {
+   "slug": "01 — hook",
+   "pose": "wait",
+   "cam": "big",
+   "lines": [
+    "Incognito mode doesn't make you _invisible_."
+   ],
+   "hero": [
+    {
+     "type": "browser",
+     "incognito": true,
+     "tab": "New Incognito Tab",
+     "url": "Search or type a URL",
+     "icon": "lucide:hat-glasses",
+     "color": "#e8eaed",
+     "title": "You've gone Incognito",
+     "text": "browse more privately",
+     "w": 900,
+     "h": 600,
+     "y": 700,
+     "at": "word:make"
+    },
+    {
+     "type": "stamp",
+     "text": "NOT INVISIBLE",
+     "size": 96,
+     "x": 560,
+     "y": 900,
+     "rot": -8,
+     "at": "word:invisible"
+    }
+   ]
+  },
+  {
+   "slug": "02 — what it does",
+   "pose": "explain",
+   "lines": [
+    "It only hides your history from people who _share_ your device."
+   ],
+   "hero": {
+    "type": "panel",
+    "w": 900,
+    "h": 600,
+    "y": 740,
+    "label": "// incognito, honestly",
+    "children": [
+     {
+      "type": "card",
+      "icon": "lucide:laptop",
+      "title": "Others on this device",
+      "text": "won't see what you browsed",
+      "w": 700,
+      "x": 450,
+      "y": 270,
+      "at": "word:hides"
+     },
+     {
+      "type": "sticker",
+      "lines": [
+       "THAT'S ALL"
+      ],
+      "red": true,
+      "x": 640,
+      "y": 490,
+      "rot": 6,
+      "size": 80,
+      "at": "word:device"
+     }
+    ]
+   }
+  },
+  {
+   "slug": "03 — gone on close",
+   "pose": "count",
+   "lines": [
+    "Your history, cookies and form info vanish when you _close_ it."
+   ],
+   "hero": {
+    "type": "list",
+    "title": "// deleted when you close it",
+    "items": [
+     "Browsing history",
+     "Cookies and site data",
+     "Info typed in forms"
+    ],
+    "ticks": [
+     "word:history",
+     "word:cookies",
+     "word:form"
+    ],
+    "y": 740,
+    "w": 820
+   }
+  },
+  {
+   "slug": "04 — who still sees",
+   "pose": "point_side",
+   "count": "3",
+   "lines": [
+    "But websites, your school or office, and your internet provider can still _see_ it."
+   ],
+   "hero": [
+    {
+     "type": "row",
+     "y": 700,
+     "at": "word:websites",
+     "ats": [
+      "word:websites",
+      "word:school",
+      "word:internet"
+     ],
+     "tiles": [
+      {
+       "icon": "lucide:globe",
+       "label": "Websites"
+      },
+      {
+       "icon": "lucide:building-2",
+       "label": "School or office"
+      },
+      {
+       "icon": "lucide:router",
+       "label": "Internet provider"
+      }
+     ]
+    },
+    {
+     "type": "sticker",
+     "lines": [
+      "STILL SEE YOU"
+     ],
+     "red": true,
+     "y": 1000,
+     "rot": -3,
+     "size": 84,
+     "at": "word:see"
+    }
+   ]
+  },
+  {
+   "slug": "05 — 2024",
+   "pose": "shocked",
+   "react": "word:settled",
+   "lines": [
+    "In twenty twenty-four, _Google_ settled a lawsuit over it."
+   ],
+   "hero": [
+    {
+     "type": "scramble",
+     "text": "2024",
+     "size": 120,
+     "y": 480,
+     "at": "word:twenty",
+     "decode": 0.5,
+     "label": "// april"
+    },
+    {
+     "type": "logo",
+     "icon": "logos:google-icon",
+     "name": "Google",
+     "y": 690,
+     "at": "word:google"
+    },
+    {
+     "type": "stamp",
+     "text": "SETTLED",
+     "size": 130,
+     "y": 930,
+     "rot": -6,
+     "at": "word:settled"
+    }
+   ]
+  },
+  {
+   "slug": "06 — the deal",
+   "pose": "count",
+   "lines": [
+    "It agreed to delete _billions_ of private browsing records."
+   ],
+   "hero": [
+    {
+     "type": "scramble",
+     "text": "BILLIONS",
+     "red": true,
+     "size": 150,
+     "y": 470,
+     "at": "word:billions",
+     "label": "// private browsing records"
+    },
+    {
+     "type": "grid",
+     "shape": "doc",
+     "n": 32,
+     "cols": 8,
+     "y": 860,
+     "dropAt": "word:records"
+    }
+   ]
+  },
+  {
+   "slug": "07 — the truth",
+   "pose": "shrug",
+   "lines": [
+    "So it hides you from your _family_, not the internet."
+   ],
+   "hero": {
+    "type": "compare",
+    "swap": true,
+    "y": 780,
+    "left": {
+     "title": "Your family",
+     "text": "can't see it"
+    },
+    "right": {
+     "title": "The internet",
+     "text": "still can"
+    },
+    "rightAt": "word:internet"
+   }
+  },
+  {
+   "slug": "08 — share",
+   "pose": "point_up",
+   "lines": [
+    "Send this to the friend who thinks incognito is a _cloak_."
+   ],
+   "hero": {
+    "type": "comment",
+    "who": "Send this to",
+    "keyword": "THAT FRIEND",
+    "y": 760
+   }
+  }
+ ]
+}
