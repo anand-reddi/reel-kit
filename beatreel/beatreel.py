@@ -139,8 +139,8 @@ def build(sc, tm, work):
         ws = [w for l in tm["lines"] for w in l["words"]]
         words = [{"t": w["t"], "d": r3((ws[k + 1]["t"] if k + 1 < len(ws) else w["t"] + .3) - w["t"]), "n": len(re.sub(r"[^A-Za-z0-9]", "", w["w"]))} for k, w in enumerate(ws)]
         reel["avatar"] = {"poses": [{"t0": t0, "pose": b.get("pose", "talk")} for b, (t0, _) in zip(sc["beats"], bounds)], "words": words,
-                          "top": sc.get("presenter", {}).get("y", 954), "scale": sc.get("presenter", {}).get("scale", 1.15), "colors": sc.get("avatar_colors", {})}
-        reel["presenter"] = {"headX": .5, "headY": .373}
+                          "top": sc.get("presenter", {}).get("y", 1060), "scale": sc.get("presenter", {}).get("scale", 1), "colors": sc.get("avatar_colors", {})}
+        reel["presenter"] = {"headX": .5, "headY": .31}
     else:
         cdir = sc.get("character") if os.path.isdir(str(sc.get("character"))) else os.path.join(KIT, "characters", sc.get("character"))
         cj = json.load(open(os.path.join(cdir, "character.json")))

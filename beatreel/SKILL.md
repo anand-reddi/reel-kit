@@ -77,20 +77,28 @@ two references is not built yet.
 ```
 
 Top-level keys: `name`, `theme`, `counter` {label, start}, `voice` (reel-kit voice block), `presenter` {scale, y}
-(default 1.15 / 954: head centre ≈ y 1340), `caption_words` (block size, default 7), `intro`, `sfx_level`,
+(default 1 / 1060: head centre ≈ y 1340), `caption_words` (block size, default 7), `intro`, `sfx_level`,
 `character` ("kai" default; or a reel-kit video character folder such as "otaku"), `avatar_colors` (override
-Kai's palette: skin, skinHi, skinLo, hair, shirt, tee, phones, iris, …).
+Kai's palette: skin, skinSh, hair, shirt, shirtSh, cuff, tee, iris, …).
 
 ### The presenter: Kai (engine/avatar.js)
 
-An **original** flat-vector presenter in the references' style (flat colour, thin dark outline, dotted halftone
-shadow, chest-up), not a copy of the reference creator's avatar: wavy side-swept hair, rectangular glasses, light
-stubble, navy overshirt over a white tee, orange headphones round the neck. Drawn in code, so it animates on the
-reel clock: rises in, mouth opens on every word (bigger for longer words), blinks every 2–4 s, nods on long
-words, changes pose every beat (arms, fingers, brows, eyes, mouth shape, head tilt), waves on `hi`, sweats on
-`nervous`, reacts on `react`. Poses: talk, calm, smile, explain, hi/wave, point_up, point_side, count, count3,
-shrug, shocked, excited, shh, thumbs_up, think, wait, facepalm, clasp (+ aliases). Redraws run in the timeline's
-onUpdate, so seek with events on (`tl.seek(t, false)`) when screenshotting pages by hand.
+An **original** presenter drawn the way the references draw theirs, with his own face (the reference avatar is
+the creator's likeness, so never copy it): flat fills and **no outlines** (form comes from one darker shade per
+shape), thin lines only on the hands, square-dot halftone shadow, big head on sloped shoulders, two-bone arms
+with a cuff, hands with real fingers. Curly dark hair with a fade, no glasses, no beard, open green zip hoodie
+over a white tee. Drawn in code, so it animates on the reel clock: rises in, mouth opens on every word (bigger
+for longer words), hands and head beat along on the stronger words, blinks every 2-4 s, slight body sway, new
+pose every beat, waves on `hi`, shakes on `gasp`, sweats when nervous, thought bubble on `think`.
+
+Poses (arms + face): talk (both hands raised, the references' default), calm, smile, explain/present (open palm
+out to the side), both, hi/wave, point_up, point_side, one, count, count3, shrug, shocked (both hands over the
+mouth), gasp (O mouth, hands out), oops (hands on cheeks), excited, shh, thumbs_up (with a wink), think, wait,
+stop, facepalm, clasp, arms_crossed. Face-only moods on the talk/calm arms: laugh, nervous, stressed, sad,
+angry, bored, skeptical, wink, cry, panic. Per arm a pose sets palm x/y, rotation, finger extension, finger
+spread, thumb angle and `el: 1` (elbow outward instead of down). Redraws run in the timeline's onUpdate, so
+seek with events on (`tl.seek(t, false)`) when screenshotting pages by hand. Default placement: `presenter`
+{scale 1, y 1060} (head centre about y 1340).
 
 Beat keys: `slug`, `lines` (usually one; `_x_` = red italic serif), `cam` ("big" = presenter starts large until
 the beat's first hero lands), `react` (word or list of words: burst lines + impact), `pose` (presenter clip: talk, explain, calm,

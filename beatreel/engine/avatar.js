@@ -1,210 +1,254 @@
-// beatreel avatar: an original flat-vector presenter ("Kai"), drawn in code, animated on the reel timeline.
-// Style matches the references (flat colour, thin dark outline, dotted halftone shadow, chest-up, gestures every
-// beat, mouth moving on every word, blinks), but it is its own character: wavy side-swept hair, rectangular
-// glasses, light stubble, navy overshirt over a white tee, orange headphones round the neck.
+// beatreel avatar: "Kai", an original presenter drawn in code and animated on the reel timeline.
+// Drawing manner follows the reference reels: flat fills, NO outlines on the figure (form comes from one darker
+// shade per shape), thin lines only on the hands, square-grid halftone shadow, big head on sloped shoulders,
+// two-bone arms with a cuff, hands with real fingers. The face is his own: curly dark hair with a fade, no
+// glasses, no beard, open zip hoodie over a white tee.
 // All motion is state on plain objects tweened by the timeline + one redraw in the timeline's onUpdate,
 // so any frame can be rendered in any order.
 (function () {
   const R = window.REEL, A = R.avatar; if (!A) return;
   const tl = window.__timelines.reel, NS = 'http://www.w3.org/2000/svg';
-  const C = Object.assign({ skin: '#e9b48e', skinHi: '#f6cfae', skinLo: '#cf9470', line: '#3a271d', hair: '#2a1c16', hairHi: '#4a3328',
-    shirt: '#2d3a55', shirtLo: '#222c42', tee: '#f6f2ea', phones: '#ff7a3d', phonesLo: '#d95c22', iris: '#4b2e1d', lens: 'rgba(255,255,255,.10)',
-    mouth: '#6b2320', tongue: '#e0706a', glasses: '#1c1c1c' }, A.colors || {});
+  const C = Object.assign({ skin: '#cf9a74', skinSh: '#b57f5b', skinLo: '#a8724f', ear: '#c48d68', line: '#7a4a31',
+    hair: '#1f1714', hairHi: '#3b2c25', fade: '#5a4135', brow: '#241a16',
+    shirt: '#4d6b5d', shirtSh: '#3c5549', shirtHi: '#5c7c6d', cuff: '#6f8f80', tee: '#f7f4ee', teeSh: '#e2ddd3', cord: '#efe9dc',
+    eye: '#ffffff', iris: '#2a1a12', mouth: '#5a1f1c', tongue: '#e2685f', lip: '#9c5a44' }, A.colors || {});
   const W = 1080, H = 900;
   const pres = document.getElementById('pres'), pin = document.getElementById('presin');
-  const SC = A.scale ?? 1.15;   // the whole presenter: head centre lands at about y 1340 on the frame
-  pres.style.cssText = `left:${540 - W * SC / 2}px;top:${A.top ?? 954}px;width:${W * SC}px;height:${H * SC}px`;
+  const SC = A.scale ?? 1;
+  pres.style.cssText = `left:${540 - W * SC / 2}px;top:${A.top ?? 1060}px;width:${W * SC}px;height:${H * SC}px`;
   const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('width', W * SC); svg.setAttribute('height', H * SC);
   svg.style.overflow = 'visible'; pin.appendChild(svg);
   const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); (parent || svg).appendChild(e); return e; };
   const g = (parent, attrs) => el('g', attrs || {}, parent);
-  const OL = { stroke: C.line, 'stroke-width': 3.5, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' };
+  const set = (e, a) => { for (const k in a) e.setAttribute(k, a[k]); };
 
-  // ---------- defs: halftone dots + soft gradients
+  const HEAD = 'M432 300 C432 214 472 186 540 186 C608 186 648 214 648 300 L648 372 C648 440 600 478 540 478 C480 478 432 440 432 372 Z';
+  const BODY = 'M296 900 C296 770 314 650 350 590 C378 554 440 534 492 522 L588 522 C640 534 702 554 730 590 C766 650 784 770 784 900 Z';
+  const HAIR = 'M430 312 C418 250 424 190 462 160 C466 128 504 108 536 122 C560 98 606 104 622 134 C660 144 676 196 660 250 C656 276 652 296 650 312 L640 268 C634 240 618 226 598 232 C578 240 560 222 540 226 C518 232 500 222 480 232 C458 240 446 252 442 272 Z';
+
   const defs = el('defs', {});
   defs.innerHTML = `
-   <pattern id="avdots" width="7" height="7" patternUnits="userSpaceOnUse"><circle cx="3.5" cy="3.5" r="1.7" fill="rgba(0,0,0,.30)"/></pattern>
-   <radialGradient id="avskin" cx=".42" cy=".38" r=".75"><stop offset="0" stop-color="${C.skinHi}"/><stop offset=".65" stop-color="${C.skin}"/><stop offset="1" stop-color="${C.skinLo}"/></radialGradient>
-   <linearGradient id="avshirt" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${C.shirt}"/><stop offset="1" stop-color="${C.shirtLo}"/></linearGradient>
-   <linearGradient id="avhair" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${C.hairHi}"/><stop offset=".5" stop-color="${C.hair}"/></linearGradient>
+   <pattern id="avdots" width="6" height="6" patternUnits="userSpaceOnUse"><rect x="1.2" y="1.2" width="3.4" height="3.4" rx="1.2" fill="rgba(20,16,14,.42)"/></pattern>
+   <clipPath id="avheadclip"><path d="${HEAD}"/></clipPath><clipPath id="avbodyclip"><path d="${BODY}"/></clipPath>
+   <clipPath id="avhairclip"><path d="${HAIR}"/></clipPath>
+   <clipPath id="aveye0"><ellipse id="aveyec0"/></clipPath><clipPath id="aveye1"><ellipse id="aveyec1"/></clipPath>
    <clipPath id="avmouthclip"><path id="avmclip" d=""/></clipPath>`;
 
-  // ---------- shapes (head centre 540, 318)
-  const HEAD = 'M540 178 C612 178 655 228 657 300 C659 380 628 448 586 474 C566 486 552 490 540 490 C528 490 514 486 494 474 C452 448 421 380 423 300 C425 228 468 178 540 178 Z';
-  const BODY = 'M118 900 C122 760 168 668 262 628 C318 604 382 590 452 578 L628 578 C698 590 762 604 818 628 C912 668 958 760 962 900 Z';
-  const NECK = 'M494 430 L494 548 C510 566 570 566 586 548 L586 430 Z';
-  const HAIR = 'M418 322 C404 262 420 200 462 172 C470 148 500 136 526 146 C542 126 576 126 592 144 C618 134 648 152 654 180 C678 200 682 250 666 300 C662 318 660 326 656 334 C650 300 638 276 620 262 C592 274 556 270 530 254 C506 270 474 276 448 272 C436 288 426 306 418 322 Z';
-  const FRINGE = 'M448 272 C470 226 520 198 574 204 C614 208 642 230 656 262 C628 244 592 236 558 242 C530 248 506 258 488 270 C474 278 458 280 448 272 Z';
+  // ---------- everything sits in one group so the whole figure can lean
+  const fig = g(svg, {});
+  // halftone shadow: a dotted copy of the silhouette, down and to the right
+  const sh = g(fig, { transform: 'translate(15 17)' });
+  el('path', { d: BODY, fill: 'url(#avdots)' }, sh);
+  const shHead = g(sh, {}); el('path', { d: HEAD, fill: 'url(#avdots)' }, shHead); el('path', { d: HAIR, fill: 'url(#avdots)' }, shHead);
+  const shArm = [0, 1].map(() => el('path', { d: '', fill: 'none', stroke: 'url(#avdots)', 'stroke-width': 78, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, sh));
+  const shHand = [0, 1].map(() => el('circle', { r: 48, fill: 'url(#avdots)' }, sh));
 
-  // shadow (halftone copy of the silhouette, offset)
-  const sh = g(svg, { transform: 'translate(16 18)' });
-  el('path', { d: BODY, fill: 'url(#avdots)' }, sh); el('path', { d: HEAD, fill: 'url(#avdots)' }, sh); el('path', { d: HAIR, fill: 'url(#avdots)' }, sh);
+  // ---------- body: open zip hoodie over a white tee
+  const body = g(fig, {});
+  el('path', { d: 'M446 560 C428 486 462 450 502 446 L578 446 C618 450 652 486 634 560 C600 528 480 528 446 560 Z', fill: C.shirtSh }, body);   // hood behind the neck
+  el('path', { d: BODY, fill: C.shirt }, body);
+  const bsh = g(body, { 'clip-path': 'url(#avbodyclip)' });
+  el('path', { d: 'M700 540 C760 600 800 760 800 900 L720 900 C730 780 726 640 700 540 Z', fill: C.shirtSh }, bsh);                 // shaded side
+  el('path', { d: 'M350 600 C330 680 322 780 322 900 L300 900 L300 600 Z', fill: C.shirtHi, opacity: .6 }, bsh);
+  el('path', { d: 'M492 522 L588 522 C600 640 606 780 606 900 L474 900 C474 780 480 640 492 522 Z', fill: C.tee }, body);
+  el('path', { d: 'M588 522 C600 640 606 780 606 900 L586 900 C586 780 582 640 572 540 Z', fill: C.teeSh }, body);
+  el('path', { d: 'M492 522 C480 640 474 780 474 900', fill: 'none', stroke: C.shirtSh, 'stroke-width': 9 }, body);                 // zip edges
+  el('path', { d: 'M588 522 C600 640 606 780 606 900', fill: 'none', stroke: C.shirtSh, 'stroke-width': 9 }, body);
+  el('path', { d: 'M452 548 C470 530 488 524 500 528 C494 560 484 590 470 610 C456 596 450 572 452 548 Z', fill: C.shirtHi }, body);  // hood lapels
+  el('path', { d: 'M628 548 C610 530 592 524 580 528 C586 560 596 590 610 610 C624 596 630 572 628 548 Z', fill: C.shirtHi }, body);
+  el('path', { d: 'M478 600 C476 650 478 690 482 730 M602 600 C604 646 602 680 598 712', fill: 'none', stroke: C.cord, 'stroke-width': 7, 'stroke-linecap': 'round' }, body);  // drawstrings
+  el('path', { d: 'M482 724 L483 748 M598 706 L597 730', fill: 'none', stroke: C.shirtSh, 'stroke-width': 9, 'stroke-linecap': 'round' }, body);
+  el('path', { d: 'M500 440 L500 520 C516 544 564 544 580 520 L580 440 Z', fill: C.skinSh }, body);                                 // neck
+  el('path', { d: 'M500 470 C520 492 560 492 580 470 L580 500 C560 512 520 512 500 500 Z', fill: C.skinLo, opacity: .7 }, body);
+  el('path', { d: 'M494 522 C514 548 566 548 586 522', fill: 'none', stroke: C.teeSh, 'stroke-width': 7, 'stroke-linecap': 'round' }, body);
 
-  const body = g(svg, {});
-  el('path', { d: BODY, fill: 'url(#avshirt)', ...OL }, body);
-  // tee + open overshirt placket
-  el('path', { d: 'M452 578 L628 578 C640 680 642 800 640 900 L440 900 C438 800 440 680 452 578 Z', fill: C.tee, ...OL }, body);
-  el('path', { d: 'M452 578 C470 650 470 760 452 900 L404 900 C410 780 416 670 430 598 Z', fill: C.shirt, ...OL }, body);
-  el('path', { d: 'M628 578 C610 650 610 760 628 900 L676 900 C670 780 664 670 650 598 Z', fill: C.shirt, ...OL }, body);
-  el('circle', { cx: 448, cy: 700, r: 6, fill: C.line }, body); el('circle', { cx: 452, cy: 790, r: 6, fill: C.line }, body);
-  el('path', { d: 'M300 700 L392 700 L392 770 L300 770 Z', fill: 'none', stroke: C.shirtLo, 'stroke-width': 5, 'stroke-linejoin': 'round' }, body);  // pocket
-  const neck = el('path', { d: NECK, fill: C.skinLo, ...OL }, body);
-  el('path', { d: 'M494 520 C520 540 560 540 586 520 L586 548 C570 566 510 566 494 548 Z', fill: 'rgba(0,0,0,.12)' }, body);
-  el('path', { d: 'M470 576 C500 600 580 600 610 576', fill: 'none', ...OL, stroke: C.tee, 'stroke-width': 16 }, body);   // tee collar
-  el('path', { d: 'M470 576 C500 600 580 600 610 576', fill: 'none', ...OL }, body);
-  // headphones round the neck
-  const ph = g(body, {});
-  el('path', { d: 'M452 560 C470 640 610 640 628 560', fill: 'none', stroke: C.phonesLo, 'stroke-width': 22, 'stroke-linecap': 'round' }, ph);
-  el('path', { d: 'M452 560 C470 640 610 640 628 560', fill: 'none', stroke: C.phones, 'stroke-width': 14, 'stroke-linecap': 'round' }, ph);
-  el('rect', { x: 412, y: 540, width: 64, height: 88, rx: 26, fill: C.phones, ...OL, transform: 'rotate(-18 444 584)' }, ph);
-  el('rect', { x: 604, y: 540, width: 64, height: 88, rx: 26, fill: C.phones, ...OL, transform: 'rotate(18 636 584)' }, ph);
-  el('rect', { x: 424, y: 552, width: 40, height: 64, rx: 16, fill: C.phonesLo, transform: 'rotate(-18 444 584)' }, ph);
-  el('rect', { x: 616, y: 552, width: 40, height: 64, rx: 16, fill: C.phonesLo, transform: 'rotate(18 636 584)' }, ph);
-
-  // ---------- head (rotates around the neck)
-  const head = g(svg, {});
-  el('ellipse', { cx: 424, cy: 330, rx: 24, ry: 38, fill: C.skin, ...OL }, head); el('ellipse', { cx: 656, cy: 330, rx: 24, ry: 38, fill: C.skin, ...OL }, head);
-  el('ellipse', { cx: 428, cy: 332, rx: 10, ry: 20, fill: C.skinLo }, head); el('ellipse', { cx: 652, cy: 332, rx: 10, ry: 20, fill: C.skinLo }, head);
-  el('path', { d: HEAD, fill: 'url(#avskin)', ...OL }, head);
-  el('path', { d: 'M446 408 C470 462 510 484 540 484 C570 484 610 462 634 408 C622 452 588 480 540 482 C492 480 458 452 446 408 Z', fill: 'rgba(58,39,29,.16)' }, head);  // stubble
-  el('path', { d: 'M500 410 C520 402 560 402 580 410 C562 406 518 406 500 410 Z', fill: 'rgba(58,39,29,.35)', stroke: 'rgba(58,39,29,.35)', 'stroke-width': 8, 'stroke-linecap': 'round' }, head); // light moustache
-  el('ellipse', { cx: 466, cy: 380, rx: 22, ry: 13, fill: 'rgba(255,110,90,.16)' }, head); el('ellipse', { cx: 614, cy: 380, rx: 22, ry: 13, fill: 'rgba(255,110,90,.16)' }, head);
-  el('path', { d: 'M540 330 C536 352 528 368 522 376 C532 384 548 384 558 376', fill: 'none', stroke: C.skinLo, 'stroke-width': 6, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, head);  // nose
-  // eyes
-  const eyes = [], lids = [];
-  [[492, 322], [588, 322]].forEach(([x, y]) => { const e = g(head, {});
-    el('ellipse', { cx: x, cy: y, rx: 21, ry: 23, fill: '#fff', ...OL, 'stroke-width': 2.5 }, e);
-    const ir = g(e, {}); el('circle', { cx: x, cy: y + 2, r: 12.5, fill: C.iris }, ir); el('circle', { cx: x, cy: y + 2, r: 6, fill: '#120c09' }, ir); el('circle', { cx: x - 4, cy: y - 3, r: 3.6, fill: '#fff' }, ir);
-    eyes.push(ir); lids.push(el('path', { d: '', fill: C.skin, stroke: C.line, 'stroke-width': 2.5 }, e)); });
-  // brows
-  const browL = el('path', { d: '', fill: 'none', stroke: C.hair, 'stroke-width': 11, 'stroke-linecap': 'round' }, head);
-  const browR = el('path', { d: '', fill: 'none', stroke: C.hair, 'stroke-width': 11, 'stroke-linecap': 'round' }, head);
-  // glasses (rectangular)
-  const gl = g(head, {});
-  el('rect', { x: 452, y: 292, width: 80, height: 60, rx: 14, fill: C.lens, stroke: C.glasses, 'stroke-width': 7 }, gl);
-  el('rect', { x: 548, y: 292, width: 80, height: 60, rx: 14, fill: C.lens, stroke: C.glasses, 'stroke-width': 7 }, gl);
-  el('path', { d: 'M532 316 C536 310 544 310 548 316', fill: 'none', stroke: C.glasses, 'stroke-width': 7, 'stroke-linecap': 'round' }, gl);
-  el('path', { d: 'M452 312 L428 318 M628 312 L652 318', fill: 'none', stroke: C.glasses, 'stroke-width': 7, 'stroke-linecap': 'round' }, gl);
-  el('path', { d: 'M462 300 L478 300 M558 300 L574 300', stroke: 'rgba(255,255,255,.55)', 'stroke-width': 5, 'stroke-linecap': 'round' }, gl);
-  // mouth: closed smile line + an open mouth that grows
-  const mouth = g(head, {});
-  const mOpen = el('path', { d: '', fill: C.mouth, ...OL, 'stroke-width': 3 }, mouth);
+  // ---------- head
+  const head = g(fig, {});
+  const earL = el('ellipse', { cx: 430, cy: 338, rx: 17, ry: 27, fill: C.ear }, head), earR = el('ellipse', { cx: 650, cy: 338, rx: 17, ry: 27, fill: C.ear }, head);
+  el('path', { d: HEAD, fill: C.skin }, head);
+  const hsh = g(head, { 'clip-path': 'url(#avheadclip)' });
+  el('path', { d: 'M660 180 L660 490 L560 490 C624 452 634 400 630 330 C628 270 624 220 600 180 Z', fill: C.skinSh, opacity: .55 }, hsh);   // shaded side of the face
+  el('rect', { x: 428, y: 250, width: 20, height: 76, fill: C.fade, opacity: .75 }, hsh); el('rect', { x: 632, y: 250, width: 20, height: 76, fill: C.fade, opacity: .85 }, hsh);  // fade at the temples
+  const feat = g(head, {});
+  el('ellipse', { cx: 470, cy: 388, rx: 20, ry: 11, fill: 'rgba(230,110,90,.20)' }, feat); el('ellipse', { cx: 606, cy: 388, rx: 20, ry: 11, fill: 'rgba(230,110,90,.20)' }, feat);
+  el('path', { d: 'M544 340 C544 362 554 376 556 384 C552 394 534 394 526 388 C536 388 544 384 544 378 Z', fill: C.skinSh }, feat);   // nose
+  const eyes = [[494, 330], [586, 330]].map(([x, y], k) => { const e = g(feat, {});
+    const white = el('ellipse', { cx: x, cy: y, fill: C.eye }, e), inner = g(e, { 'clip-path': `url(#aveye${k})` });
+    const pupil = el('circle', { r: 10.5, fill: C.iris }, inner), glint = el('circle', { r: 3.2, fill: '#fff' }, inner);
+    const lid = el('rect', { fill: C.skinSh }, inner);
+    const line = el('path', { d: '', fill: 'none', stroke: C.brow, 'stroke-width': 5.5, 'stroke-linecap': 'round' }, e);
+    return { x, y, e, white, pupil, glint, lid, line, clip: document.getElementById('aveyec' + k) }; });
+  const brows = [0, 1].map(() => el('path', { d: '', fill: 'none', stroke: C.brow, 'stroke-width': 13, 'stroke-linecap': 'round' }, feat));
+  const mouth = g(feat, {});
+  const mOpen = el('path', { d: '', fill: C.mouth }, mouth);
   const mIn = g(mouth, { 'clip-path': 'url(#avmouthclip)' });
-  const teeth = el('rect', { x: 500, y: 418, width: 80, height: 14, fill: '#fff' }, mIn);
-  const tongue = el('ellipse', { cx: 540, cy: 470, rx: 26, ry: 14, fill: C.tongue }, mIn);
-  const mLine = el('path', { d: '', fill: 'none', stroke: C.line, 'stroke-width': 6, 'stroke-linecap': 'round' }, mouth);
-  // hair on top
-  el('path', { d: HAIR, fill: 'url(#avhair)', ...OL }, head);
-  el('path', { d: FRINGE, fill: C.hair, ...OL }, head);
-  el('path', { d: 'M470 196 C496 170 532 164 560 170 M580 160 C606 158 630 170 640 190 M500 226 C528 214 566 212 602 222', fill: 'none', stroke: 'rgba(255,255,255,.17)', 'stroke-width': 7, 'stroke-linecap': 'round' }, head);
-  el('path', { d: 'M424 316 C426 336 428 350 432 362 M656 316 C654 336 652 350 648 362', fill: 'none', stroke: C.hair, 'stroke-width': 9, 'stroke-linecap': 'round' }, head);   // sideburns
-  // sweat drop (for "nervous"/"stressed")
-  const sweat = el('path', { d: 'M418 250 C410 266 408 276 416 282 C424 288 434 280 430 268 C428 262 424 256 418 250 Z', fill: '#cfe8ff', stroke: '#6a9cc8', 'stroke-width': 3, opacity: 0 }, head);
+  const teeth = el('rect', { fill: '#fff', rx: 3 }, mIn), tongue = el('ellipse', { ry: 13, fill: C.tongue }, mIn);
+  const mLine = el('path', { d: '', fill: 'none', stroke: C.mouth, 'stroke-width': 6.5, 'stroke-linecap': 'round' }, mouth);
+  const mLip = el('path', { d: '', fill: 'none', stroke: C.skinSh, 'stroke-width': 5, 'stroke-linecap': 'round' }, mouth);
+  // hair: curly top, drawn over the forehead
+  el('path', { d: HAIR, fill: C.hair }, head);
+  const hh = g(head, { 'clip-path': 'url(#avhairclip)' });
+  el('path', { d: 'M470 176 C482 150 512 140 532 150 M548 140 C572 124 604 134 612 156 M630 170 C648 190 652 220 646 246 M452 214 C462 196 482 190 498 196 M520 190 C540 178 566 180 580 194 M600 200 C614 198 626 208 630 222',
+    fill: 'none', stroke: C.hairHi, 'stroke-width': 9, 'stroke-linecap': 'round' }, hh);
+  // sweat drops + thought bubble
+  const drop = 'M0 -16 C-9 0 -11 10 -4 16 C4 22 14 14 10 2 C8 -4 4 -10 0 -16 Z';
+  const sweat = [el('path', { d: drop, fill: '#dff0ff', stroke: '#7fa9cf', 'stroke-width': 2.5, transform: 'translate(424 262)', opacity: 0 }, head),
+    el('path', { d: drop, fill: '#dff0ff', stroke: '#7fa9cf', 'stroke-width': 2.5, transform: 'translate(664 300) scale(.8)', opacity: 0 }, head)];
+  const qb = g(head, { opacity: 0 });
+  el('circle', { cx: 668, cy: 176, r: 9, fill: '#fff' }, qb); el('circle', { cx: 690, cy: 146, r: 14, fill: '#fff' }, qb); el('circle', { cx: 734, cy: 96, r: 44, fill: '#fff' }, qb);
+  const qt = el('text', { x: 734, y: 118, 'text-anchor': 'middle', 'font-size': 62, 'font-weight': 800, 'font-family': 'Space Grotesk, sans-serif', fill: '#e8452c' }, qb); qt.textContent = '?';
 
-  // ---------- arms + hands (drawn over the body and the face)
-  const arms = g(svg, {});
-  const mkArm = () => { const a = g(arms, {}); const o = el('path', { d: '', fill: 'none', stroke: C.line, 'stroke-width': 104, 'stroke-linecap': 'round' }, a);
-    const f = el('path', { d: '', fill: 'none', stroke: 'url(#avshirt)', 'stroke-width': 96, 'stroke-linecap': 'round' }, a);
-    const cuff = el('ellipse', { rx: 44, ry: 18, fill: C.shirtLo, ...OL }, a);
-    const hand = g(a, {}); const fingers = [];
-    for (let i = 0; i < 5; i++) fingers.push(el('rect', { x: -12, y: 0, width: 24, height: 10, rx: 12, fill: C.skin, ...OL, 'stroke-width': 3 }, hand));
-    el('rect', { x: -38, y: -42, width: 76, height: 84, rx: 30, fill: C.skin, ...OL, 'stroke-width': 3 }, hand);
-    const thumb = el('rect', { x: -13, y: 0, width: 26, height: 10, rx: 13, fill: C.skin, ...OL, 'stroke-width': 3 }, hand);
-    return { o, f, cuff, hand, fingers, thumb }; };
+  // ---------- arms: shoulder → elbow → wrist, cuff, hand
+  const arms = g(fig, {});
+  const SW = 76, HS = 1.25;
+  const mkArm = () => { const a = g(arms, {});
+    const lo = el('path', { d: '', fill: 'none', stroke: C.shirtSh, 'stroke-width': SW, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, a);
+    const hi = el('path', { d: '', fill: 'none', stroke: C.shirt, 'stroke-width': SW - 12, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, a);
+    const hand = g(a, {});
+    const fingers = [0, 1, 2, 3].map(() => el('rect', { fill: C.skin, stroke: C.line, 'stroke-width': 2.6 }, hand));
+    const thumb = el('rect', { fill: C.skin, stroke: C.line, 'stroke-width': 2.6 }, hand);
+    el('rect', { x: -33, y: -30, width: 66, height: 74, rx: 26, fill: C.skin, stroke: C.line, 'stroke-width': 2.6 }, hand);
+    el('rect', { x: -28.5, y: -34, width: 57, height: 26, rx: 6, fill: C.skin }, hand);            // fingers run into the palm
+    const thumbFill = el('rect', { fill: C.skin }, hand);
+    el('path', { d: 'M-14 6 C-6 14 8 14 16 4', fill: 'none', stroke: C.line, 'stroke-width': 2.2, 'stroke-linecap': 'round', opacity: .55 }, hand);
+    const cuff = el('path', { d: '', fill: 'none', stroke: C.cuff, 'stroke-width': SW - 2, 'stroke-linecap': 'butt' }, a);
+    const cuffL = el('path', { d: '', fill: 'none', stroke: C.shirtSh, 'stroke-width': 3, opacity: .7 }, a);
+    return { lo, hi, cuff, cuffL, hand, fingers, thumb, thumbFill }; };
   const ARM = [mkArm(), mkArm()];   // 0 = screen left, 1 = screen right
-  const SHOULDER = [[262, 640], [818, 640]];
+  const SHO = [[364, 598], [716, 598]], L1 = 165, L2 = 155;
 
-  // ---------- pose library: hand centre x/y, rotation, finger extension [thumb, index, middle, ring, pinky], thumb angle
-  const OPEN = [.8, 1, 1, 1, .9], POINT = [.25, 1, 0, 0, 0], FIST = [.3, 0, 0, 0, 0];
-  const HID = (s) => ({ x: s ? 820 : 260, y: 1060, r: 0, f: OPEN, ta: -40 });
+  // ---------- pose library. Per arm: palm centre x/y, r (0 = fingers up), f = [thumb, index, middle, ring, pinky]
+  // extension, sp = finger spread, ta = thumb angle, flip, el: -1 = elbow the other way.
+  const OPEN = [1, 1, 1, 1, 1], CUP = [.75, .8, .78, .72, .62], POINT = [.3, 1, 0, 0, 0], FIST = [.35, 0, 0, 0, 0], FLAT = [.5, 1, 1, 1, 1];
+  const REST = k => ({ x: k ? 772 : 308, y: 990, r: k ? 174 : -174, f: CUP, sp: .3 });
+  const UP = k => ({ x: k ? 790 : 290, y: 540, r: k ? 10 : -10, f: CUP, sp: .35 });          // the reference's talking hands
+  const LOW = k => ({ x: k ? 742 : 338, y: 800, r: k ? 60 : -60, f: CUP, sp: .5 });
   const P = {
-    talk: [HID(0), { x: 760, y: 760, r: -18, f: [.6, .9, .9, .85, .8], ta: -40 }],
-    calm: [HID(0), HID(1)],
-    smile: [HID(0), HID(1)],
-    explain: [HID(0), { x: 800, y: 560, r: 14, f: OPEN, ta: -45 }],
-    hi: [HID(0), { x: 820, y: 400, r: 16, f: OPEN, ta: -50, wave: 1 }],
-    wave: [HID(0), { x: 820, y: 400, r: 16, f: OPEN, ta: -50, wave: 1 }],
-    point_up: [HID(0), { x: 790, y: 470, r: -6, f: POINT, ta: -30 }],
-    point_side: [{ x: 235, y: 610, r: -92, f: POINT, ta: -30 }, HID(1)],
-    count: [HID(0), { x: 800, y: 500, r: -4, f: [0, 1, 1, 0, 0], ta: -10 }],
-    count3: [HID(0), { x: 800, y: 500, r: -4, f: [0, 1, 1, 1, 0], ta: -10 }],
-    shrug: [{ x: 210, y: 640, r: -62, f: OPEN, ta: -45, flip: 1 }, { x: 870, y: 640, r: 62, f: OPEN, ta: -45 }],
-    shocked: [{ x: 400, y: 420, r: 18, f: OPEN, ta: -45, flip: 1 }, { x: 680, y: 420, r: -18, f: OPEN, ta: -45 }],
-    excited: [{ x: 230, y: 380, r: -10, f: FIST, ta: -20, flip: 1 }, { x: 850, y: 380, r: 10, f: FIST, ta: -20 }],
-    shh: [HID(0), { x: 548, y: 470, r: -10, f: POINT, ta: -20 }],
-    thumbs_up: [HID(0), { x: 800, y: 520, r: 0, f: [1, 0, 0, 0, 0], ta: 10 }],
-    think: [HID(0), { x: 560, y: 520, r: 8, f: [.2, .35, 0, 0, 0], ta: -30 }],
-    wait: [HID(0), { x: 800, y: 520, r: 0, f: [.7, 1, 1, 1, 1], ta: -60 }],
-    facepalm: [HID(0), { x: 520, y: 250, r: -20, f: OPEN, ta: -40 }],
-    clasp: [{ x: 500, y: 700, r: 30, f: [.4, .5, .5, .5, .5], ta: -20, flip: 1 }, { x: 580, y: 700, r: -30, f: [.4, .5, .5, .5, .5], ta: -20 }],
+    talk: [UP(0), UP(1)],
+    calm: [REST(0), REST(1)],
+    smile: [REST(0), REST(1)],
+    explain: [{ x: 196, y: 640, r: -62, f: OPEN, sp: 1 }, LOW(1)],
+    present: [{ x: 196, y: 640, r: -62, f: OPEN, sp: 1 }, LOW(1)],
+    both: [{ x: 196, y: 660, r: -66, f: OPEN, sp: 1 }, { x: 884, y: 660, r: 66, f: OPEN, sp: 1 }],
+    hi: [REST(0), { x: 850, y: 350, r: 12, f: OPEN, sp: 1, wv: 1 }],
+    wave: [REST(0), { x: 850, y: 350, r: 12, f: OPEN, sp: 1, wv: 1 }],
+    point_up: [{ x: 292, y: 420, r: -6, f: POINT, sp: 0 }, REST(1)],
+    point_side: [{ x: 132, y: 590, r: -78, f: POINT, sp: 0 }, REST(1)],
+    count: [REST(0), { x: 810, y: 440, r: 4, f: [.2, 1, 1, 0, 0], sp: .9 }],
+    count3: [REST(0), { x: 810, y: 440, r: 4, f: [.2, 1, 1, 1, 0], sp: .9 }],
+    one: [REST(0), { x: 810, y: 440, r: 4, f: POINT, sp: 0 }],
+    shrug: [{ x: 170, y: 668, r: -74, f: OPEN, sp: 1 }, { x: 910, y: 668, r: 74, f: OPEN, sp: 1 }],
+    shocked: [{ x: 496, y: 424, r: 62, f: FLAT, sp: 0, ta: -20, el: 1 }, { x: 584, y: 430, r: -62, f: FLAT, sp: 0, ta: -20, el: 1 }],
+    gasp: [{ x: 224, y: 706, r: -44, f: OPEN, sp: 1 }, { x: 856, y: 706, r: 44, f: OPEN, sp: 1 }],
+    oops: [{ x: 408, y: 390, r: 12, f: FLAT, sp: .3 }, { x: 672, y: 390, r: -12, f: FLAT, sp: .3 }],
+    excited: [{ x: 236, y: 420, r: -12, f: FIST }, { x: 844, y: 420, r: 12, f: FIST }],
+    shh: [REST(0), { x: 556, y: 512, r: -4, f: POINT, sp: 0, ta: -30 }],
+    thumbs_up: [REST(0), { x: 810, y: 500, r: 0, f: [1, 0, 0, 0, 0], ta: -8 }],
+    think: [REST(0), { x: 580, y: 512, r: -14, f: [.6, .25, 0, 0, 0], ta: -70 }],
+    wait: [REST(0), { x: 815, y: 460, r: 0, f: OPEN, sp: .25 }],
+    stop: [{ x: 265, y: 460, r: 0, f: OPEN, sp: .25 }, { x: 815, y: 460, r: 0, f: OPEN, sp: .25 }],
+    facepalm: [REST(0), { x: 600, y: 300, r: -26, f: FLAT, sp: .35 }],
+    clasp: [{ x: 512, y: 740, r: 50, f: [.4, .5, .5, .5, .5] }, { x: 572, y: 744, r: -50, f: [.4, .5, .5, .5, .5] }],
+    arms_crossed: [{ x: 640, y: 790, r: 80, f: [.3, .4, .4, .4, .4] }, { x: 440, y: 800, r: -80, f: [.3, .4, .4, .4, .4] }],
   };
-  const FACE = { talk: { smile: .55 }, calm: { smile: .4 }, smile: { smile: 1 }, explain: { smile: .6, brow: .2 }, hi: { smile: 1, brow: .3 },
-    wave: { smile: 1 }, point_up: { smile: .7, brow: .5 }, point_side: { smile: .6, brow: .2, lookX: -6 }, count: { smile: .5 }, count3: { smile: .5 },
-    shrug: { smile: .3, brow: .9, tilt: 6 }, shocked: { smile: 0, brow: 1, eyes: 1.25, shock: 1 }, excited: { smile: 1, brow: .6 },
-    shh: { smile: .2, brow: .4, lookX: 4 }, thumbs_up: { smile: 1, brow: .3 }, think: { smile: .2, brow: -.4, lookX: 6, lookY: -6, tilt: -5 },
-    wait: { smile: .3, brow: .4 }, facepalm: { smile: 0, brow: -.6, lid: .9, tilt: -6 }, clasp: { smile: .6 }, nervous: { smile: .2, brow: .7, sweat: 1 },
-    stressed: { smile: 0, brow: .8, sweat: 1 }, sad: { smile: -.6, brow: -.2 }, angry: { smile: -.4, brow: -1 }, laugh: { smile: 1, brow: .4 },
-    ok: { smile: .7 }, bored: { smile: 0, lid: .45 }, arms_crossed: { smile: .2 }, cry: { smile: -.8, brow: .6 }, panic: { smile: -.2, brow: 1, eyes: 1.2, sweat: 1 } };
-  const ALIAS = { rest: 'calm', up: 'point_up', card: 'point_side', palms: 'explain', thumb: 'thumbs_up', end: 'smile', happy: 'smile', surprised: 'shocked',
-    neutral: 'talk', yes: 'thumbs_up', no: 'wait', laugh: 'smile', ok: 'thumbs_up', nervous: 'shrug', stressed: 'shrug', panic: 'shocked', sad: 'calm',
-    angry: 'wait', cry: 'calm', bored: 'calm', arms_crossed: 'clasp' };
+  const FACE = {
+    talk: { smile: .6 }, calm: { smile: .45 }, smile: { smile: 1, happy: .0, brow: .2 }, explain: { smile: .65, brow: .25, turn: -.5, lookX: -3 },
+    present: { smile: .7, brow: .3, turn: -.5, lookX: -3 }, both: { smile: .7, brow: .4 }, hi: { smile: 1, grin: 1, brow: .4 }, wave: { smile: 1, grin: 1, brow: .4 },
+    point_up: { smile: .7, brow: .6, lookX: -4, lookY: -5, turn: -.4 }, point_side: { smile: .3, brow: .1, brow2: .6, lookX: -7, lid: .3, turn: -1 },
+    count: { smile: .55, brow: .3 }, count3: { smile: .55, brow: .3 }, one: { smile: .55, brow: .4 },
+    shrug: { smile: .2, brow: .9, browA: .5, tilt: 5, shrug: 1 }, shocked: { smile: 0, brow: 1, eyes: 1.3, shock: 1 },
+    gasp: { smile: 0, brow: 1, eyes: 1.3, shock: 1 }, oops: { smile: -.3, brow: .8, browA: .8, eyes: 1.2, shock: 1, sweat: 1 },
+    excited: { smile: 1, grin: 1, brow: .7, happy: 1 }, shh: { smile: .25, brow: .5, lookX: 3 }, thumbs_up: { smile: 1, grin: 1, brow: .3, wink: 1 },
+    think: { smile: .1, brow: .1, brow2: .7, lookX: 6, lookY: -7, tilt: -5, q: 1 }, wait: { smile: .15, brow: .5 }, stop: { smile: 0, brow: .6 },
+    facepalm: { smile: -.5, brow: -.2, browA: .7, lid: 1, tilt: -6, sweat: 1 }, clasp: { smile: .6 },
+    nervous: { smile: .2, brow: .7, browA: .7, sweat: 1 }, stressed: { smile: -.3, brow: .6, browA: .9, sweat: 1 }, sad: { smile: -.7, brow: .2, browA: 1, lid: .3 },
+    angry: { smile: -.5, brow: -.4, browA: -1 }, laugh: { smile: 1, grin: 1, happy: 1, brow: .5 }, ok: { smile: .8, wink: 1 },
+    bored: { smile: -.1, lid: .5 }, arms_crossed: { smile: .15, brow2: .6, lid: .25 }, skeptical: { smile: .1, brow2: .8, lid: .4, lookX: -6, turn: -.6 },
+    cry: { smile: -.9, brow: .5, browA: 1, lid: .6, sweat: 1 }, panic: { smile: -.2, brow: 1, browA: .6, eyes: 1.25, shock: 1, sweat: 1 }, wink: { smile: .9, wink: 1 } };
+  const ALIAS = { rest: 'calm', up: 'point_up', card: 'point_side', palms: 'both', thumb: 'thumbs_up', end: 'smile', happy: 'smile', surprised: 'gasp',
+    neutral: 'talk', yes: 'thumbs_up', no: 'stop', laugh: 'talk', ok: 'thumbs_up', nervous: 'talk', stressed: 'oops', panic: 'oops', sad: 'calm',
+    angry: 'arms_crossed', cry: 'calm', bored: 'calm', skeptical: 'point_side', wink: 'talk', two: 'count', three: 'count3' };
   const pose = n => P[n] || P[ALIAS[n]] || P.talk;
-  const face0 = { smile: .55, brow: 0, eyes: 1, shock: 0, lookX: 0, lookY: 0, tilt: 0, lid: 0, sweat: 0 };
+  const face0 = { smile: .55, brow: 0, brow2: 0, browA: 0, eyes: 1, shock: 0, grin: 0, happy: 0, wink: 0, lookX: 0, lookY: 0, tilt: 0, lid: 0, sweat: 0, turn: 0, shrug: 0, q: 0 };
+  const arm0 = q => ({ x: q.x, y: q.y, r: q.r, ta: q.ta ?? -58, sp: q.sp ?? .4, flip: q.flip || 0, el: q.el || 0, wv: q.wv || 0, f0: q.f[0], f1: q.f[1], f2: q.f[2], f3: q.f[3], f4: q.f[4] });
 
   // ---------- state + redraw
-  const S = { a: [Object.assign({}, HID(0)), Object.assign({}, HID(1))], f: Object.assign({ open: 0, blink: 0, nod: 0, wave: 0 }, face0) };
-  S.a.forEach(a => { a.f0 = a.f[0]; a.f1 = a.f[1]; a.f2 = a.f[2]; a.f3 = a.f[3]; a.f4 = a.f[4]; a.flip = a.flip || 0; });
-  function drawArm(k) { const s = S.a[k], A_ = ARM[k], [sx, sy] = SHOULDER[k], side = k ? 1 : -1;
-    const r = (s.r + (k ? s.wave || 0 : 0) * 0 + (k === 1 ? S.f.wave : 0));
-    const rad = r * Math.PI / 180, wx = s.x - Math.sin(rad) * -48, wy = s.y + Math.cos(rad) * 48;   // wrist just below the palm
-    const out = s.y > 880 ? 18 : 70, mx = (sx + wx) / 2 + side * out, my = Math.max(sy, wy) + (s.y > 880 ? 20 : 70);   // elbow out and down (hugs the body at rest)
-    const d = `M${sx} ${sy} Q${mx} ${my} ${wx} ${wy}`; A_.o.setAttribute('d', d); A_.f.setAttribute('d', d);
-    A_.cuff.setAttribute('cx', wx); A_.cuff.setAttribute('cy', wy); A_.cuff.setAttribute('transform', `rotate(${r} ${wx} ${wy})`);
-    A_.hand.setAttribute('transform', `translate(${s.x} ${s.y}) rotate(${r}) scale(${s.flip > .5 ? -1 : 1} 1)`);
-    const ext = [s.f0, s.f1, s.f2, s.f3, s.f4], X = [0, -27, -9, 9, 26], LEN = [0, 62, 68, 62, 50];
-    for (let i = 1; i < 5; i++) { const L = 12 + LEN[i] * ext[i]; const fi = A_.fingers[i - 1];
-      fi.setAttribute('x', X[i] - 11); fi.setAttribute('y', -36 - L); fi.setAttribute('width', 22); fi.setAttribute('height', L + 14); fi.setAttribute('rx', 11); }
-    A_.fingers[4].setAttribute('opacity', 0);
-    const TL = 14 + 46 * ext[0]; A_.thumb.setAttribute('x', -13); A_.thumb.setAttribute('y', -TL); A_.thumb.setAttribute('height', TL + 10);
-    A_.thumb.setAttribute('transform', `translate(-30 6) rotate(${s.ta ?? -40})`); }
+  const S = { a: [arm0(REST(0)), arm0(REST(1))], f: Object.assign({ open: 0, blink: 0, nod: 0, wave: 0, bob: 0, sway: 0 }, face0) };
+  const FX = [-25.5, -8.5, 8.5, 25.5], FL = [50, 58, 54, 42], FA = [-15, -5, 5, 15];
+  function drawArm(k) { const s = S.a[k], a = ARM[k], side = k ? 1 : -1, f = S.f;
+    const sx = SHO[k][0], sy = SHO[k][1] - f.shrug * 18;
+    const r = s.r + f.wave * s.wv, rad = r * Math.PI / 180, ux = Math.sin(rad), uy = -Math.cos(rad);
+    const up = s.y < 880 ? 1 : 0, hx = s.x + f.sway * side * 4 * up, hy = s.y + f.bob * up;
+    const wx = hx - ux * 60, wy = hy - uy * 60;
+    let dx = wx - sx, dy = wy - sy, d = Math.hypot(dx, dy) || 1; const dd = Math.min(d, L1 + L2 - 2);
+    const aa = (L1 * L1 - L2 * L2 + dd * dd) / (2 * dd), h = Math.sqrt(Math.max(L1 * L1 - aa * aa, 0));
+    const mx = sx + dx / d * aa, my = sy + dy / d * aa, px = -dy / d, py = dx / d;
+    const e1 = [mx + px * h, my + py * h], e2 = [mx - px * h, my - py * h];
+    const out = s.el > .5, sc = e => out ? side * e[0] : side * e[0] * .3 + e[1]; const e = sc(e1) > sc(e2) ? e1 : e2;
+    const d1 = `M${sx} ${sy} L${e[0]} ${e[1]} L${wx} ${wy}`;
+    a.lo.setAttribute('d', d1); a.hi.setAttribute('d', `M${sx - 3} ${sy - 4} L${e[0] - 3} ${e[1] - 4} L${wx - 3} ${wy - 4}`); shArm[k].setAttribute('d', d1);
+    let fx = wx - e[0], fy = wy - e[1]; const fl = Math.hypot(fx, fy) || 1; fx /= fl; fy /= fl;
+    a.cuff.setAttribute('d', `M${wx - fx * 12} ${wy - fy * 12} L${wx + fx * 14} ${wy + fy * 14}`);
+    a.cuffL.setAttribute('d', `M${wx - fx * 12 - fy * 37} ${wy - fy * 12 + fx * 37} L${wx - fx * 12 + fy * 37} ${wy - fy * 12 - fx * 37}`);
+    const mir = (k === 0) !== (s.flip > .5);
+    a.hand.setAttribute('transform', `translate(${hx} ${hy}) rotate(${r}) scale(${mir ? -HS : HS} ${HS})`);
+    set(shHand[k], { cx: hx, cy: hy - 10 });
+    const ext = [s.f0, s.f1, s.f2, s.f3, s.f4];
+    for (let i = 0; i < 4; i++) { const L = 9 + FL[i] * ext[i + 1];
+      set(a.fingers[i], { x: FX[i] - 8.5, y: -26 - L, width: 17, height: L + 14, rx: 8.5, transform: `rotate(${FA[i] * s.sp * ext[i + 1]} ${FX[i]} -22)` }); }
+    const TL = 14 + 36 * ext[0], tt = `translate(-27 12) rotate(${s.ta})`;
+    set(a.thumb, { x: -10, y: -TL, width: 20, height: TL + 12, rx: 10, transform: tt });
+    set(a.thumbFill, { x: -7.5, y: -6, width: 15, height: 18, rx: 6, transform: tt }); }
   function drawFace() { const f = S.f;
-    head.setAttribute('transform', `rotate(${f.tilt + f.nod * 2} 540 470) translate(0 18) translate(540 470) scale(1.08) translate(-540 -470)`);
-    // brows: raise (+) / frown (-)
-    const by = 282 - f.brow * 12, bk = f.brow < 0 ? -f.brow * 8 : 0;
-    browL.setAttribute('d', `M462 ${by + 6 + bk} Q490 ${by - 8} 518 ${by + 2 - bk}`); browR.setAttribute('d', `M562 ${by + 2 - bk} Q590 ${by - 8} 618 ${by + 6 + bk}`);
-    eyes.forEach((e, k) => e.setAttribute('transform', `translate(${f.lookX} ${f.lookY}) scale(${f.eyes}) translate(${(1 - f.eyes) * (k ? 588 : 492) / f.eyes} ${(1 - f.eyes) * 324 / f.eyes})`));
-    const lid = Math.max(f.lid, f.blink);
-    [[492, 322], [588, 322]].forEach(([x, y], k) => { const top = y - 23, cut = top + 46 * lid;
-      lids[k].setAttribute('d', lid < .02 ? '' : `M${x - 22} ${top - 2} L${x + 22} ${top - 2} L${x + 22} ${cut} Q${x} ${cut + 6} ${x - 22} ${cut} Z`); });
+    const ht = `rotate(${f.tilt + f.nod * 1.6} 540 500) translate(0 ${f.nod * 5 - f.shrug * 4}) translate(540 500) scale(1.3) translate(-540 -500)`;
+    head.setAttribute('transform', ht); shHead.setAttribute('transform', ht);
+    feat.setAttribute('transform', `translate(${f.turn * 9} 0)`);
+    set(earL, { rx: 17 + f.turn * 4 }); set(earR, { rx: 17 - f.turn * 4 });
+    // brows: raise, angle (browA < 0 angry, > 0 worried), brow2 lifts the right one alone
+    [0, 1].forEach(k => { const by = 288 - (f.brow + (k ? f.brow2 : 0)) * 14, a = f.browA * 9, s = k ? 1 : -1, cx = k ? 586 : 494;
+      brows[k].setAttribute('d', `M${cx + s * 30} ${by + 5 - a} Q${cx + s * 6} ${by - 9} ${cx - s * 26} ${by + a + 1}`); });
+    // eyes
+    eyes.forEach((E, k) => { const closed = f.happy > .5 || (k === 1 && f.wink > .5), rx = 17.5 * f.eyes, ry = 15.5 * f.eyes, { x, y } = E;
+      const lid = Math.max(f.lid, f.blink, f.eyes > 1.1 ? 0 : .14);
+      set(E.white, { rx, ry, opacity: closed ? 0 : 1 }); set(E.clip, { cx: x, cy: y, rx, ry });
+      set(E.pupil, { cx: x + f.lookX, cy: y + f.lookY + 1, opacity: closed ? 0 : 1 }); set(E.glint, { cx: x + f.lookX - 3.5, cy: y + f.lookY - 3, opacity: closed ? 0 : 1 });
+      const cut = y - ry + 2 * ry * lid; set(E.lid, { x: x - rx - 2, y: y - ry - 2, width: rx * 2 + 4, height: Math.max(0, cut - (y - ry) + 2), opacity: closed ? 0 : 1 });
+      if (closed) E.line.setAttribute('d', `M${x - 19} ${y + 5} Q${x} ${y - 15} ${x + 19} ${y + 5}`);
+      else if (lid < .06) E.line.setAttribute('d', `M${x - rx} ${y - 1} A${rx} ${ry} 0 0 1 ${x + rx} ${y - 1}`);
+      else { const q = Math.max(-1, Math.min(1, (cut - y) / ry)), hw = Math.max(rx * Math.sqrt(1 - q * q), rx * .82); E.line.setAttribute('d', `M${x - hw} ${Math.min(cut, y + 6)} Q${x} ${Math.min(cut, y + 6) + (lid > .9 ? 7 : -4 + lid * 6)} ${x + hw} ${Math.min(cut, y + 6)}`); } });
     // mouth
-    const o = f.shock ? Math.max(.55, f.open) : f.open, sm = f.smile, y0 = 430;
-    if (o < .12) { mOpen.setAttribute('d', ''); mLine.setAttribute('d', `M505 ${y0 - sm * 4} Q540 ${y0 + 12 + sm * 14} 575 ${y0 - sm * 4}`); }
+    const sm = f.smile, y0 = 430, o = Math.max(f.open, f.shock ? .6 : 0, f.grin > .5 ? .5 : 0);
+    if (o < .12) { mOpen.setAttribute('d', ''); mLine.setAttribute('d', `M${508 - sm * 4} ${y0 - sm * 6} Q540 ${y0 + sm * 18} ${572 + sm * 4} ${y0 - sm * 6}`); mLip.setAttribute('d', `M528 ${y0 + 20 + Math.max(sm, 0) * 4} Q540 ${y0 + 24 + Math.max(sm, 0) * 4} 552 ${y0 + 20 + Math.max(sm, 0) * 4}`); set(teeth, { height: 0 }); set(tongue, { opacity: 0 }); }
     else { mLine.setAttribute('d', '');
-      const w = f.shock ? 20 + o * 8 : 30 + sm * 7, h = 6 + o * 32;
-      const d = f.shock ? `M${540 - w} ${y0 + h / 2} C${540 - w} ${y0 - 6} ${540 + w} ${y0 - 6} ${540 + w} ${y0 + h / 2} C${540 + w} ${y0 + h + 8} ${540 - w} ${y0 + h + 8} ${540 - w} ${y0 + h / 2} Z`
-        : `M${540 - w} ${y0 - sm * 4} Q540 ${y0 - 4} ${540 + w} ${y0 - sm * 4} Q${540 + w * .8} ${y0 + h} 540 ${y0 + h + 4} Q${540 - w * .8} ${y0 + h} ${540 - w} ${y0 - sm * 4} Z`;
-      mOpen.setAttribute('d', d); document.getElementById('avmclip').setAttribute('d', d);
-      teeth.setAttribute('y', y0 - 8); teeth.setAttribute('x', 540 - w); teeth.setAttribute('width', w * 2); teeth.setAttribute('height', f.shock ? 0 : 12);
-      tongue.setAttribute('cy', y0 + h); tongue.setAttribute('rx', w * .6); }
-    sweat.setAttribute('opacity', f.sweat); }
+      let d;
+      if (f.shock > .5) { const w = 19 + o * 6, h = 16 + o * 14; d = `M${540 - w} ${y0 + 4} C${540 - w} ${y0 - h} ${540 + w} ${y0 - h} ${540 + w} ${y0 + 4} C${540 + w} ${y0 + h + 14} ${540 - w} ${y0 + h + 14} ${540 - w} ${y0 + 4} Z`;
+        set(teeth, { height: 0 }); set(tongue, { cx: 540, cy: y0 + h + 12, rx: w * .7, opacity: 1 }); mLip.setAttribute('d', ''); }
+      else { const sp = Math.max(sm, 0), w = 27 + sp * 9 + f.grin * 7, h = 7 + o * 30, ty = y0 - 9, cy = ty - sp * 5;
+        d = `M${540 - w} ${cy} Q540 ${ty + 5} ${540 + w} ${cy} Q${540 + w * .82} ${ty + h + 2} 540 ${ty + h + 5} Q${540 - w * .82} ${ty + h + 2} ${540 - w} ${cy} Z`;
+        set(teeth, { x: 540 - w * .72, y: ty - 6, width: w * 1.44, height: 16 + (f.grin > .5 ? 3 : 0) }); set(tongue, { cx: 540, cy: ty + h + 6, rx: w * .55, opacity: 1 });
+        mLip.setAttribute('d', `M528 ${ty + h + 15} Q540 ${ty + h + 19} 552 ${ty + h + 15}`); }
+      mOpen.setAttribute('d', d); document.getElementById('avmclip').setAttribute('d', d); }
+    sweat.forEach(s => s.setAttribute('opacity', f.sweat)); qb.setAttribute('opacity', f.q);
+    fig.setAttribute('transform', `rotate(${f.sway * .7} 540 900)`); }
   function redraw() { drawArm(0); drawArm(1); drawFace(); }
 
   // ---------- timeline: poses per beat, mouth per word, blinks, reactions
-  const setPose = (name, t, dur) => { const p = pose(name), fc = Object.assign({}, face0, FACE[name] || FACE[ALIAS[name]] || {});
-    p.forEach((q, k) => { const s = S.a[k]; const to = { x: q.x, y: q.y, r: q.r, ta: q.ta ?? -40, flip: q.flip || 0, f0: q.f[0], f1: q.f[1], f2: q.f[2], f3: q.f[3], f4: q.f[4] };
-      if (t <= 0) { Object.assign(s, to); tl.set(s, to, 0); } else tl.to(s, Object.assign({ duration: dur, ease: 'back.out(1.4)' }, to), t); });
-    const fto = { smile: fc.smile, brow: fc.brow, eyes: fc.eyes, shock: fc.shock, lookX: fc.lookX, lookY: fc.lookY, tilt: fc.tilt, lid: fc.lid, sweat: fc.sweat };
-    if (t <= 0) { Object.assign(S.f, fto); tl.set(S.f, fto, 0); } else tl.to(S.f, Object.assign({ duration: dur * .8, ease: 'power2.out' }, fto), t);
-    if (pose(name)[1].wave) for (let k = 0; k < 6; k++) tl.to(S.f, { wave: k % 2 ? -12 : 12, duration: .16, ease: 'sine.inOut' }, t + .2 + k * .16);
-    if (pose(name)[1].wave) tl.to(S.f, { wave: 0, duration: .16 }, t + .2 + 6 * .16); };
-  A.poses.forEach((b, k) => setPose(b.pose, k ? b.t0 - .08 : 0, .32));
-  // mouth: open on every word, close between; bigger for longer words
-  A.words.forEach(w => { const v = Math.min(.85, .35 + w.n * .05); tl.to(S.f, { open: v, duration: .07, ease: 'power1.out' }, w.t);
-    tl.to(S.f, { open: .05, duration: .09, ease: 'power1.in' }, w.t + Math.max(.1, Math.min(w.d * .65, .28)));
-    if (w.n > 5) tl.to(S.f, { nod: 1, duration: .12, yoyo: true, repeat: 1, ease: 'sine.inOut' }, w.t); });
-  // blinks, seeded
-  let s = 11, t = .9; const rnd = () => ((s = (s * 16807) % 2147483647) / 2147483647);
-  while (t < R.dur - .3) { tl.to(S.f, { blink: 1, duration: .06 }, t); tl.to(S.f, { blink: 0, duration: .09 }, t + .1); t += 2.2 + rnd() * 2.2; }
-  (R.reacts || []).forEach(t => tl.to(S.f, { eyes: 1.25, brow: 1, duration: .12, yoyo: true, repeat: 1 }, t));
-  redraw(); const prev = tl.eventCallback('onUpdate'); tl.eventCallback('onUpdate', function () { if (prev) prev.apply(this, arguments); redraw(); });
+  const setPose = (name, t, dur) => { const p = pose(name), fto = Object.assign({}, face0, FACE[name] || FACE[ALIAS[name]] || {});
+    p.forEach((q, k) => { const s = S.a[k], to = arm0(q);
+      if (t <= 0) { Object.assign(s, to); tl.set(s, to, 0); } else tl.to(s, Object.assign({ duration: dur, ease: 'back.out(1.5)' }, to), t + k * .03); });
+    if (t <= 0) { Object.assign(S.f, fto); tl.set(S.f, fto, 0); } else tl.to(S.f, Object.assign({ duration: dur * .7, ease: 'power2.out' }, fto), t);
+    if (p.some(q => q.wv)) { for (let k = 0; k < 6; k++) tl.to(S.f, { wave: k % 2 ? -13 : 13, duration: .15, ease: 'sine.inOut' }, t + .2 + k * .15);
+      tl.to(S.f, { wave: 0, duration: .15 }, t + .2 + 6 * .15); }
+    if (name === 'gasp' || name === 'oops' || name === 'panic') for (let k = 0; k < 6; k++) tl.to(S.f, { bob: k % 2 ? 7 : -7, duration: .06 }, t + .15 + k * .06); };
+  A.poses.forEach((b, k) => setPose(b.pose, k ? b.t0 - .08 : 0, .34));
+  // mouth on every word (bigger for longer words); the hands and head beat along on the stronger words
+  let s = 11; const rnd = () => ((s = (s * 16807) % 2147483647) / 2147483647);
+  A.words.forEach((w, i) => { const v = Math.min(.9, .38 + w.n * .055); tl.to(S.f, { open: v, duration: .07, ease: 'power1.out' }, w.t);
+    tl.to(S.f, { open: .04, duration: .09, ease: 'power1.in' }, w.t + Math.max(.1, Math.min(w.d * .65, .28)));
+    if (w.n > 3) { tl.to(S.f, { bob: -9 - rnd() * 6, duration: .09, ease: 'power2.out' }, w.t); tl.to(S.f, { bob: 0, duration: .2, ease: 'sine.inOut' }, w.t + .1); }
+    if (w.n > 5) tl.to(S.f, { nod: 1, duration: .12, yoyo: true, repeat: 1, ease: 'sine.inOut' }, w.t);
+    if (i % 5 === 2) tl.to(S.f, { sway: rnd() * 2 - 1, duration: .5, ease: 'sine.inOut' }, w.t); });
+  let t = .9; while (t < R.dur - .3) { tl.to(S.f, { blink: 1, duration: .05 }, t); tl.to(S.f, { blink: 0, duration: .08 }, t + .09); t += 2.2 + rnd() * 2.2; }
+  (R.reacts || []).forEach(t => tl.to(S.f, { eyes: 1.3, brow: 1, duration: .12, yoyo: true, repeat: 1 }, t));
+  window.__avatar = S; redraw(); const prev = tl.eventCallback('onUpdate'); tl.eventCallback('onUpdate', function () { if (prev) prev.apply(this, arguments); redraw(); });
 })();
