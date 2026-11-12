@@ -76,8 +76,21 @@ two references is not built yet.
 }
 ```
 
-Top-level keys: `name`, `theme`, `counter` {label, start}, `voice` (reel-kit voice block), `presenter` {width, x, y},
-`caption_words` (block size, default 7), `intro`, `sfx_level`, `character` (folder; default reel-kit's otaku).
+Top-level keys: `name`, `theme`, `counter` {label, start}, `voice` (reel-kit voice block), `presenter` {scale, y}
+(default 1.15 / 954: head centre ≈ y 1340), `caption_words` (block size, default 7), `intro`, `sfx_level`,
+`character` ("kai" default; or a reel-kit video character folder such as "otaku"), `avatar_colors` (override
+Kai's palette: skin, skinHi, skinLo, hair, shirt, tee, phones, iris, …).
+
+### The presenter: Kai (engine/avatar.js)
+
+An **original** flat-vector presenter in the references' style (flat colour, thin dark outline, dotted halftone
+shadow, chest-up), not a copy of the reference creator's avatar: wavy side-swept hair, rectangular glasses, light
+stubble, navy overshirt over a white tee, orange headphones round the neck. Drawn in code, so it animates on the
+reel clock: rises in, mouth opens on every word (bigger for longer words), blinks every 2–4 s, nods on long
+words, changes pose every beat (arms, fingers, brows, eyes, mouth shape, head tilt), waves on `hi`, sweats on
+`nervous`, reacts on `react`. Poses: talk, calm, smile, explain, hi/wave, point_up, point_side, count, count3,
+shrug, shocked, excited, shh, thumbs_up, think, wait, facepalm, clasp (+ aliases). Redraws run in the timeline's
+onUpdate, so seek with events on (`tl.seek(t, false)`) when screenshotting pages by hand.
 
 Beat keys: `slug`, `lines` (usually one; `_x_` = red italic serif), `cam` ("big" = presenter starts large until
 the beat's first hero lands), `react` (word or list of words: burst lines + impact), `pose` (presenter clip: talk, explain, calm,

@@ -133,15 +133,27 @@ def build(sc, tm, work):
         for s_ in b.get("sfx", []):   # extra sounds: [time|word:xyz, id, gain]
             cues.append([r3(at_time(s_[0], tm, i, t0)), s_[1], s_[2] if len(s_) > 2 else -16])
     lines = blocks(tm, sc.get("caption_words", 7))
-    cdir = sc.get("character", os.path.join(KIT, "characters", "otaku")); cj = json.load(open(os.path.join(cdir, "character.json")))
     reel = {"dur": dur, "theme": sc.get("theme", "paper"), "counter": sc.get("counter"), "beats": beats, "items": items, "lines": lines,
-            "cams": cams, "reacts": reacts, "presenter": {"headX": cj.get("head_x", .517), "headY": cj.get("head_y", .31)}}
+            "cams": cams, "reacts": reacts}
+    if sc.get("character", "kai") == "kai":
+        ws = [w for l in tm["lines"] for w in l["words"]]
+        words = [{"t": w["t"], "d": r3((ws[k + 1]["t"] if k + 1 < len(ws) else w["t"] + .3) - w["t"]), "n": len(re.sub(r"[^A-Za-z0-9]", "", w["w"]))} for k, w in enumerate(ws)]
+        reel["avatar"] = {"poses": [{"t0": t0, "pose": b.get("pose", "talk")} for b, (t0, _) in zip(sc["beats"], bounds)], "words": words,
+                          "top": sc.get("presenter", {}).get("y", 954), "scale": sc.get("presenter", {}).get("scale", 1.15), "colors": sc.get("avatar_colors", {})}
+        reel["presenter"] = {"headX": .5, "headY": .373}
+    else:
+        cdir = sc.get("character") if os.path.isdir(str(sc.get("character"))) else os.path.join(KIT, "characters", sc.get("character"))
+        cj = json.load(open(os.path.join(cdir, "character.json")))
+        reel["presenter"] = {"headX": cj.get("head_x", .517), "headY": cj.get("head_y", .31)}
     return reel, bounds, cues
 
 
 def presenter(sc, bounds, dur):
-    """the avatar at the bottom: one transparent gesture clip per beat ("pose"), looped for the beat's length."""
-    cdir = sc.get("character", os.path.join(KIT, "characters", "otaku"))
+    """the avatar at the bottom. Default "kai": the engine's own code-drawn presenter (engine/avatar.js), posed per
+    beat. Any other value is a reel-kit video character folder (one transparent gesture clip per beat, looped)."""
+    if sc.get("character", "kai") == "kai":
+        return None, '<div id="pres"><div id="presin"></div></div>'
+    cdir = sc.get("character") if os.path.isdir(str(sc.get("character"))) else os.path.join(KIT, "characters", sc.get("character"))
     c = json.load(open(os.path.join(cdir, "character.json"))); clips, alias = c["clips"], c.get("aliases", {})
     cw, ch = c.get("canvas", [1800, 1080]); P = sc.get("presenter", {})
     W = P.get("width", 1500); x = P.get("x", 540 - W / 2); y = P.get("y", 1150)
@@ -161,9 +173,10 @@ def presenter(sc, bounds, dur):
 def page(sc, tm, work):
     pg = os.path.join(work, "page"); shutil.rmtree(pg, ignore_errors=True); os.makedirs(os.path.join(pg, "assets"))
     shutil.copytree(os.path.join(HERE, "engine", "fonts"), os.path.join(pg, "fonts"))
-    for f in ("gsap.min.js", "beats.js", "style.css"): shutil.copy(os.path.join(HERE, "engine", f), pg)
+    for f in ("gsap.min.js", "beats.js", "avatar.js", "style.css"): shutil.copy(os.path.join(HERE, "engine", f), pg)
     reel, bounds, cues = build(sc, tm, work)
-    src, pres = presenter(sc, bounds, tm["duration"]); shutil.copy(src, os.path.join(pg, "assets", os.path.basename(src)))
+    src, pres = presenter(sc, bounds, tm["duration"])
+    if src: shutil.copy(src, os.path.join(pg, "assets", os.path.basename(src)))
     dur = tm["duration"]
     html = f'''<!doctype html><html lang="en"><head><meta charset="utf-8"/><title>{sc["_name"]}</title>
 <link rel="stylesheet" href="style.css"/><script src="gsap.min.js"></script></head><body>
@@ -171,7 +184,7 @@ def page(sc, tm, work):
  <div id="stage"><div id="dots"></div><div id="glow"></div><div id="flood"></div>
   <div id="meta"></div><div id="cap"></div><div id="heroes"></div>{pres}<div id="wipe"></div></div>
 </div>
-<script>window.REEL = {json.dumps(reel)};</script><script src="beats.js"></script></body></html>'''
+<script>window.REEL = {json.dumps(reel)};</script><script src="beats.js"></script><script src="avatar.js"></script></body></html>'''
     open(os.path.join(pg, "index.html"), "w").write(html)
     return bounds, cues
 
