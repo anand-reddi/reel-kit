@@ -324,7 +324,7 @@ html, body { margin: 0; background: #000; }
 .shbrand svg { width: 110px; height: 110px; } .shbrand b { font: 900 96px/1 AV, sans-serif; color: #fff; letter-spacing: -3px; }
 .shview { position: absolute; left: 40px; width: 1000px; border-radius: 34px; overflow: hidden; background: #1f1f1e; border: 2px solid rgba(255,255,255,.12); box-shadow: 0 40px 90px rgba(0,0,0,.6); }
 .shcam { position: absolute; left: 0; top: 0; } .shcam img { display: block; }
-.shring { position: absolute; border-style: solid; border-color: #e5372d; box-shadow: 0 0 0 9999px rgba(0,0,0,.35); pointer-events: none; }
+.shring { position: absolute; border-style: solid; border-color: #ff3b30; box-shadow: 0 0 24px rgba(255,59,48,.55); pointer-events: none; }
 .shcur { position: absolute; left: 0; top: 0; width: 24px; height: 24px; z-index: 4; transform-origin: 0 0; } .shcur svg { width: 24px; height: 24px; display: block; }
 .shrip { position: absolute; width: 20px; height: 20px; margin: -10px 0 0 -10px; border-radius: 50%; border: 3px solid #fff; }
 .shlabel { position: absolute; left: 60px; right: 60px; text-align: center; font: 900 78px/1.05 AV, sans-serif; color: #fff; letter-spacing: -2px; }
@@ -347,3 +347,13 @@ html, body { margin: 0; background: #000; }
 .wkpin.ok i { background: #3ddc84; } .wkpin.bad i { background: #e5372d; color: #fff; }
 .wkpin b { font: 900 44px/1 AV, sans-serif; white-space: nowrap; } .wkpin.ok b { color: #3ddc84; } .wkpin.bad b { color: #ff6b5e; }
 .wknote { position: absolute; left: 60px; right: 60px; top: 1330px; padding: 40px 44px; border-radius: 30px; background: rgba(61,220,132,.12); border: 3px solid #3ddc84; font: 900 64px/1.1 AV, sans-serif; color: #fff; letter-spacing: -1px; }
+
+/* Clock: calendar page + analog clock */
+.ckplace { position: absolute; left: 60px; right: 60px; top: 300px; text-align: center; font: 900 92px/1 AV, sans-serif; color: #fff; letter-spacing: -2px; }
+.ckcal { position: absolute; left: 70px; top: 560px; width: 430px; height: 500px; border-radius: 40px; background: #f2f1ee; overflow: hidden; box-shadow: 0 40px 80px rgba(0,0,0,.6); transform-origin: 50% 0; text-align: center; }
+.ckmon { height: 130px; background: #e5372d; color: #fff; font: 900 80px/130px AV, sans-serif; letter-spacing: 4px; }
+.ckday { font: 900 250px/1 AV, sans-serif; color: #0b0b0b; margin-top: 40px; letter-spacing: -8px; } .ckdow { font-size: 34px; letter-spacing: 6px; color: #555; margin-top: 10px; }
+.ckface { position: absolute; right: 60px; top: 560px; width: 480px; height: 480px; }
+.ckface svg { width: 100%; height: 100%; } .ckrim { fill: #161618; stroke: #f2f1ee; stroke-width: 5; } .ckface line { stroke: #f2f1ee; stroke-linecap: round; }
+.ckh { stroke-width: 9 !important; } .ckm { stroke-width: 6 !important; stroke: #e5372d !important; }
+.ckdig { position: absolute; left: 60px; right: 60px; top: 1160px; text-align: center; font: 900 120px/1 AV, sans-serif; color: #fff; letter-spacing: -3px; }

@@ -571,7 +571,7 @@ BL.Shot = (box, c, T, S) => {
     tl.fromTo(hd, { opacity: 0, y: -24 }, { opacity: 1, y: 0, duration: .25, ease: 'power3.out', immediateRender: false }, a); }
   const view = el('div', 'shview', sh); view.style.top = vt + 'px'; view.style.height = vh + 'px';
   const cam = el('div', 'shcam', view); cam.style.width = iw + 'px'; cam.style.height = ih + 'px';
-  const im = el('img', '', cam); im.src = c.src; im.style.width = iw + 'px'; im.style.height = ih + 'px';
+  const im = el('img', '', cam); im.src = c.src; im.style.width = iw + 'px'; im.style.height = ih + 'px'; if (c.bright) im.style.filter = `brightness(${c.bright}) contrast(1.06)`;
   const fit = r => { const [x, y, w, h] = r || [0, 0, iw, ih]; const sc = Math.min(vw * .92 / w, vh * .8 / h, c.maxZoom || 2.4); return { scale: sc, x: vw / 2 - (x + w / 2) * sc, y: vh / 2 - (y + h / 2) * sc }; };
   const f0 = fit(null); gsap.set(cam, { transformOrigin: '0 0', ...f0 });
   tl.fromTo(view, { y: 140, opacity: 0, scale: .95 }, { y: 0, opacity: 1, scale: 1, duration: .35, ease: 'power3.out', immediateRender: false }, a);
@@ -580,10 +580,11 @@ BL.Shot = (box, c, T, S) => {
   const sts = c.steps || []; sts.forEach((st, k) => { if (st.until == null && sts[k + 1] && sts[k + 1].at != null) st.until = sts[k + 1].at; });
   sts.forEach(st => { const t = st.at != null ? T(st.at) : a; const f = fit(st.rect);
     tl.to(cam, { ...f, duration: .5, ease: 'power3.inOut' }, t); sfx(t, 'swish/soft', -17);
-    if (st.rect && st.ring) { const [x, y, w, h] = st.rect, rg = el('div', 'shring', cam); const p = 10 / f.scale * 2;
+    if (st.rect && st.ring) { const [x, y, w, h] = st.rect, rg = el('div', 'shring', cam); const p = (c.pad ?? 8) / f.scale;   // one ring at a time: it fades out before the next step's ring lands
       Object.assign(rg.style, { left: (x - p) + 'px', top: (y - p) + 'px', width: (w + 2 * p) + 'px', height: (h + 2 * p) + 'px', borderWidth: (6 / f.scale) + 'px', borderRadius: (14 / f.scale) + 'px' });
-      tl.fromTo(rg, { opacity: 0, scale: 1.3 }, { opacity: 1, scale: 1, duration: .25, ease: 'back.out(2)', immediateRender: false }, t + .45);
-      tl.to(rg, { opacity: 0, duration: .15 }, st.until != null ? T(st.until) : t + 2.2); }
+      const t1 = t + .45, t2 = Math.max(t1 + .3, (st.until != null ? T(st.until) : t + 2.2) - .05);
+      tl.set(rg, { opacity: 0 }, a); tl.fromTo(rg, { opacity: 0, scale: 1.15 }, { opacity: 1, scale: 1, duration: .22, ease: 'back.out(2)', immediateRender: false }, t1);
+      tl.fromTo(rg, { opacity: 1 }, { opacity: 0, duration: .12, immediateRender: false }, t2); }
     if (st.rect && st.tap) { const [x, y, w, h] = st.rect; const tx = x + w / 2, ty = y + h / 2; const cs = 1 / f.scale * 2.2;
       tl.set(cur, { opacity: 1 }, t); tl.fromTo(cur, { x: cx, y: cy, scale: cs }, { x: tx, y: ty, scale: cs, duration: .45, ease: 'power2.inOut', immediateRender: false }, t + .2);
       tl.to(cur, { scale: cs * .8, duration: .08, yoyo: true, repeat: 1 }, t + .68); cx = tx; cy = ty;
@@ -626,6 +627,28 @@ BL.Week = (box, c, T, S) => {
     const pin = el('div', 'wkpin ' + (ok ? 'ok' : 'bad'), sh, `<i>${ok ? '✓' : '✕'}</i><b>${esc(m.text || '')}</b>`); pin.style.left = (60 + m.day * 140 + 62) + 'px';
     K.vis(pin, t, b); tl.fromTo(pin, { y: 60, opacity: 0, scale: .6 }, { y: 0, opacity: 1, scale: 1, duration: .3, ease: 'back.out(2)', immediateRender: false }, t);
     tl.to(tile, { backgroundColor: ok ? 'rgba(61,220,132,.25)' : 'rgba(229,55,45,.3)', borderColor: ok ? '#3ddc84' : '#e5372d', duration: .2 }, t); sfx(t, ok ? 'pro_pop/tink' : 'pro_impact/air', -13); });
+};
+
+// ================================================================== Clock: a calendar page and an analog clock side by side; each item flips the page and spins the hands to a time
+// items: [{at, place, month, day, h (0-23), m, label}], chip: {text, at}
+BL.Clock = (box, c, T, S) => {
+  const a = S.start, b = S.end; K.ground(a, c.ground || 'bg'); const sh = layer(box, a, b); const it = c.items || [];
+  const pl = el('div', 'ckplace', sh); const cal = el('div', 'ckcal', sh, '<div class="ckmon"></div><div class="ckday"></div><div class="ckdow mono"></div>');
+  const face = el('div', 'ckface', sh); let ticks = ''; for (let k = 0; k < 60; k++) ticks += `<line x1="100" y1="${k % 5 ? 8 : 6}" x2="100" y2="${k % 5 ? 13 : 22}" stroke-width="${k % 5 ? 1.5 : 4}" transform="rotate(${k * 6} 100 100)"/>`;
+  face.innerHTML = `<svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="96" class="ckrim"/>${ticks}<line class="ckh" x1="100" y1="100" x2="100" y2="52"/><line class="ckm" x1="100" y1="100" x2="100" y2="28"/><circle cx="100" cy="100" r="7" fill="#e5372d"/></svg>`;
+  const hh = face.querySelector('.ckh'), mm = face.querySelector('.ckm'); const dig = el('div', 'ckdig', sh);
+  tl.fromTo([cal, face], { y: 120, opacity: 0 }, { y: 0, opacity: 1, duration: .35, ease: 'back.out(1.4)', stagger: .08, immediateRender: false }, a);
+  let H = 0, M = 0;
+  it.forEach((o, k) => { const t = o.at != null ? T(o.at) : a + .05; const nh = (o.h % 12) * 30 + o.m * .5, nm = o.m * 6;
+    let th = nh, tm = nm; if (k > 0) { while (th <= H) th += 360; tm = nm + 360 * Math.round((th - H) / 360 * 3 + 2); }
+    const setTxt = () => { pl.textContent = o.place || ''; cal.querySelector('.ckmon').textContent = o.month; cal.querySelector('.ckday').textContent = o.day; cal.querySelector('.ckdow').textContent = o.dow || ''; dig.textContent = o.label || ''; };
+    if (k === 0) { tl.call(setTxt, null, a); tl.set(hh, { rotation: th, svgOrigin: '100 100' }, a); tl.set(mm, { rotation: tm, svgOrigin: '100 100' }, a); }
+    else { tl.to(cal, { rotationX: 90, duration: .16, ease: 'power2.in' }, t); tl.call(setTxt, null, t + .16); tl.to(cal, { rotationX: 0, duration: .2, ease: 'power2.out' }, t + .16);
+      tl.fromTo(hh, { rotation: H, svgOrigin: '100 100' }, { rotation: th, duration: 1.0, ease: 'power3.inOut', immediateRender: false }, t);
+      tl.fromTo(mm, { rotation: M, svgOrigin: '100 100' }, { rotation: tm, duration: 1.0, ease: 'power3.inOut', immediateRender: false }, t);
+      tl.fromTo(dig, { opacity: 0 }, { opacity: 1, duration: .2, immediateRender: false }, t + .9); sfx(t, 'swipe/paper', -15); sfx(t + .1, 'pro_riser/air_gate', -19); sfx(t + 1, 'pro_pop/thup', -13); }
+    H = th; M = tm; });
+  if (c.chip) { const ch = el('div', 'bbadge', sh, esc(c.chip.text)); ch.style.top = '1560px'; const t = T(c.chip.at); K.vis(ch, t, b); tl.fromTo(ch, { scale: 2.2, opacity: 0, rotation: -10 }, { scale: 1, opacity: 1, rotation: -4, duration: .22, ease: 'power4.out', immediateRender: false }, t); }
 };
 
 // ================================================================== Duo: two tall cards (two products, two models) land one by one, then a link joins them
