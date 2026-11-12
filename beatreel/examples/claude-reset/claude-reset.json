@@ -1,0 +1,30 @@
+{
+ "name": "claude-reset",
+ "theme": "paper",
+ "counter": {"label": "RESETS", "start": "0"},
+ "voice": {"name": "am_puck", "speed": 1.12, "say": {"US": "U S"}},
+ "beats": [
+  {"slug": "01 — hook", "pose": "shh", "count": "1",
+   "lines": ["Claude hid a _free_ reset button in your settings."],
+   "hero": [{"type": "shot", "src": "usage.png", "label": "settings → usage", "w": 900, "y": 760, "rings": [[85.5, 63.5, 12.5, 7]], "ringAt": ["word:button"]}]},
+  {"slug": "02 — who", "pose": "count", "count": "1",
+   "lines": ["Pro, Max, Ultra and Team all get _one_."],
+   "hero": [{"type": "sticker", "lines": ["PRO · MAX", "ULTRA · TEAM"], "red": true, "redLine": 1, "y": 700, "rot": -3},
+            {"type": "stamp", "text": "1 FREE", "at": "word:one", "y": 960, "x": 700, "rot": -8}]},
+  {"slug": "03 — what", "pose": "explain",
+   "lines": ["It refills your five-hour limit _and_ your whole week."],
+   "hero": [{"type": "num", "value": 0, "from": 100, "suffix": "%", "label": "// weekly usage", "count": 1.1, "at": "word:refills", "y": 780}]},
+  {"slug": "04 — the catch", "pose": "wait", "count": "1", "bg": "black",
+   "lines": ["But there's no undo."],
+   "hero": [{"type": "sticker", "lines": ["NO UNDO"], "red": true, "y": 760, "rot": -4}]},
+  {"slug": "05 — when", "pose": "point_up",
+   "lines": ["Use it when you're _maxed out_ with days still left."],
+   "hero": [{"type": "list", "title": "// when to press it", "items": ["Hit the weekly cap", "Days left in the week", "Not the day before refill"], "ticks": ["word:maxed", "word:days", "word:left+0.3"], "y": 760}]},
+  {"slug": "06 — deadline", "pose": "point_side", "count": "0", "wipe": true,
+   "lines": ["It expires December _tenth_, US time."],
+   "hero": [{"type": "date", "month": "DEC", "day": "10", "y": 760, "rot": 4}]},
+  {"slug": "07 — share", "pose": "smile",
+   "lines": ["Send this to the friend who keeps _hitting_ the limit."],
+   "hero": [{"type": "comment", "who": "Send to", "keyword": "THAT FRIEND", "y": 760}]}
+ ]
+}
