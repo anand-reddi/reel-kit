@@ -13,6 +13,9 @@ def earshot():
 KEYS = {"minor": [0, 0, 3, -2], "major": [0, 0, 5, -3], "dark": [0, -1, -4, -2]}
 def beat(n, cfg):
     if cfg.get("style", "beat") == "none": return np.zeros(n)
+    if cfg.get("style") == "curious":
+        from core.music import curious
+        return curious(n, cfg)
     bpm = cfg.get("bpm", 100); spb = 60 / bpm; root = cfg.get("root", 38); prog = KEYS.get(cfg.get("key", "minor"), KEYS["minor"])
     rng = np.random.default_rng(3); mus = np.zeros(n)
     def add(sig, at, g):
@@ -59,7 +62,12 @@ def mix(work, cues, dur, cfg):
     sfx = sfx[:n]
     lv = cfg.get("levels", {})
     norm = lambda x, L: x * 10 ** ((L - m.integrated_loudness(x)) / 20) if np.abs(x).max() > 0 else x
-    out = norm(vo, -15) + norm(mus, lv.get("music", -31)) + norm(sfx, lv.get("sfx", -24))
+    mus = norm(mus, lv.get("music", -31))
+    duck = cfg.get("music", {}).get("duck_db", 0)
+    if duck and np.abs(vo).max() > 0:   # dip the bed a little under the voice, recover in the gaps
+        w = int(.05 * SR); env = np.sqrt(np.convolve(vo ** 2, np.ones(w) / w, "same")); act = np.clip(env / (np.percentile(env[env > 0], 60) + 1e-9), 0, 1)
+        act = np.convolve(act, np.ones(int(.25 * SR)) / int(.25 * SR), "same"); mus = mus * 10 ** (-duck * act / 20)
+    out = norm(vo, -15) + mus + norm(sfx, lv.get("sfx", -24))
     out = np.stack([out, out], 1); out = norm(out, -14)
     lim = 10 ** (-1.8 / 20)
     if np.abs(resample_poly(out, 4, 1, axis=0)).max() > lim: out = np.tanh(out / lim) * lim; out = norm(out, -14)

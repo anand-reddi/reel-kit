@@ -155,7 +155,28 @@ beat start), `until` (a word: leave early), `keep` (stay N more beats), `x`, `y`
 | `pile` | items [..], hi [indexes], dropAt, each, fs, w, h — labels rain down and pile up |
 | `gauge` | title, value, verdict, at2, count — a 0-100 dial (green / amber / red) with the verdict |
 | `dots` | n, cols, cell, hi, hi2, redAt, darkAt, legend [[time, text, "r1"/"r2"]] — a 10 x 10 share grid |
+| `profile` | img, handle, cat, bio, covers [paths], tapAt, gridAt — the follow end card: avatar ring, Follow button tapped (hearts), grid of earlier reel covers |
 | `follow` | img, handle, text, tapAt — the follow card; the button turns to "Following" on tapAt |
+
+### Fast-cut, visual-first reels (the user's current standard)
+
+- **No visual stays on screen longer than about 1.5 s.** Write each beat as `"shots"`: a list of shots, each one item
+  or a list of items shown together; a shot lasts until the next shot's `at` (the last until the beat ends). Set
+  top-level `"max_hold": 1.6` and the build prints every item that stays longer. Vary the entrances with `"in"`
+  (zoom, left, right, up, down, flip, drop, swing) and exits with `"out"` (left, right, zoom, down, shrink).
+- **Show the source** whenever there is one (screenshots, the real file, the real command output); explain the rest
+  with animated scenes (code, hub, pile, gauge, dots, send, meet, sort, answer...).
+- **Presenter only as short cutaways** where his expression fits the line: beat `"flash": ["word:x", 0.9]` plus that
+  beat's `"pose"` shows Krish for under a second in a glowing card in the middle; never on the first frame.
+- **Instagram-safe captions:** `"caption_y": [1300, 1300]` keeps the caption above the profile row and clear of the
+  right-hand buttons (kit theme caption box runs x 56-930); keep visuals in y 120-1260 and, below y 830, left of x 930
+  (`"hero_x": 490` moves the default centre left).
+- **Music:** `"music": {"style": "curious", "bpm": 120, "level": -33, "duck_db": 3}` is a quiet code-made curiosity bed
+  (plucked D Lydian arpeggio with echo, ticks, soft pad, a sub and kick lift in the middle third, a bell every fourth
+  bar), built from the measured shape of the user's reference reel (120 BPM, D major colour, sparse bed under the voice).
+  It sits about 18 dB under the voice and dips 3 dB more while he speaks.
+- End on the `profile` card (Follow tapped, earlier reel covers), not a plain follow card.
+- Example: `examples/skillspector/`.
 
 ## Files
 

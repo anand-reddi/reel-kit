@@ -17,7 +17,8 @@
   const on = (el, t) => { tl.set(el, { attr: { 'data-on': 0 } }, 0); tl.set(el, { attr: { 'data-on': 1 } }, t); };
   // seeded random, so a frame always renders the same
   let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
-  st.className = 't-' + (R.theme || 'paper');
+  st.className = 't-' + (R.theme || 'paper') + (R.flashes ? ' flashmode' : '');
+  if (R.theme === 'kit') tl.fromTo(st, { backgroundPosition: '0px 0px' }, { backgroundPosition: '0px -360px', duration: R.dur, ease: 'none', immediateRender: true }, 0);
 
   // ---- meta row: slug on the left, a running counter on the right
   const meta = document.getElementById('meta'); if (R.meta === false) meta.style.display = 'none'; const slug = $('span', '', meta), cnt = $('span', '', meta); cnt.id = 'cnt'; slug.style.position = 'relative'; cnt.style.position = 'relative';
@@ -51,7 +52,7 @@
       tl.fromTo(s, { opacity: 0, y: 12, filter: 'blur(5px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: .16, ease: 'power2.out', immediateRender: true }, t - .06);
       on(s, t + .08); });
     if (k + 1 < R.lines.length) tl.to(el, { y: -26, opacity: 0, duration: .12, ease: 'power2.in' }, end - .12);
-    requestAnimationFrame(() => { const f = Math.min(1, 904 / Math.max(1, el.scrollWidth)); if (f < 1) { el.style.transformOrigin = R.capY ? '50% 0' : '0 0'; el.style.transform = `scale(${f})`; } });
+    requestAnimationFrame(() => { const f = Math.min(1, ((el.parentNode && el.parentNode.clientWidth) || 920) / Math.max(1, el.scrollWidth)); if (f < 1) { el.style.transformOrigin = R.capY ? '50% 0' : '0 0'; el.style.transform = `scale(${f})`; } });
   });
 
   // ---- heroes
@@ -266,6 +267,19 @@
       pls.forEach((p_, j) => { const b = a + j * .2; vis(p_, b, b + .62); tl.set(p_, { x: 0, y: 0, rotation: o.payloadSvg ? 0 : -30 }, b);
         tl.to(p_, { x: 250, y: -170, rotation: o.payloadSvg ? 10 : 0, duration: .3, ease: 'power1.out' }, b); tl.to(p_, { x: 500, y: -30, rotation: o.payloadSvg ? 25 : 35, duration: .3, ease: 'power1.in' }, b + .3); });
       tl.fromTo(to, { scale: 1.25 }, { scale: 1, duration: .4, ease: 'elastic.out(1.2,.4)', immediateRender: false }, a + .6); on(to, a + .6); },
+
+    // the follow end card: avatar, handle, a Follow button that gets tapped, and a grid of earlier reels flipping in
+    profile: (o, e, t) => { e.className += ' prof card hs'; e.style.width = (o.w || 900) + 'px';
+      e.innerHTML = `<div class="ph"><div class="pav"><img src="${o.img || ''}"></div><div class="pn"><b>${esc(o.handle || '')}</b><span>${esc(o.cat || '')}</span><p>${esc(o.bio || '')}</p></div></div>
+        <div class="pbtn"><span class="a">Follow</span><span class="b">Following ✓</span></div><div class="pgrid">${(o.covers || []).map(c => `<div class="pg"><img src="${c}"></div>`).join('')}</div><div class="ptap"></div>`;
+      const btn = e.querySelector('.pbtn'), tap = e.querySelector('.ptap'), pav = e.querySelector('.pav'), a = o.tapAt ?? t + .6;
+      tl.fromTo(pav, { scale: .3, rotation: -40 }, { scale: 1, rotation: 0, duration: .45, ease: 'back.out(2.2)', immediateRender: false }, t + .05);
+      vis(tap, a - .35, a + .45); tl.fromTo(tap, { x: 260, y: 220, scale: 1 }, { x: 0, y: 0, duration: .3, ease: 'power2.out', immediateRender: false }, a - .35);
+      tl.to(tap, { scale: .7, duration: .08, yoyo: true, repeat: 1 }, a - .05); on(btn, a);
+      tl.fromTo(btn, { scale: .9 }, { scale: 1, duration: .35, ease: 'back.out(3)', immediateRender: false }, a);
+      for (let k = 0; k < 7; k++) { const hz = $('div', 'pheart', e, '♥'); vis(hz, a, a + .9); tl.fromTo(hz, { x: 0, y: 0, scale: .4, opacity: 1 }, { x: (rnd() - .5) * 340, y: -160 - rnd() * 200, scale: 1 + rnd() * .6, opacity: 0, duration: .85, ease: 'power2.out', immediateRender: false }, a + k * .03); }
+      const gs = [...e.querySelectorAll('.pg')], ga = o.gridAt ?? t + .3;
+      tl.fromTo(gs, { rotationY: 90, opacity: 0, transformPerspective: 900 }, { rotationY: 0, opacity: 1, duration: .32, stagger: .06, ease: 'power3.out', immediateRender: false }, ga); },
     // the follow card: avatar, handle, a button that gets tapped and turns into "Following"
     follow: (o, e, t) => { e.className += ' fol card hs';
       e.innerHTML = `<img src="${o.img || ''}"><b>${esc(o.handle || '')}</b><span>${esc(o.text || '')}</span><div class="fbtn"><span class="a">Follow</span><span class="b">Following ✓</span></div>`;
@@ -282,11 +296,17 @@
     vis(e, t, u);
     const stamp = o.type === 'stamp', stk = o.type === 'sticker';
     const pop = stamp ? { scale: 2.6, opacity: 0, rotation: (o.rot || 0) - 14 } : { scale: .55, opacity: 0, y: 46, rotation: (o.rot || 0) + (stk ? -12 : -4) };
-    pop.scale *= S1; if (o.pop !== false) tl.fromTo(e, pop, { scale: S1, opacity: 1, y: 0, rotation: o.rot || 0, duration: stamp ? .2 : .42, ease: stamp ? 'power4.out' : 'back.out(1.8)', immediateRender: false }, t);
+    const IN = { zoom: { scale: S1 * 1.6, opacity: 0, filter: 'blur(10px)' }, left: { x: -480, opacity: 0, rotation: (o.rot || 0) - 6 }, right: { x: 480, opacity: 0, rotation: (o.rot || 0) + 6 },
+      up: { y: 300, opacity: 0 }, down: { y: -300, opacity: 0 }, flip: { rotationY: -85, opacity: 0, transformPerspective: 1400 }, drop: { y: -620, opacity: 1 }, swing: { rotationX: -70, opacity: 0, transformPerspective: 1400, transformOrigin: '50% 0%' } };
+    pop.scale *= S1;
+    if (o.in && IN[o.in]) tl.fromTo(e, IN[o.in], { x: 0, y: 0, scale: S1, opacity: 1, rotation: o.rot || 0, rotationY: 0, rotationX: 0, filter: 'blur(0px)', duration: o.in === 'drop' ? .55 : .36, ease: o.in === 'drop' ? 'bounce.out' : 'power3.out', immediateRender: false }, t);
+    else if (o.pop !== false) tl.fromTo(e, pop, { scale: S1, opacity: 1, y: 0, rotation: o.rot || 0, duration: stamp ? .2 : .42, ease: stamp ? 'power4.out' : 'back.out(1.8)', immediateRender: false }, t);
     if (o.tilt) tl.fromTo(inner, { rotationX: o.tilt[0], rotationY: o.tilt[1] || 0, transformPerspective: 1500 }, { rotationX: 0, rotationY: 0, transformPerspective: 1500, duration: o.tiltDur ?? 1.2, ease: 'power3.out', immediateRender: true }, t);
     if (o.push) tl.fromTo(inner, { scale: 1 }, { scale: o.push, duration: Math.max(.5, u - t), ease: 'none', immediateRender: false }, t);
     if (!owner && o.float !== false && u - t > 1.4) tl.to(e, { y: -10, duration: (u - t - .5) / 2, ease: 'sine.inOut', yoyo: true, repeat: 1 }, t + .45);
-    if (o.exit !== 'cut' && u < R.dur && (!owner || o.until != null)) tl.to(e, { y: owner ? -20 : -70, opacity: 0, duration: .16, ease: 'power2.in' }, u - .16);
+    const OUT = { left: { x: -520, opacity: 0 }, right: { x: 520, opacity: 0 }, zoom: { scale: S1 * 1.5, opacity: 0, filter: 'blur(8px)' }, down: { y: 360, opacity: 0 }, shrink: { scale: S1 * .4, opacity: 0 } };
+    if (o.out && OUT[o.out] && u < R.dur) tl.to(e, Object.assign({ duration: .18, ease: 'power2.in' }, OUT[o.out]), u - .18);
+    else if (o.exit !== 'cut' && u < R.dur && (!owner || o.until != null)) tl.to(e, { y: owner ? -20 : -70, opacity: 0, duration: .16, ease: 'power2.in' }, u - .16);
     return e;
   }
   R.items.forEach(o => place(o, heroes, null));
@@ -298,12 +318,15 @@
   if (pbox) { tl.fromTo(pbox, { y: 700 }, { y: 0, duration: .5, ease: 'back.out(1.1)', immediateRender: true }, 0);
   }
   (R.cams || []).forEach(c => { tl.set(pin, { scale: c.scale, y: c.y }, c.t0); if (c.t1 != null) tl.to(pin, { scale: 1, y: 0, duration: .38, ease: 'power3.inOut' }, c.t1); });
-  { const ps = [pres, pbox].filter(Boolean); let shown = R.beats[0]?.pres !== false;
+  if (R.flashes) { const ps = [pres, pbox].filter(Boolean); tl.set(ps, { autoAlpha: 0, y: 0 }, 0.001);
+    R.flashes.forEach(([a, d]) => { tl.fromTo(ps, { autoAlpha: 0, scale: .82, y: 60 }, { autoAlpha: 1, scale: 1, y: 0, duration: .2, ease: 'back.out(2)', transformOrigin: '50% 60%', immediateRender: false }, a);
+      tl.to(ps, { autoAlpha: 0, scale: 1.06, duration: .14, ease: 'power2.in' }, a + d - .14); }); }
+  else { const ps = [pres, pbox].filter(Boolean); let shown = R.beats[0]?.pres !== false;
     if (!shown) tl.set(ps, { y: 900 }, .01);
     R.beats.forEach((b, k) => { if (!k) return; const want = b.pres !== false; if (want === shown) return; shown = want;
       if (want) tl.fromTo(ps, { y: 900 }, { y: 0, duration: .45, ease: 'back.out(1.2)', immediateRender: false }, b.t0 - .05);
       else tl.to(ps, { y: 900, duration: .35, ease: 'power3.in' }, b.t0 - .1); }); }
-  R.beats.forEach((b, k) => { if (k) tl.fromTo(pres, { scale: .975 }, { scale: 1, duration: .28, ease: 'back.out(3)', transformOrigin: '50% 100%', immediateRender: false }, b.t0); });
+  R.beats.forEach((b, k) => { if (k && !R.flashes) tl.fromTo(pres, { scale: .975 }, { scale: 1, duration: .28, ease: 'back.out(3)', transformOrigin: '50% 100%', immediateRender: false }, b.t0); });
   const hx = (P.headX ?? .517) * 100, hy = (P.headY ?? .31) * 100;
   (R.reacts || []).forEach(t => {
     const bu = $('div', 'burst', pin); bu.style.left = hx + '%'; bu.style.top = hy + '%';

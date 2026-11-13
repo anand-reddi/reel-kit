@@ -63,7 +63,7 @@ def at_time(v, tm, i, t0):
     if v is None: return t0 + 0.05
     if isinstance(v, (int, float)): return t0 + v
     while v.startswith("next:"): v, i = v[5:], i + 1   # "next:word:x" = a word in the following beat (for items that "keep")
-    m = re.match(r"word:([^#+-]+)(?:#(\d+))?([+-][\d.]+)?$", v)
+    m = re.match(r"word:(.+?)(?:#(\d+))?([+-]\d[\d.]*)?$", v)
     if not m: raise SystemExit(f"bad time {v!r}")
     return word_time(tm, i, m.group(1), int(m.group(2) or 1) - 1) - 0.06 + float(m.group(3) or 0)
 
@@ -97,6 +97,7 @@ def build(sc, tm, work):
 
     def prep(h, i, t0, until, top):
         o = dict(h); o["at"] = r3(at_time(h.get("at"), tm, i, t0))
+        if top and "x" not in h and sc.get("hero_x"): o["x"] = sc["hero_x"]
         if until is not None: o["until"] = until
         elif "until" in h: o["until"] = r3(at_time(h["until"], tm, i, t0))
         for k in TIME_LISTS:
@@ -107,6 +108,12 @@ def build(sc, tm, work):
             if o.get(k) and not o[k].startswith(("http", "data:")):
                 src = o[k] if os.path.isabs(o[k]) else os.path.join(sc["_dir"], o[k])
                 dst = "assets/" + os.path.basename(src); shutil.copy(src, os.path.join(work, "page", dst)); o[k] = dst
+        if o.get("covers"):
+            cs = []
+            for c in o["covers"]:
+                src = c if os.path.isabs(c) else os.path.join(sc["_dir"], c); dst = "assets/" + os.path.basename(src)
+                shutil.copy(src, os.path.join(work, "page", dst)); cs.append(dst)
+            o["covers"] = cs
         for k in ("words", "speak", "scroll", "legend"):   # [[time, ...], ...]
             if k in o: o[k] = [[r3(at_time(x[0], tm, i, t0))] + list(x[1:]) for x in o[k]]
         for m in o.get("marks", []):
@@ -129,6 +136,14 @@ def build(sc, tm, work):
     for i, (b, (t0, t1)) in enumerate(zip(sc["beats"], bounds)):
         beats.append({"t0": t0, "t1": t1, "slug": b.get("slug", f"{i + 1:02d}"), "count": b.get("count"), "bg": b.get("bg"), "wipe": b.get("wipe", False), "pres": b.get("presenter", True)})
         hs = b.get("hero", []); hs = hs if isinstance(hs, list) else [hs]
+        shots = [g if isinstance(g, list) else [g] for g in b.get("shots", [])]
+        starts = [at_time(g[0].get("at"), tm, i, t0) for g in shots]
+        for k, g in enumerate(shots):   # each shot ends where the next begins (or at the beat end)
+            end = r3(starts[k + 1]) if k + 1 < len(shots) else r3(t1)
+            for h in g:
+                o = prep(dict(h, at=h.get("at", g[0].get("at"))), i, t0, end, True)
+                if "until" in h: o["until"] = r3(at_time(h["until"], tm, i, t0))
+                items.append(o)
         for h in hs:
             keep = h.get("keep", 0); until = r3(bounds[min(i + keep, len(bounds) - 1)][1])
             o = prep(h, i, t0, until, True)
@@ -147,6 +162,15 @@ def build(sc, tm, work):
     reel = {"dur": dur, "theme": sc.get("theme", "paper"), "counter": sc.get("counter"), "meta": sc.get("meta", True), "beats": beats, "items": items, "lines": lines,
             "cams": cams, "reacts": reacts}
     if sc.get("theme") == "kit" or sc.get("caption_y"): reel["capY"] = sc.get("caption_y", [1150, 1580])
+    fl = []
+    for i, (b, (t0, t1)) in enumerate(zip(sc["beats"], bounds)):   # presenter cutaways: "flash": ["word:x", seconds]
+        f = b.get("flash")
+        if f: fl.append([r3(at_time(f[0], tm, i, t0)), f[1] if len(f) > 1 else .9])
+    if fl: reel["flashes"] = fl
+    hold = sc.get("max_hold")
+    if hold:   # the visuals must keep changing: warn about anything on screen longer than max_hold seconds
+        for o in items:
+            if o["until"] - o["at"] > hold + .05: print(f'  ! held {o["until"] - o["at"]:.1f}s: {o["type"]} at {o["at"]:.2f}')
     if sc.get("character", "kai") == "kai":
         ws = [w for l in tm["lines"] for w in l["words"]]
         words = [{"t": w["t"], "d": r3((ws[k + 1]["t"] if k + 1 < len(ws) else w["t"] + .3) - w["t"]), "n": len(re.sub(r"[^A-Za-z0-9]", "", w["w"]))} for k, w in enumerate(ws)]
@@ -241,7 +265,7 @@ def main():
     print("render ..."); render(work, os.path.join(work, "silent.mp4"))
     if cmd == "board":
         out = os.path.join(sc["_dir"], sc["_name"] + "-frames.jpg"); board(work, bounds, out); print("frames:", out); return
-    print("mix ..."); lufs, n = sound.mix(work, cues, tm["duration"], {"music": {"style": "none"}, "levels": {"sfx": sc.get("sfx_level", -26)}})
+    print("mix ..."); lufs, n = sound.mix(work, cues, tm["duration"], {"music": sc.get("music", {"style": "none"}), "levels": {"sfx": sc.get("sfx_level", -26), "music": sc.get("music", {}).get("level", -33)}})
     out = os.path.join(sc["_dir"], sc["_name"] + ".mp4")
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", os.path.join(work, "silent.mp4"), "-i", os.path.join(work, "mix.wav"),
                     "-map", "0:v", "-map", "1:a", "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-shortest", out], check=True)
