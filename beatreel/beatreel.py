@@ -73,7 +73,7 @@ def icon(name, size=120, color="#111"):
 
 
 TIME_LISTS = ("ticks", "hiAt", "ringAt", "ats")
-TIME_ONE = ("rightAt", "dropAt")
+TIME_ONE = ("rightAt", "dropAt", "tapAt")
 
 
 def blocks(tm, max_words=7):
@@ -173,16 +173,23 @@ def presenter(sc, bounds, dur):
 def page(sc, tm, work):
     pg = os.path.join(work, "page"); shutil.rmtree(pg, ignore_errors=True); os.makedirs(os.path.join(pg, "assets"))
     shutil.copytree(os.path.join(HERE, "engine", "fonts"), os.path.join(pg, "fonts"))
-    for f in ("gsap.min.js", "beats.js", "avatar.js", "style.css"): shutil.copy(os.path.join(HERE, "engine", f), pg)
+    for f in ("gsap.min.js", "beats.js", "avatar.js", "style.css", "kit-bg.png"): shutil.copy(os.path.join(HERE, "engine", f), pg)
     reel, bounds, cues = build(sc, tm, work)
     src, pres = presenter(sc, bounds, tm["duration"])
+    vids = ""
+    for k, o in enumerate([o for o in reel["items"] if o["type"] == "video"]):
+        o["vid"] = f"hv{k}"; d = r3(o.get("until", tm["duration"]) - o["at"] + 0.2)
+        vids += (f'<video class="clip" id="hv{k}" src="{o["src"]}" muted playsinline data-start="{r3(o["at"] - 0.2)}" data-duration="{d}" '
+                 f'data-media-start="{r3(max(0, o.get("media", 0) - 0.2))}" data-track-index="{4 + k}"></video>')
+    box = '<div id="pbox"></div>' if sc.get("theme") == "kit" else ""
     if src: shutil.copy(src, os.path.join(pg, "assets", os.path.basename(src)))
     dur = tm["duration"]
     html = f'''<!doctype html><html lang="en"><head><meta charset="utf-8"/><title>{sc["_name"]}</title>
 <link rel="stylesheet" href="style.css"/><script src="gsap.min.js"></script></head><body>
 <div id="root" data-composition-id="reel" data-start="0" data-duration="{dur}" data-width="1080" data-height="1920" data-fps="30">
  <div id="stage"><div id="dots"></div><div id="glow"></div><div id="flood"></div>
-  <div id="meta"></div><div id="cap"></div><div id="heroes"></div>{pres}<div id="wipe"></div></div>
+  <div id="meta"></div><div id="cap"></div><div id="heroes"></div>{box}{pres}<div id="wipe"></div></div>
+ <div id="vids" style="display:none">{vids}</div>
 </div>
 <script>window.REEL = {json.dumps(reel)};</script><script src="beats.js"></script><script src="avatar.js"></script></body></html>'''
     open(os.path.join(pg, "index.html"), "w").write(html)

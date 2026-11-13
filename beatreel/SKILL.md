@@ -43,7 +43,9 @@ for the punchline (`"bg": "red" | "black"`), a halftone dot wipe marks a chapter
 beat is always the CTA (comment a keyword / send to a friend / follow).
 
 Themes: `paper` (off-white #efece6, ink, red #e8452c — most references), `ink` (dark navy, agents/dashboards),
-`neon` (near-black, lime #c8f53c + pink glow, launches/AI video tools). The illustrated desk-room look seen in
+`neon` (near-black, lime #c8f53c + pink glow, launches/AI video tools). `kit` mixes in reel-kit's look: its black grid background, Archivo
+type, red #e5372d, red halftone shadows, and the presenter (use `"character": "otaku"` for Krish) rising out of a
+rounded box with a red glow, like reel-kit's character box. Example: `examples/claude-meetings-kit/`. The illustrated desk-room look seen in
 two references is not built yet.
 
 ## Workflow (the user's standing rules apply)
@@ -109,7 +111,7 @@ sad, cry, panic, nervous, thumbs_up, point_up, point_side, count, wave, bored), 
 
 Every hero item: `type`, `at` (`"word:xyz"`, `"word:xyz#2"`, `"word:xyz+0.2"`, seconds into the beat, or omitted =
 beat start), `until` (a word: leave early), `keep` (stay N more beats), `x`, `y` (centre, px), `rot`, `z`,
-`scale`, `sfx` (false = silent), `sfx_id`, `float` (false = no drift), `exit` ("cut" = no fade). Any item can take
+`scale` (size multiplier), `sfx` (false = silent), `sfx_id`, `float` (false = no drift), `exit` ("cut" = no fade). Any item can take
 `icon` (+ `color`) where it shows one.
 
 | type | keys |
@@ -133,6 +135,8 @@ beat start), `until` (a word: leave early), `keep` (stay N more beats), `x`, `y`
 | `date` | month, day |
 | `image` | src, w, radius, shadow |
 | `html` | html (escape hatch) |
+| `video` | src (mp4), media (start second in the clip), url, tab, w, aspect, fit, words [[time, text, red]] — a clip playing in a browser window, with pop-on labels |
+| `follow` | img, handle, text, tapAt — the follow card; the button turns to "Following" on tapAt |
 
 ## Files
 

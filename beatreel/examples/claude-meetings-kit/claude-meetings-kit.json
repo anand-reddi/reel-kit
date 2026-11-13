@@ -1,0 +1,396 @@
+{
+ "name": "claude-meetings-kit",
+ "theme": "kit",
+ "character": "otaku",
+ "meta": false,
+ "voice": {
+  "name": "am_puck",
+  "speed": 1.15
+ },
+ "presenter": {
+  "width": 1400,
+  "y": 1180
+ },
+ "beats": [
+  {
+   "pose": "hi",
+   "cam": "big",
+   "lines": [
+    "Claude can now join your _Google Meet_, and build the doc while you talk."
+   ],
+   "hero": [
+    {
+     "type": "row",
+     "tiles": [
+      {
+       "icon": "logos:claude-icon",
+       "label": "Claude"
+      },
+      {
+       "icon": "logos:google-meet-2020",
+       "label": "Google Meet"
+      }
+     ],
+     "ats": [
+      "word:Claude",
+      "word:Google"
+     ],
+     "y": 760,
+     "until": "word:build",
+     "scale": 1.6
+    },
+    {
+     "type": "video",
+     "src": "launch.mp4",
+     "media": 47.0,
+     "url": "claude.ai",
+     "tab": "Meeting notes",
+     "at": "word:build",
+     "y": 800,
+     "words": [
+      [
+       "word:doc",
+       "BUILDS THE DOC"
+      ],
+      [
+       "word:talk",
+       "WHILE YOU TALK",
+       true
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "pose": "explain",
+   "lines": [
+    "Just say, Claude, start a _whiteboard_."
+   ],
+   "hero": [
+    {
+     "type": "video",
+     "src": "launch.mp4",
+     "media": 10.4,
+     "url": "meet.google.com",
+     "tab": "Google Meet",
+     "y": 780,
+     "words": [
+      [
+       "word:whiteboard",
+       "“START A WHITEBOARD”",
+       true
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "pose": "count",
+   "lines": [
+    "Everyone throws in ideas, and Claude _sorts_ them, easiest to hardest."
+   ],
+   "hero": [
+    {
+     "type": "video",
+     "src": "launch.mp4",
+     "media": 21.6,
+     "url": "meet.google.com",
+     "tab": "Whiteboard",
+     "y": 780,
+     "until": "word:easiest",
+     "words": [
+      [
+       "word:ideas",
+       "EVERYONE'S IDEAS"
+      ],
+      [
+       "word:sorts",
+       "CLAUDE SORTS THEM",
+       true
+      ]
+     ]
+    },
+    {
+     "type": "shot",
+     "src": "sorted.png",
+     "label": "sorted by claude",
+     "w": 960,
+     "y": 800,
+     "at": "word:easiest",
+     "rings": [
+      [
+       0,
+       24,
+       25,
+       9
+      ],
+      [
+       56,
+       24,
+       24,
+       9
+      ]
+     ],
+     "ringAt": [
+      "word:easiest",
+      "word:hardest"
+     ]
+    },
+    {
+     "type": "stamp",
+     "text": "SORTED",
+     "at": "word:hardest",
+     "x": 790,
+     "y": 1060,
+     "rot": -10,
+     "size": 90
+    }
+   ]
+  },
+  {
+   "pose": "think",
+   "react": "word:links",
+   "lines": [
+    "Ask it something, and it checks your docs and _links_ the source."
+   ],
+   "hero": [
+    {
+     "type": "shot",
+     "src": "chat2.jpg",
+     "label": "meeting chat",
+     "w": 720,
+     "y": 800,
+     "rings": [
+      [
+       18,
+       12,
+       58,
+       20
+      ],
+      [
+       18,
+       32,
+       58,
+       32
+      ],
+      [
+       30,
+       47,
+       42,
+       14
+      ]
+     ],
+     "ringAt": [
+      "word:ask",
+      "word:checks",
+      "word:links"
+     ]
+    }
+   ]
+  },
+  {
+   "pose": "thumbs_up",
+   "lines": [
+    "When the call ends, your notes, action items and transcript are already in _Claude_."
+   ],
+   "hero": [
+    {
+     "type": "list",
+     "title": "// after the call",
+     "items": [
+      "Notes",
+      "Action items",
+      "Full transcript"
+     ],
+     "ticks": [
+      "word:notes",
+      "word:action",
+      "word:transcript"
+     ],
+     "y": 660,
+     "w": 820
+    },
+    {
+     "type": "logo",
+     "icon": "logos:claude-icon",
+     "name": "Claude",
+     "at": "word:Claude",
+     "x": 560,
+     "y": 1110,
+     "rot": -3
+    }
+   ]
+  },
+  {
+   "pose": "shh",
+   "lines": [
+    "It never saves the audio, and by default, it leaves if an _outsider_ joins."
+   ],
+   "hero": [
+    {
+     "type": "row",
+     "tiles": [
+      {
+       "icon": "lucide:mic-off",
+       "color": "#e5372d",
+       "label": "Audio"
+      },
+      {
+       "icon": "lucide:user-x",
+       "color": "#e5372d",
+       "label": "Outsiders"
+      }
+     ],
+     "ats": [
+      0,
+      "word:outsider"
+     ],
+     "y": 720,
+     "until": "word:audio",
+     "scale": 1.7
+    },
+    {
+     "type": "sticker",
+     "lines": [
+      "NO AUDIO",
+      "SAVED"
+     ],
+     "red": true,
+     "redLine": 1,
+     "at": "word:audio",
+     "x": 330,
+     "y": 700,
+     "rot": -5
+    },
+    {
+     "type": "sticker",
+     "lines": [
+      "OUTSIDER IN",
+      "CLAUDE OUT"
+     ],
+     "red": true,
+     "redLine": 1,
+     "at": "word:outsider",
+     "x": 720,
+     "y": 1000,
+     "rot": 4
+    }
+   ]
+  },
+  {
+   "pose": "wait",
+   "bg": "red",
+   "react": "word:catch",
+   "lines": [
+    "The catch? It's only on _Team_ and _Enterprise_, and only Google Meet for now."
+   ],
+   "hero": [
+    {
+     "type": "sticker",
+     "lines": [
+      "TEAM +",
+      "ENTERPRISE"
+     ],
+     "at": "word:Team",
+     "y": 680,
+     "rot": -3
+    },
+    {
+     "type": "logo",
+     "icon": "logos:google-meet-2020",
+     "name": "Meet only",
+     "at": "word:Google",
+     "y": 1040,
+     "rot": 3
+    }
+   ]
+  },
+  {
+   "pose": "point_side",
+   "lines": [
+    "Docs and whiteboards are free till _February tenth_."
+   ],
+   "hero": [
+    {
+     "type": "row",
+     "tiles": [
+      {
+       "icon": "lucide:file-text",
+       "color": "#e5372d",
+       "label": "Docs"
+      },
+      {
+       "icon": "lucide:presentation",
+       "color": "#e5372d",
+       "label": "Whiteboards"
+      }
+     ],
+     "ats": [
+      0,
+      "word:whiteboards"
+     ],
+     "y": 860,
+     "until": "word:February",
+     "scale": 1.7
+    },
+    {
+     "type": "date",
+     "month": "FEB",
+     "day": "10",
+     "x": 400,
+     "y": 780,
+     "rot": -4,
+     "at": "word:February"
+    },
+    {
+     "type": "stamp",
+     "text": "FREE",
+     "at": "word:free",
+     "x": 760,
+     "y": 560,
+     "rot": 10,
+     "size": 120
+    },
+    {
+     "type": "sticker",
+     "text": "2027",
+     "at": "word:tenth",
+     "x": 720,
+     "y": 1030,
+     "rot": 4,
+     "size": 80
+    }
+   ]
+  },
+  {
+   "pose": "smile",
+   "lines": [
+    "Send this to the teammate who _always_ takes the notes."
+   ],
+   "hero": [
+    {
+     "type": "comment",
+     "who": "Send this to",
+     "keyword": "THE NOTE TAKER",
+     "y": 760
+    }
+   ]
+  },
+  {
+   "presenter": false,
+   "lines": [
+    "Follow for more like this."
+   ],
+   "hero": [
+    {
+     "type": "follow",
+     "img": "pfp.png",
+     "handle": "@krishexplainz",
+     "text": "AI and tech, explained in a minute",
+     "tapAt": "word:follow+0.4",
+     "y": 1000
+    }
+   ]
+  }
+ ]
+}

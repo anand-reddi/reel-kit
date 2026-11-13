@@ -2,3 +2,5 @@ build/
 *.mp4
 *-frames.jpg
 __pycache__/
+examples/*/launch.mp4
+examples/*/pfp.png

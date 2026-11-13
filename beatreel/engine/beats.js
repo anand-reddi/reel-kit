@@ -33,7 +33,7 @@
   // ---- background floods (a beat can turn the page red / black) and halftone wipes
   const flood = document.getElementById('flood');
   R.beats.forEach(b => {
-    const col = b.bg === 'red' ? 'var(--accent)' : b.bg === 'black' ? '#0d0d0d' : null;
+    const col = b.bg === 'red' ? (getComputedStyle(st).getPropertyValue('--accent').trim() || '#e8452c') : b.bg === 'black' ? '#0d0d0d' : null;
     if (col) { tl.set(flood, { background: col, opacity: 1 }, b.t0); tl.set(flood, { opacity: 0 }, b.t1);
       tl.set(st, { '--ink': '#fff', '--mute': 'rgba(255,255,255,.4)', '--meta': 'rgba(255,255,255,.7)', '--accent': b.bg === 'red' ? '#111' : 'var(--hi)' }, b.t0);
       tl.set(st, { '--ink': '', '--mute': '', '--meta': '', '--accent': '' }, b.t1); }
@@ -104,17 +104,29 @@
     panel: (o, e) => { e.className += ' panel card hs'; e.style.width = (o.w || 920) + 'px'; e.style.height = (o.h || 760) + 'px';
       if (o.label) $('div', 'lbl plbl', e, esc(o.label)); (o.children || []).forEach(ch => place(ch, e, o)); },
     html: (o, e) => { e.innerHTML = o.html; },
+    // a playing clip in a browser window (the <video> is made by beatreel.py so the renderer can drive it)
+    video: (o, e) => { e.className += ' brw vid hs'; e.style.width = (o.w || 940) + 'px';
+      e.innerHTML = `<div class="bt"><i></i><i></i><i></i><span class="tab">${esc(o.tab || '')}</span><span class="vurl">${esc(o.url || '')}</span></div><div class="vb" style="aspect-ratio:${o.aspect || '16/9'}"></div>`;
+      const v = document.getElementById(o.vid); if (v) { v.style.cssText = 'width:100%;height:100%;object-fit:' + (o.fit || 'cover') + ';display:block'; e.querySelector('.vb').appendChild(v); }
+      (o.words || []).forEach(([at, txt, red]) => { const w = $('div', 'vword' + (red ? ' red' : ''), e, esc(txt)); vis(w, at, o.until);
+        tl.fromTo(w, { scale: 1.8, opacity: 0, rotation: -6 }, { scale: 1, opacity: 1, rotation: -3, duration: .22, ease: 'back.out(2.4)', immediateRender: false }, at);
+        e.querySelectorAll('.vword').forEach(x => { if (x !== w) tl.set(x, { autoAlpha: 0 }, at); }); }); },
+    // the follow card: avatar, handle, a button that gets tapped and turns into "Following"
+    follow: (o, e, t) => { e.className += ' fol card hs';
+      e.innerHTML = `<img src="${o.img || ''}"><b>${esc(o.handle || '')}</b><span>${esc(o.text || '')}</span><div class="fbtn"><span class="a">Follow</span><span class="b">Following ✓</span></div>`;
+      const btn = e.querySelector('.fbtn'), at = o.tapAt ?? t + .6; on(btn, at);
+      tl.fromTo(btn, { scale: .86 }, { scale: 1, duration: .3, ease: 'back.out(3)', immediateRender: false }, at); },
   };
   function place(o, parent, owner) {
     const e = $('div', 'h', parent); const t = o.at, u = o.until ?? owner?.until ?? R.dur;
     (B[o.type] || B.card)(o, e, t);
     e.style.left = (o.x ?? (owner ? (owner.w || 920) / 2 : 540)) + 'px'; e.style.top = (o.y ?? (owner ? (owner.h || 760) / 2 : 820)) + 'px'; e.style.zIndex = o.z ?? 1;
-    if (o.scale) e.style.scale = o.scale;
-    gsap.set(e, { xPercent: -50, yPercent: -50, rotation: o.rot || 0 });
+    const S1 = o.scale || 1;
+    gsap.set(e, { xPercent: -50, yPercent: -50, rotation: o.rot || 0, scale: S1 });
     vis(e, t, u);
     const stamp = o.type === 'stamp', stk = o.type === 'sticker';
     const pop = stamp ? { scale: 2.6, opacity: 0, rotation: (o.rot || 0) - 14 } : { scale: .55, opacity: 0, y: 46, rotation: (o.rot || 0) + (stk ? -12 : -4) };
-    tl.fromTo(e, pop, { scale: 1, opacity: 1, y: 0, rotation: o.rot || 0, duration: stamp ? .2 : .42, ease: stamp ? 'power4.out' : 'back.out(1.8)', immediateRender: false }, t);
+    pop.scale *= S1; tl.fromTo(e, pop, { scale: S1, opacity: 1, y: 0, rotation: o.rot || 0, duration: stamp ? .2 : .42, ease: stamp ? 'power4.out' : 'back.out(1.8)', immediateRender: false }, t);
     if (!owner && o.float !== false && u - t > 1.4) tl.to(e, { y: -10, duration: (u - t - .5) / 2, ease: 'sine.inOut', yoyo: true, repeat: 1 }, t + .45);
     if (o.exit !== 'cut' && u < R.dur && (!owner || o.until != null)) tl.to(e, { y: owner ? -20 : -70, opacity: 0, duration: .16, ease: 'power2.in' }, u - .16);
     return e;
@@ -124,6 +136,9 @@
   // ---- presenter: rises in, can start big and shrink when the hero lands, bounces on beat changes, reacts
   const pres = document.getElementById('pres'), pin = document.getElementById('presin'); const P = R.presenter || {};
   tl.fromTo(pres, { y: 700 }, { y: 0, duration: .5, ease: 'back.out(1.3)', immediateRender: true }, 0);
+  const pbox = document.getElementById('pbox');
+  if (pbox) { tl.fromTo(pbox, { y: 700 }, { y: 0, duration: .5, ease: 'back.out(1.1)', immediateRender: true }, 0);
+    R.beats.forEach(b => { if (b.pres === false) tl.to(pbox, { y: 900, duration: .4, ease: 'power3.in' }, b.t0 - .05); }); }
   (R.cams || []).forEach(c => { tl.set(pin, { scale: c.scale, y: c.y }, c.t0); if (c.t1 != null) tl.to(pin, { scale: 1, y: 0, duration: .38, ease: 'power3.inOut' }, c.t1); });
   R.beats.forEach(b => { if (b.pres === false) tl.to(pres, { y: 900, duration: .4, ease: 'power3.in' }, b.t0 - .05); });
   R.beats.forEach((b, k) => { if (k) tl.fromTo(pres, { scale: .975 }, { scale: 1, duration: .28, ease: 'back.out(3)', transformOrigin: '50% 100%', immediateRender: false }, b.t0); });
