@@ -59,9 +59,10 @@ def word_time(tm, i, word, nth=0):
 
 
 def at_time(v, tm, i, t0):
-    """an item's moment: None (beat start), seconds from the beat start, or "word:xyz" / "word:xyz#2" (+-0.1)."""
+    """an item's moment: None (beat start), seconds from the beat start, or "word:xyz" / "word:xyz#2" (+-0.1); "next:word:xyz" looks in the next beat."""
     if v is None: return t0 + 0.05
     if isinstance(v, (int, float)): return t0 + v
+    while v.startswith("next:"): v, i = v[5:], i + 1   # "next:word:x" = a word in the following beat (for items that "keep")
     m = re.match(r"word:([^#+-]+)(?:#(\d+))?([+-][\d.]+)?$", v)
     if not m: raise SystemExit(f"bad time {v!r}")
     return word_time(tm, i, m.group(1), int(m.group(2) or 1) - 1) - 0.06 + float(m.group(3) or 0)
@@ -74,7 +75,7 @@ def icon(name, size=120, color="#111"):
 
 TIME_LISTS = ("ticks", "hiAt", "ringAt", "ats")
 TIME_ONE = ("rightAt", "dropAt", "tapAt", "claudeAt", "outsiderAt", "leaveAt", "endAt", "strikeAt", "checkAt", "answerAt",
-            "linkAt", "sortAt", "markAt", "sendAt", "flipAt")
+            "linkAt", "sortAt", "markAt", "sendAt", "flipAt", "scanAt", "plugAt", "at2", "redAt", "darkAt")
 
 
 def blocks(tm, max_words=7):
@@ -106,10 +107,13 @@ def build(sc, tm, work):
             if o.get(k) and not o[k].startswith(("http", "data:")):
                 src = o[k] if os.path.isabs(o[k]) else os.path.join(sc["_dir"], o[k])
                 dst = "assets/" + os.path.basename(src); shutil.copy(src, os.path.join(work, "page", dst)); o[k] = dst
-        for k in ("words", "speak"):   # [[time, ...], ...]
+        for k in ("words", "speak", "scroll", "legend"):   # [[time, ...], ...]
             if k in o: o[k] = [[r3(at_time(x[0], tm, i, t0))] + list(x[1:]) for x in o[k]]
+        for m in o.get("marks", []):
+            for k in ("at", "until"):
+                if k in m: m[k] = r3(at_time(m[k], tm, i, t0))
         if o.get("icon"): o["svg"] = icon(o["icon"], 160, o.get("color", "#111"))
-        for k in ("fromIcon", "toIcon"):
+        for k in [k for k in o if k.endswith("Icon")]:
             if o.get(k): o[k[:-4] + "Svg"] = icon(o[k], 160, o.get(k[:-4] + "Color", "#fff"))
         if isinstance(o.get("items"), list) and o["items"] and isinstance(o["items"][0], dict):
             o["items"] = [dict(x, svg=icon(x["icon"], 160, x.get("color", "#e5372d")) if x.get("icon") else "") for x in o["items"]]

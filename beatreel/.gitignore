@@ -1,6 +1,6 @@
-build/
-*.mp4
 *-frames.jpg
+*.mp4
 __pycache__/
+build/
 examples/*/launch.mp4
 examples/*/pfp.png

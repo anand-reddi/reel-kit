@@ -282,3 +282,53 @@ html, body { margin: 0; background: #000; }
 .snd .st i { display: grid; place-items: center; width: 220px; height: 220px; margin: 0 auto 16px; border-radius: 50%; padding: 50px; box-sizing: border-box; } .snd .st i svg { width: 100%; height: 100%; }
 .snd .st b { font: 900 44px AR, sans-serif; } .snd .st[data-on="1"] i { box-shadow: 0 0 0 12px rgba(229,55,45,.4), 0 0 80px rgba(229,55,45,.6); }
 .spl { position: absolute; left: 230px; top: 250px; width: 90px; height: 90px; color: #f2f1ee; } .spl svg { width: 100%; height: 100%; }
+
+/* ---- scenes v3: code, hub, pile, gauge, dots */
+.code { padding: 0; overflow: hidden; background: #111113; }
+.cbar { height: 64px; display: flex; align-items: center; gap: 12px; padding: 0 24px; background: #1c1c1f; border-bottom: 2px solid rgba(255,255,255,.06); }
+.cbar i { width: 16px; height: 16px; border-radius: 50%; background: #3a3a3e; } .cbar i:first-child { background: var(--accent); }
+.cbar span { margin-left: 10px; font: 600 26px MONO, monospace; color: #c9c9cf; } .cbar em { margin-left: auto; font: 700 20px MONO, monospace; font-style: normal; color: #fff; background: var(--accent); padding: 6px 12px; border-radius: 8px; letter-spacing: 1px; }
+.cwin { position: relative; overflow: hidden; background: #111113; }
+.cin { position: relative; padding: 12px 0; }
+.cl2 { display: flex; white-space: pre; font: 500 27px MONO, monospace; color: #d7d7dc; }
+.cl2 u { width: 76px; flex: none; text-align: right; padding-right: 22px; color: #55555c; text-decoration: none; }
+.cl2 span { overflow: hidden; text-overflow: ellipsis; padding-right: 20px; }
+.cl2 .k { color: #ff7a6e; font-style: normal; } .cl2 .s { color: #a5e26a; font-style: normal; } .cl2 .c { color: #6c6c74; } .cl2 b { color: #fff; } .cl2 b.hd { color: #fff; font-weight: 800; }
+.cmk { position: absolute; left: 8px; right: 8px; border: 4px solid var(--accent); border-radius: 10px; background: rgba(229,55,45,.16); box-shadow: 0 0 40px rgba(229,55,45,.35); }
+.cmk.green { border-color: #76b900; background: rgba(118,185,0,.14); box-shadow: 0 0 40px rgba(118,185,0,.3); }
+.ctag { position: absolute; right: 10px; top: -30px; padding: 6px 14px; border-radius: 8px; background: var(--accent); color: #fff; font: 800 22px AR, sans-serif; letter-spacing: .5px; white-space: nowrap; }
+.ctag.green { background: #76b900; color: #0b0b0b; }
+.cbeam { position: absolute; left: 0; right: 0; top: 0; height: 6px; background: #76b900; box-shadow: 0 0 30px 10px rgba(118,185,0,.55); z-index: 3; }
+
+.hlines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.hlines path { stroke: rgba(229,55,45,.85); stroke-width: 5; fill: none; stroke-dasharray: 1; stroke-linecap: round; }
+.hc { position: absolute; transform: translate(-50%,-50%); width: 300px; padding: 30px 20px; text-align: center; z-index: 2; }
+.hc > i { display: block; width: 120px; height: 120px; margin: 0 auto 12px; } .hc > i svg { width: 100%; height: 100%; } .hc > b { font: 900 40px AR, sans-serif; }
+.hplug { position: absolute; left: 50%; top: -86px; margin-left: -120px; width: 240px; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px 0; border-radius: 16px; background: var(--accent); color: #fff; font: 800 28px AR, sans-serif; }
+.hplug svg { width: 38px; height: 38px; }
+.hn { position: absolute; transform: translate(-50%,-50%); display: flex; flex-direction: column; align-items: center; gap: 10px; z-index: 2; }
+.hn > i { width: 150px; height: 150px; border-radius: 50%; background: #1b1b1d; border: 4px solid #333338; display: grid; place-items: center; transition: none; }
+.hn > i svg { width: 46%; height: 46%; } .hn > b { font: 900 36px AR, sans-serif; color: #f2f1ee; }
+.hn[data-on="1"] > i { border-color: var(--accent); background: #2a0f0d; box-shadow: 0 0 60px rgba(229,55,45,.55); }
+.hdot { position: absolute; left: 0; top: 0; width: 20px; height: 20px; margin: -10px; border-radius: 50%; background: #fff; box-shadow: 0 0 20px 6px rgba(229,55,45,.8); z-index: 1; }
+
+.pile { position: relative; }
+.pc2 { position: absolute; height: auto; padding: 14px 0; box-sizing: border-box; text-align: center; border-radius: 14px; background: #1d1d20; border: 2px solid rgba(255,255,255,.1); color: #f2f1ee; font-family: AR, sans-serif; font-weight: 800; white-space: nowrap; box-shadow: 0 10px 24px rgba(0,0,0,.5); }
+.pc2.hot { background: var(--accent); border-color: transparent; color: #fff; }
+
+.gauge { width: 470px; padding: 26px 26px 30px; text-align: center; box-sizing: border-box; }
+.gauge .gt { font: 800 28px MONO, monospace; color: #c9c9cf; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gauge svg { width: 100%; display: block; } .gauge svg path { fill: none; stroke-width: 18; stroke-linecap: butt; }
+.gauge .gn line { stroke: #f2f1ee; stroke-width: 6; stroke-linecap: round; } .gauge .gn circle { fill: #f2f1ee; }
+.gauge .gv { font: 900 110px/1 AR, sans-serif; letter-spacing: -4px; margin-top: -6px; } .gauge .gv small { font-size: 40px; color: #8a8a90; letter-spacing: 0; }
+.gauge .gk { display: inline-block; margin-top: 16px; padding: 12px 24px; border-radius: 12px; font: 900 38px AR, sans-serif; }
+.gauge .gk.bad { background: #e5372d; color: #fff; } .gauge .gk.mid { background: #f5a524; color: #111; } .gauge .gk.ok { background: #2fbf74; color: #08240f; }
+
+.dots { display: grid; gap: 12px; position: relative; }
+.dc { aspect-ratio: 1; border-radius: 12px; background: #26262a; }
+.dc[data-on="1"] { background: #e5372d; box-shadow: 0 0 20px rgba(229,55,45,.6); } .dc[data-on="2"] { background: #5c0d08; box-shadow: inset 0 0 0 4px #ff5a4e; }
+.dl2 { position: absolute; right: -10px; padding: 10px 18px; border-radius: 12px; font: 900 34px AR, sans-serif; white-space: nowrap; }
+.dl2.r1 { top: -80px; left: 0; right: auto; background: #e5372d; color: #fff; } .dl2.r2 { bottom: -80px; right: 0; background: #5c0d08; color: #fff; box-shadow: inset 0 0 0 4px #ff5a4e; }
+
+.term .bad { color: #ff5a4e; font-weight: 800; } .term .ok { color: #2fbf74; font-weight: 800; } .term .mid { color: #f5a524; font-weight: 700; }
+.snd .spl svg { width: 100%; height: 100%; }

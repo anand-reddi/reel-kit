@@ -113,7 +113,7 @@ laugh, hi, shrug, smile, think, clasp, wait, ok, shh, arms_crossed, facepalm, ex
 sad, cry, panic, nervous, thumbs_up, point_up, point_side, count, wave, bored), `count` (new counter value),
 `bg`, `wipe`, `pause_before`, `sfx` ([[time|"word:x", id, gain]]), `hero` (one item or a list).
 
-Every hero item: `type`, `at` (`"word:xyz"`, `"word:xyz#2"`, `"word:xyz+0.2"`, seconds into the beat, or omitted =
+Every hero item: `type`, `tilt` [rx, ry] (starts tilted in 3D and settles), `push` (slow zoom to this scale), `at` (`"word:xyz"`, `"word:xyz#2"`, `"word:xyz+0.2"`, seconds into the beat, or omitted =
 beat start), `until` (a word: leave early), `keep` (stay N more beats), `x`, `y` (centre, px), `rot`, `z`,
 `scale` (size multiplier), `sfx` (false = silent), `sfx_id`, `float` (false = no drift), `exit` ("cut" = no fade). Any item can take
 `icon` (+ `color`) where it shows one.
@@ -129,7 +129,7 @@ beat start), `until` (a word: leave early), `keep` (stay N more beats), `x`, `y`
 | `stamp` | text, size |
 | `shot` | src, label, w, rings [[x%, y%, w%, h%]], ringAt [times] |
 | `phone` | src or title, scale |
-| `term` | title, lines [..] (types out; `$ ` turns accent), type (seconds) |
+| `term` | title, lines [..] (types out; `$ ` turns accent; verdict words are coloured), typeDur (seconds) |
 | `logo` | icon (e.g. simple-icons:claude), color, name |
 | `list` | title, items [..], ticks [times], mark ("x" for crosses), w |
 | `row` | tiles [{icon, label}], ats [times] — icon tiles landing one per word |
@@ -150,6 +150,11 @@ beat start), `until` (a word: leave early), `keep` (stay N more beats), `x`, `y`
 | `plans` | items [{t, ok}], markAt — plan cards; the ones left out grey and cross, the rest light up |
 | `flip` | pages [{m, d, y}], flipAt, dur — calendar pages flipping to a date |
 | `send` | from, fromIcon, to, toIcon, c, sendAt — a paper plane flies to a person |
+| `code` | file, tag, lines [..], lang ("md" or "py"), start, rows, lh, fs, first, scroll [[time, line]], marks [{line, to, at, until, tag, color: "green"}], scanAt, scanDur — a file viewer that scrolls, boxes lines and scans |
+| `hub` | icon, label, plug + fromIcon, plugAt, items [{icon, title, a (angle)}], ats, r, cy, w, h — one thing reaching out to others |
+| `pile` | items [..], hi [indexes], dropAt, each, fs, w, h — labels rain down and pile up |
+| `gauge` | title, value, verdict, at2, count — a 0-100 dial (green / amber / red) with the verdict |
+| `dots` | n, cols, cell, hi, hi2, redAt, darkAt, legend [[time, text, "r1"/"r2"]] — a 10 x 10 share grid |
 | `follow` | img, handle, text, tapAt — the follow card; the button turns to "Following" on tapAt |
 
 ## Files

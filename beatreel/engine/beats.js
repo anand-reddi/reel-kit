@@ -85,8 +85,8 @@
     phone: (o, e) => { e.className += ' phone hs'; e.innerHTML = `<div class="scr">${o.src ? `<img src="${o.src}">` : `<div class="pt">${o.title || ''}</div>`}</div>`; if (o.scale) e.style.scale = o.scale; },
     term: (o, e, t) => { e.className += ' term hs'; if (o.w) e.style.width = o.w + 'px'; e.innerHTML = `<div class="tb"><i></i><i></i><i></i><span>${esc(o.title || 'terminal')}</span></div><div class="tx"></div>`;
       const tx = e.querySelector('.tx'), full = (o.lines || []).join('\n'), v = { n: 0 };
-      const up = () => { const s = full.slice(0, Math.round(v.n)); tx.innerHTML = esc(s).replace(/\$ /g, '<em>$ </em>') + '<span class="cur"></span>'; }; up();
-      tl.to(v, { n: full.length, duration: o.type ?? Math.min(2.2, full.length * .03), ease: 'none', onUpdate: up }, t + .25); },
+      const up = () => { const s = full.slice(0, Math.round(v.n)); tx.innerHTML = esc(s).replace(/\$ /g, '<em>$ </em>').replace(/(DO NOT INSTALL|CRITICAL|100\/100)/g, '<b class="bad">$1</b>').replace(/\b(SAFE|LOW|17\/100)\b/g, '<b class="ok">$1</b>').replace(/\b(HIGH|MEDIUM)\b/g, '<b class="mid">$1</b>') + '<span class="cur"></span>'; }; up();
+      tl.to(v, { n: full.length, duration: o.typeDur ?? Math.min(2.2, full.length * .03), ease: 'none', onUpdate: up }, t + .25); },
     logo: (o, e) => { e.className += ' logo'; e.innerHTML = `<div class="mk hs">${o.svg || ''}</div>${o.name ? `<b>${esc(o.name)}</b>` : ''}`; },
     list: (o, e) => { e.className += ' list card hs'; if (o.w) e.style.width = o.w + 'px'; e.innerHTML = (o.title ? `<div class="lbl">${esc(o.title)}</div>` : '') + (o.items || []).map(s => `<div class="li"><div class="bx"><span>${o.mark === 'x' ? XX : CK}</span></div><span>${esc(s)}</span></div>`).join('');
       e.querySelectorAll('.li').forEach((li, k) => { const at = o.ticks?.[k]; if (at == null) return; on(li, at);
@@ -118,6 +118,59 @@
         tl.fromTo(w, { scale: 1.8, opacity: 0, rotation: -6 }, { scale: 1, opacity: 1, rotation: -3, duration: .22, ease: 'back.out(2.4)', immediateRender: false }, at);
         e.querySelectorAll('.vword').forEach(x => { if (x !== w) tl.set(x, { autoAlpha: 0 }, at); }); }); },
 
+
+    // a code/file viewer: line numbers, scrolling to a line, highlight boxes with tags, a scan beam
+    code: (o, e, t) => { e.className += ' code card hs'; e.style.width = (o.w || 960) + 'px'; const L = o.lines || [], n0 = o.start || 1, lh = o.lh || 46, rows = o.rows || 11;
+      const hl = s_ => { if (o.lang === 'md') { if (/^#/.test(s_)) return `<b class="hd">${esc(s_)}</b>`; return esc(s_).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/^(\w[\w-]*):/, '<i class="k">$1</i>:'); }
+        return s_.split(/("[^"]*"|'[^']*'|#.*$)/).map(p_ => /^["']/.test(p_) ? `<i class="s">${esc(p_)}</i>` : /^#/.test(p_) ? `<i class="c">${esc(p_)}</i>` :
+          esc(p_).replace(/\b(def|for|in|if|import|return|any|from)\b/g, '<i class="k">$1</i>')).join(''); };
+      e.innerHTML = `<div class="cbar"><i></i><i></i><i></i><span>${esc(o.file || '')}</span>${o.tag ? `<em>${esc(o.tag)}</em>` : ''}</div><div class="cwin" style="height:${rows * lh + 24}px"><div class="cin"></div></div>`;
+      const win = e.querySelector('.cwin'), cin = e.querySelector('.cin');
+      L.forEach((s_, k) => { const r = $('div', 'cl2', cin, `<u>${n0 + k}</u><span>${hl(s_)}</span>`); r.style.height = lh + 'px'; r.style.lineHeight = lh + 'px'; if (o.fs) r.style.fontSize = o.fs + 'px'; });
+      if (o.first) tl.set(cin, { y: -(o.first - n0) * lh }, 0);
+      (o.scroll || []).forEach(([a, ln]) => tl.to(cin, { y: -(ln - n0) * lh, duration: .55, ease: 'power3.inOut' }, a));
+      (o.marks || []).forEach(m => { const k = m.line - n0, bx = $('div', 'cmk' + (m.color ? ' ' + m.color : ''), cin); bx.style.top = (12 + k * lh) + 'px'; bx.style.height = ((m.to ? m.to - m.line + 1 : 1) * lh) + 'px';
+        vis(bx, m.at, m.until); tl.fromTo(bx, { scaleX: 0 }, { scaleX: 1, transformOrigin: '0 50%', duration: .3, ease: 'power3.out', immediateRender: false }, m.at);
+        if (m.tag) { const tg = $('div', 'ctag' + (m.color ? ' ' + m.color : ''), bx, esc(m.tag)); tl.fromTo(tg, { y: 16, opacity: 0, scale: .7 }, { y: 0, opacity: 1, scale: 1, duration: .28, ease: 'back.out(2.4)', immediateRender: false }, m.at + .18); } });
+      if (o.scanAt != null) { const d = o.scanDur || 1.1, bm = $('div', 'cbeam', win); vis(bm, o.scanAt, o.scanAt + d); tl.fromTo(bm, { y: 0 }, { y: rows * lh, duration: d, ease: 'none', immediateRender: false }, o.scanAt); } },
+    // a hub: one thing in the middle reaching out to others; lines draw, pulses travel, targets light up
+    hub: (o, e, t) => { e.className += ' hub'; const W = o.w || 960, H = o.h || 860; e.style.width = W + 'px'; e.style.height = H + 'px';
+      const cx = W / 2, cy = o.cy ?? H / 2, N = o.items || [], R_ = o.r || 340;
+      const pos = N.map((n, k) => { const a = (n.a ?? (-90 + 360 * k / N.length)) * Math.PI / 180; return [cx + Math.cos(a) * R_, cy + Math.sin(a) * R_ * (o.squash ?? 1)]; });
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('class', 'hlines'); e.appendChild(svg);
+      const c = $('div', 'hc card hs', e, `${o.svg ? `<i>${o.svg}</i>` : ''}<b>${esc(o.label || '')}</b>`); c.style.left = cx + 'px'; c.style.top = cy + 'px';
+      if (o.fromSvg || o.plug) { const pg = $('div', 'hplug', c, `${o.fromSvg || ''}<span>${esc(o.plug || '')}</span>`); const a = o.plugAt ?? t + .3; vis(pg, a);
+        tl.fromTo(pg, { y: -260, rotation: -20, scale: 1.3 }, { y: 0, rotation: 0, scale: 1, duration: .45, ease: 'bounce.out', immediateRender: false }, a); }
+      N.forEach((n, k) => { const [x, y] = pos[k], a = o.ats?.[k] ?? t + .5 + k * .3;
+        const ln = document.createElementNS('http://www.w3.org/2000/svg', 'path'); ln.setAttribute('d', `M${cx} ${cy} L${x} ${y}`); ln.setAttribute('pathLength', 1); svg.appendChild(ln);
+        tl.set(ln, { attr: { 'stroke-dashoffset': 1 } }, 0); tl.to(ln, { attr: { 'stroke-dashoffset': 0 }, duration: .3, ease: 'power2.out' }, a - .25);
+        const nd = $('div', 'hn', e, `<i>${n.svg || ''}</i><b>${esc(n.title || '')}</b>`); nd.style.left = x + 'px'; nd.style.top = y + 'px'; vis(nd, a - .1);
+        tl.fromTo(nd, { scale: 0 }, { scale: 1, duration: .35, ease: 'back.out(2.4)', immediateRender: false }, a - .1); on(nd, a + .15);
+        for (let j = 0; j < 3; j++) { const d_ = $('div', 'hdot', e); vis(d_, a + j * .35, a + j * .35 + .4); tl.fromTo(d_, { x: cx, y: cy }, { x, y, duration: .4, ease: 'none', immediateRender: false }, a + j * .35); } }); },
+    // labels that rain down and pile up at the bottom
+    pile: (o, e, t) => { e.className += ' pile'; const W = o.w || 980, H = o.h || 760; e.style.width = W + 'px'; e.style.height = H + 'px';
+      const it = o.items || [], fs = o.fs || 30, wOf = s_ => 40 + s_.length * fs * .56, rows = []; let row = [], rw = 0;
+      it.forEach((s_, k) => { const w = wOf(s_); if (rw + w > W - 20 && row.length) { rows.push(row); row = []; rw = 0; } row.push([s_, k, w]); rw += w + 12; }); if (row.length) rows.push(row);
+      const a0 = o.dropAt ?? t + .1, ea = o.each ?? .06;
+      rows.forEach((r, ri) => { const tot = r.reduce((q, x) => q + x[2] + 12, -12); let x = (W - tot) / 2; const y = H - (ri + 1) * (fs + 40);
+        r.forEach(([s_, k, w]) => { const el = $('div', 'pc2' + ((o.hi || []).includes(k) ? ' hot' : ''), e, esc(s_)); el.style.left = x + 'px'; el.style.top = y + 'px'; el.style.width = w + 'px'; el.style.fontSize = fs + 'px'; x += w + 12;
+          const a = a0 + k * ea; vis(el, a); tl.fromTo(el, { y: -(y + 200 + rnd() * 300), rotation: (rnd() - .5) * 70 }, { y: 0, rotation: (rnd() - .5) * 8, duration: .6, ease: 'bounce.out', immediateRender: false }, a); }); }); },
+    // a dial: needle swings to the score, number counts, verdict lands
+    gauge: (o, e, t) => { e.className += ' gauge card hs'; const v = o.value ?? 0, a = o.at2 ?? t + .25, d = o.count ?? 1;
+      const arc = (a0, a1, col) => { const p_ = q => [100 + 80 * Math.cos(Math.PI * (1 - q / 100)), 100 - 80 * Math.sin(Math.PI * (1 - q / 100))], [x0, y0] = p_(a0), [x1, y1] = p_(a1); return `<path d="M${x0} ${y0} A80 80 0 0 1 ${x1} ${y1}" stroke="${col}"/>`; };
+      e.innerHTML = `${o.title ? `<div class="gt">${esc(o.title)}</div>` : ''}<svg viewBox="0 0 200 118">${arc(0, 20, '#2fbf74')}${arc(21, 50, '#f5a524')}${arc(51, 100, '#e5372d')}<g class="gn"><line x1="100" y1="100" x2="100" y2="34"/><circle cx="100" cy="100" r="7"/></g></svg><div class="gv"><span>0</span><small>/100</small></div><div class="gk ${v > 50 ? 'bad' : v > 20 ? 'mid' : 'ok'}">${esc(o.verdict || '')}</div>`;
+      const nd = e.querySelector('.gn'), sp = e.querySelector('.gv span'), vk = e.querySelector('.gk'), st = { x: 0 };
+      tl.set(nd, { rotation: -90, svgOrigin: '100 100' }, 0); tl.to(nd, { rotation: -90 + 1.8 * v, svgOrigin: '100 100', duration: d, ease: 'power3.out' }, a);
+      const up = () => { sp.textContent = Math.round(st.x); }; up(); tl.to(st, { x: v, duration: d, ease: 'power3.out', onUpdate: up }, a);
+      vis(vk, a + d - .1); tl.fromTo(vk, { scale: 2.2, opacity: 0, rotation: -8 }, { scale: 1, opacity: 1, rotation: -3, duration: .22, ease: 'power4.out', immediateRender: false }, a + d - .1); },
+    // a 10 x 10 grid: some cells light up red, a few of those go dark (two levels), legend chips land
+    dots: (o, e, t) => { e.className += ' dots'; const n = o.n || 100, cols = o.cols || 10; e.style.gridTemplateColumns = `repeat(${cols}, ${o.cell || 70}px)`;
+      const cs = Array.from({ length: n }, () => $('div', 'dc', e)); tl.fromTo(cs, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: .25, stagger: { each: .006, from: 'random' }, ease: 'back.out(2)', immediateRender: false }, t);
+      const order = cs.map((c, k) => [rnd(), k]).sort((p_, q) => p_[0] - q[0]).map(x => x[1]);
+      const h1 = order.slice(0, o.hi || 0), h2 = h1.slice(0, o.hi2 || 0);
+      h1.forEach((k, j) => tl.set(cs[k], { attr: { 'data-on': 1 } }, (o.redAt ?? t + .6) + j * .015));
+      h2.forEach((k, j) => tl.set(cs[k], { attr: { 'data-on': 2 } }, (o.darkAt ?? t + 1.4) + j * .05));
+      (o.legend || []).forEach(([a, txt, cls]) => { const lg = $('div', 'dl2 ' + (cls || ''), e, esc(txt)); vis(lg, a); tl.fromTo(lg, { scale: 1.6, opacity: 0 }, { scale: 1, opacity: 1, duration: .25, ease: 'back.out(2)', immediateRender: false }, a); }); },
     // ---------- explainer scenes: whole ideas acted out, built on the words
     // a video call: people tiles, Claude joining, speakers lighting up, an outsider joining and Claude leaving, the call ending
     meet: (o, e, t) => { e.className += ' meet hs'; e.style.width = (o.w || 920) + 'px';
@@ -206,11 +259,12 @@
     // sending: a paper plane flies from one card to a person, who bounces
     send: (o, e, t) => { e.className += ' snd';
       e.innerHTML = `<div class="sf card hs">${o.fromSvg ? `<i>${o.fromSvg}</i>` : ''}<b>${esc(o.from || 'This reel')}</b></div><svg class="sarc" viewBox="0 0 520 220"><path d="M20 190 Q260 -40 500 150" pathLength="1"/></svg>
-        <div class="st"><i style="background:${o.c || '#f5a524'}">${o.toSvg || ''}</i><b>${esc(o.to || '')}</b></div><div class="spl">${IC.plane}</div>`;
-      const a = o.sendAt ?? t + .5, pl = e.querySelector('.spl'), arc = e.querySelector('.sarc path'), to = e.querySelector('.st');
+        <div class="st"><i style="background:${o.c || '#f5a524'}">${o.toSvg || ''}</i><b>${esc(o.to || '')}</b></div>${Array.from({ length: o.n || 1 }, () => `<div class="spl">${o.payloadSvg || IC.plane}</div>`).join('')}`;
+      const a = o.sendAt ?? t + .5, pls = [...e.querySelectorAll('.spl')], pl = pls[0], arc = e.querySelector('.sarc path'), to = e.querySelector('.st');
       tl.fromTo(to, { scale: 0 }, { scale: 1, duration: .35, ease: 'back.out(2)', immediateRender: false }, t + .2);
       tl.set(arc, { attr: { 'stroke-dashoffset': 1 } }, 0); tl.to(arc, { attr: { 'stroke-dashoffset': 0 }, duration: .6, ease: 'power1.inOut' }, a);
-      vis(pl, a, a + .62); tl.set(pl, { x: 0, y: 0, rotation: -30 }, a); tl.to(pl, { x: 250, y: -170, rotation: 0, duration: .3, ease: 'power1.out' }, a); tl.to(pl, { x: 500, y: -30, rotation: 35, duration: .3, ease: 'power1.in' }, a + .3);
+      pls.forEach((p_, j) => { const b = a + j * .2; vis(p_, b, b + .62); tl.set(p_, { x: 0, y: 0, rotation: o.payloadSvg ? 0 : -30 }, b);
+        tl.to(p_, { x: 250, y: -170, rotation: o.payloadSvg ? 10 : 0, duration: .3, ease: 'power1.out' }, b); tl.to(p_, { x: 500, y: -30, rotation: o.payloadSvg ? 25 : 35, duration: .3, ease: 'power1.in' }, b + .3); });
       tl.fromTo(to, { scale: 1.25 }, { scale: 1, duration: .4, ease: 'elastic.out(1.2,.4)', immediateRender: false }, a + .6); on(to, a + .6); },
     // the follow card: avatar, handle, a button that gets tapped and turns into "Following"
     follow: (o, e, t) => { e.className += ' fol card hs';
@@ -229,6 +283,8 @@
     const stamp = o.type === 'stamp', stk = o.type === 'sticker';
     const pop = stamp ? { scale: 2.6, opacity: 0, rotation: (o.rot || 0) - 14 } : { scale: .55, opacity: 0, y: 46, rotation: (o.rot || 0) + (stk ? -12 : -4) };
     pop.scale *= S1; if (o.pop !== false) tl.fromTo(e, pop, { scale: S1, opacity: 1, y: 0, rotation: o.rot || 0, duration: stamp ? .2 : .42, ease: stamp ? 'power4.out' : 'back.out(1.8)', immediateRender: false }, t);
+    if (o.tilt) tl.fromTo(inner, { rotationX: o.tilt[0], rotationY: o.tilt[1] || 0, transformPerspective: 1500 }, { rotationX: 0, rotationY: 0, transformPerspective: 1500, duration: o.tiltDur ?? 1.2, ease: 'power3.out', immediateRender: true }, t);
+    if (o.push) tl.fromTo(inner, { scale: 1 }, { scale: o.push, duration: Math.max(.5, u - t), ease: 'none', immediateRender: false }, t);
     if (!owner && o.float !== false && u - t > 1.4) tl.to(e, { y: -10, duration: (u - t - .5) / 2, ease: 'sine.inOut', yoyo: true, repeat: 1 }, t + .45);
     if (o.exit !== 'cut' && u < R.dur && (!owner || o.until != null)) tl.to(e, { y: owner ? -20 : -70, opacity: 0, duration: .16, ease: 'power2.in' }, u - .16);
     return e;
