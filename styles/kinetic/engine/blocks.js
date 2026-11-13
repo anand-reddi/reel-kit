@@ -656,7 +656,8 @@ BL.Clock = (box, c, T, S) => {
 BL.Duo = (box, c, T, S) => {
   const a = S.start, b = S.end; K.ground(a, c.ground || 'bg'); const sh = layer(box, a, b); const cs = c.cards || [];
   cs.forEach((o, k) => { const d = el('div', 'duocard ' + (k ? 'duor' : 'duol'), sh); if (o.color) d.style.setProperty('--dc', o.color);
-    el('div', 'duologo', d, o.logo || ''); el('div', 'duotitle', d, esc(o.title || '')); el('div', 'duosub', d, esc(o.sub || ''));
+    el('div', 'duologo', d, o.logo || ''); const fit = (e, txt, big) => { const L = Math.max(...String(txt).split(' ').map(w => w.length)); if (L > 7 || String(txt).length > 9) e.style.fontSize = Math.round(big * Math.min(1, 7.5 / Math.max(L, 9))) + 'px'; };
+    fit(el('div', 'duotitle', d, esc(o.title || '')), o.title || '', 82); fit(el('div', 'duosub', d, esc(o.sub || '')), o.sub || '', 74);
     const ch = el('div', 'duochip mono', d, (o.chipIcon || '') + `<span>${esc(o.chip || '')}</span>`);
     const t = o.at != null ? T(o.at) : a + .1 + k * .5;
     tl.fromTo(d, { y: 900, rotation: k ? 14 : -14, opacity: 0 }, { y: 0, rotation: k ? 4 : -4, opacity: 1, duration: .5, ease: 'back.out(1.5)', immediateRender: false }, t);

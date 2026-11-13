@@ -258,7 +258,8 @@ html, body { margin: 0; background: #000; }
   display: flex; flex-direction: column; align-items: center; padding-top: 90px; box-sizing: border-box; color: #f2f1ee; }
 .duol { left: 55px; } .duor { right: 55px; }
 .duologo { width: 170px; height: 170px; color: var(--dc, #d97757); } .duologo svg { width: 100%; height: 100%; }
-.duotitle { font: 900 82px/1 AV, sans-serif; margin-top: 60px; letter-spacing: -2px; } .duosub { font: 800 74px/1.1 AV, sans-serif; color: var(--dc, #d97757); }
+.duotitle { font: 900 82px/1 AV, sans-serif; margin-top: 60px; letter-spacing: -2px; } .duosub { font: 800 74px/1.1 AV, sans-serif; color: var(--dc, #d97757); margin-top: 10px; }
+.duotitle, .duosub { width: 100%; box-sizing: border-box; padding: 0 36px; text-align: center; overflow-wrap: break-word; }
 .duochip { display: flex; align-items: center; gap: 12px; margin-top: auto; margin-bottom: 70px; padding: 16px 26px; border-radius: 40px; background: #2a2a2f; font-size: 27px; letter-spacing: .06em; text-align: center; max-width: 380px; }
 .duochip svg { width: 38px; height: 38px; flex: none; color: var(--dc, #d97757); }
 .duolink { position: absolute; left: 0; right: 0; top: 1300px; display: flex; align-items: center; justify-content: center; gap: 22px; color: #f2f1ee; font-size: 34px; letter-spacing: .25em; }
