@@ -97,7 +97,8 @@ mouth), gasp (O mouth, hands out), oops (hands on cheeks), excited, shh, thumbs_
 stop, facepalm, clasp, arms_crossed. Face-only moods on the talk/calm arms: laugh, nervous, stressed, sad,
 angry, bored, skeptical, wink, cry, panic. Per arm a pose sets palm x/y, rotation, finger extension, finger
 spread, thumb angle and `el: 1` (elbow outward instead of down). Redraws run in the timeline's onUpdate, so
-seek with events on (`tl.seek(t, false)`) when screenshotting pages by hand. Default placement: `presenter`
+seek with events on (`tl.seek(t, false)`) when screenshotting pages by hand. Every pose and expression is
+shown in `engine/kai-poses.jpg`. Default placement: `presenter`
 {scale 1, y 1060} (head centre about y 1340).
 
 Beat keys: `slug`, `lines` (usually one; `_x_` = red italic serif), `cam` ("big" = presenter starts large until
