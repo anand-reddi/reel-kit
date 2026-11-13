@@ -322,10 +322,10 @@
     R.flashes.forEach(([a, d]) => { tl.fromTo(ps, { autoAlpha: 0, scale: .82, y: 60 }, { autoAlpha: 1, scale: 1, y: 0, duration: .2, ease: 'back.out(2)', transformOrigin: '50% 60%', immediateRender: false }, a);
       tl.to(ps, { autoAlpha: 0, scale: 1.06, duration: .14, ease: 'power2.in' }, a + d - .14); }); }
   else { const ps = [pres, pbox].filter(Boolean); let shown = R.beats[0]?.pres !== false;
-    if (!shown) tl.set(ps, { y: 900 }, .01);
+    if (!shown) tl.set(ps, { y: 900, autoAlpha: 0 }, .01);
     R.beats.forEach((b, k) => { if (!k) return; const want = b.pres !== false; if (want === shown) return; shown = want;
-      if (want) tl.fromTo(ps, { y: 900 }, { y: 0, duration: .45, ease: 'back.out(1.2)', immediateRender: false }, b.t0 - .05);
-      else tl.to(ps, { y: 900, duration: .35, ease: 'power3.in' }, b.t0 - .1); }); }
+      if (want) tl.fromTo(ps, { y: 900, autoAlpha: 1 }, { y: 0, autoAlpha: 1, duration: .45, ease: 'back.out(1.2)', immediateRender: false }, b.t0 - .05);
+      else { tl.to(ps, { y: 900, duration: .35, ease: 'power3.in' }, b.t0 - .1); tl.set(ps, { autoAlpha: 0 }, b.t0 + .26); } }); }
   R.beats.forEach((b, k) => { if (k && !R.flashes) tl.fromTo(pres, { scale: .975 }, { scale: 1, duration: .28, ease: 'back.out(3)', transformOrigin: '50% 100%', immediateRender: false }, b.t0); });
   const hx = (P.headX ?? .517) * 100, hy = (P.headY ?? .31) * 100;
   (R.reacts || []).forEach(t => {

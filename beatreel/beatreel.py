@@ -253,6 +253,31 @@ def board(work, bounds, out):
     S.save(out, quality=88)
 
 
+def outro(sc, work, dur):
+    """Render a reel-kit script (the share and follow scenes the user likes) and append it: video after the beatreel
+    part, its voice after ours. One music bed and one mix then run over the whole thing."""
+    import numpy as np, soundfile as sf
+    src = sc["outro"] if os.path.isabs(sc["outro"]) else os.path.join(sc["_dir"], sc["outro"])
+    o = json.load(open(src)); o["intro"] = False; o["music"] = {"style": "none"}
+    tmp = os.path.join(os.path.dirname(src), "_outro.json"); json.dump(o, open(tmp, "w"), indent=1)
+    ow = os.path.join(work, "outro"); print("outro (reel-kit) ...")
+    r = subprocess.run([sys.executable, os.path.join(KIT, "reel.py"), "make", tmp, "-o", os.path.join(ow, "outro.mp4"), "--work", ow], capture_output=True, text=True)
+    os.remove(tmp)
+    if r.returncode: print(r.stdout[-1500:], r.stderr[-1500:]); raise SystemExit("outro failed")
+    main_v = os.path.join(work, "silent.mp4"); both = os.path.join(work, "silent_full.mp4")
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", main_v, "-i", os.path.join(ow, "video.mp4"), "-filter_complex",
+                    "[0:v]fps=30,format=yuv420p,setsar=1[a];[1:v]fps=30,format=yuv420p,setsar=1[b];[a][b]concat=n=2:v=1:a=0[v]", "-map", "[v]",
+                    "-c:v", "libx264", "-crf", "16", "-preset", "fast", both], check=True)
+    shutil.move(both, main_v)
+    v1, sr = sf.read(os.path.join(work, "vo.wav")); v2, sr2 = sf.read(os.path.join(ow, "vo.wav"))
+    if v1.ndim > 1: v1 = v1.mean(1)
+    if v2.ndim > 1: v2 = v2.mean(1)
+    n1 = int(round(dur * sr)); v1 = np.pad(v1, (0, max(0, n1 - len(v1))))[:n1]
+    tm2 = json.load(open(os.path.join(ow, "timing.json"))); mw = os.path.join(work, "mixfull"); os.makedirs(mw, exist_ok=True)
+    sf.write(os.path.join(mw, "vo.wav"), np.concatenate([v1, v2]).astype(np.float32), sr)
+    return dur + tm2["duration"], mw
+
+
 def main():
     if len(sys.argv) < 3: print(__doc__); sys.exit(1)
     cmd, path = sys.argv[1], sys.argv[2]; sc = load(path)
@@ -260,14 +285,17 @@ def main():
     print("voice ..."); tm = speak(sc, work)
     print(f"  {tm['duration']} s, {len(tm['lines'])} lines")
     bounds, cues = page(sc, tm, work)
+    if sc.get("sfx") is False: cues = []   # visuals and music only (the intro sound stays)
     intro = voice.intro(sc)
     if intro: cues.insert(0, [0.0, "file:" + intro["sound"], intro["gain"]])
     print("render ..."); render(work, os.path.join(work, "silent.mp4"))
     if cmd == "board":
         out = os.path.join(sc["_dir"], sc["_name"] + "-frames.jpg"); board(work, bounds, out); print("frames:", out); return
-    print("mix ..."); lufs, n = sound.mix(work, cues, tm["duration"], {"music": sc.get("music", {"style": "none"}), "levels": {"sfx": sc.get("sfx_level", -26), "music": sc.get("music", {}).get("level", -33)}})
+    dur, mw = tm["duration"], work
+    if sc.get("outro"): dur, mw = outro(sc, work, dur)   # reel-kit share + follow scenes appended
+    print("mix ..."); lufs, n = sound.mix(mw, cues, dur, {"music": sc.get("music", {"style": "none"}), "levels": {"sfx": sc.get("sfx_level", -26), "music": sc.get("music", {}).get("level", -33)}})
     out = os.path.join(sc["_dir"], sc["_name"] + ".mp4")
-    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", os.path.join(work, "silent.mp4"), "-i", os.path.join(work, "mix.wav"),
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", os.path.join(work, "silent.mp4"), "-i", os.path.join(mw, "mix.wav"),
                     "-map", "0:v", "-map", "1:a", "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-shortest", out], check=True)
     print(f"done: {out}  ({lufs:.1f} LUFS, {n} sounds)")
 

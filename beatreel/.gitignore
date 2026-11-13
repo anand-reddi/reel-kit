@@ -4,3 +4,5 @@ __pycache__/
 build/
 examples/*/launch.mp4
 examples/*/pfp.png
+examples/*/assets/pfp-krish.png
+examples/*/_outro.json

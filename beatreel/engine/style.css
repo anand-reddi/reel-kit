@@ -334,7 +334,7 @@ html, body { margin: 0; background: #000; }
 .snd .spl svg { width: 100%; height: 100%; }
 
 /* ---- kit v3: Instagram-safe caption band (clear of the profile row and the right-hand buttons) */
-.t-kit #cap { left: 56px; right: 150px; }
+.t-kit #cap { left: 130px; right: 130px; }
 .t-kit .cl { font-size: 66px; }
 .t-kit .cl .w.it { font-size: 76px; }
 /* presenter as a short cutaway in the middle of the frame */
