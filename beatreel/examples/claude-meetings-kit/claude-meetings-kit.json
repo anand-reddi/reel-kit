@@ -9,215 +9,228 @@
  },
  "presenter": {
   "width": 1400,
-  "y": 1180
+  "y": 1340
  },
  "beats": [
   {
    "pose": "hi",
-   "cam": "big",
    "lines": [
     "Claude can now join your _Google Meet_, and build the doc while you talk."
    ],
    "hero": [
     {
-     "type": "row",
-     "tiles": [
-      {
-       "icon": "logos:claude-icon",
-       "label": "Claude"
-      },
-      {
-       "icon": "logos:google-meet-2020",
-       "label": "Google Meet"
-      }
-     ],
-     "ats": [
-      "word:Claude",
-      "word:Google"
-     ],
-     "y": 760,
-     "until": "word:build",
-     "scale": 1.6
-    },
-    {
-     "type": "video",
-     "src": "launch.mp4",
-     "media": 47.0,
-     "url": "claude.ai",
-     "tab": "Meeting notes",
-     "at": "word:build",
-     "y": 800,
-     "words": [
+     "type": "meet",
+     "icon": "logos:claude-icon",
+     "title": "Pie brainstorm",
+     "w": 900,
+     "x": 540,
+     "y": 480,
+     "claudeAt": "word:join",
+     "speak": [
+      [
+       "word:build",
+       0
+      ],
       [
        "word:doc",
-       "BUILDS THE DOC"
+       2
+      ],
+      [
+       "word:while",
+       1
       ],
       [
        "word:talk",
-       "WHILE YOU TALK",
-       true
+       3
       ]
+     ],
+     "typing": [
+      [
+       "word:build",
+       "word:talk+0.6"
+      ]
+     ]
+    },
+    {
+     "type": "doc",
+     "icon": "logos:claude-icon",
+     "title": "Meeting notes",
+     "w": 600,
+     "x": 690,
+     "y": 920,
+     "rot": 3,
+     "at": "word:build",
+     "step": 0.22,
+     "lines": [
+      "# Pie brainstorm",
+      "Pick this year's special pie",
+      "6 ideas on the board",
+      "# Action items"
      ]
     }
    ]
   },
   {
-   "pose": "explain",
+   "presenter": false,
    "lines": [
     "Just say, Claude, start a _whiteboard_."
    ],
    "hero": [
     {
-     "type": "video",
-     "src": "launch.mp4",
-     "media": 10.4,
-     "url": "meet.google.com",
-     "tab": "Google Meet",
-     "y": 780,
-     "words": [
-      [
-       "word:whiteboard",
-       "“START A WHITEBOARD”",
-       true
-      ]
-     ]
+     "type": "speak",
+     "text": "Claude, start a whiteboard.",
+     "who": "You",
+     "dur": 1.2,
+     "y": 560,
+     "scale": 1.15
+    },
+    {
+     "type": "sort",
+     "icon": "logos:claude-icon",
+     "title": "Whiteboard",
+     "sub": "Claude · live",
+     "empty": "Drop ideas here",
+     "at": "word:whiteboard",
+     "y": 1100,
+     "exit": "cut",
+     "float": false
     }
    ]
   },
   {
-   "pose": "count",
+   "presenter": false,
    "lines": [
     "Everyone throws in ideas, and Claude _sorts_ them, easiest to hardest."
    ],
    "hero": [
     {
-     "type": "video",
-     "src": "launch.mp4",
-     "media": 21.6,
-     "url": "meet.google.com",
-     "tab": "Whiteboard",
-     "y": 780,
-     "until": "word:easiest",
-     "words": [
-      [
-       "word:ideas",
-       "EVERYONE'S IDEAS"
-      ],
-      [
-       "word:sorts",
-       "CLAUDE SORTS THEM",
-       true
-      ]
-     ]
-    },
-    {
-     "type": "shot",
-     "src": "sorted.png",
-     "label": "sorted by claude",
-     "w": 960,
-     "y": 800,
-     "at": "word:easiest",
-     "rings": [
-      [
-       0,
-       24,
-       25,
-       9
-      ],
-      [
-       56,
-       24,
-       24,
-       9
-      ]
+     "type": "sort",
+     "icon": "logos:claude-icon",
+     "title": "Whiteboard",
+     "sub": "Claude · live",
+     "y": 830,
+     "h": 900,
+     "pop": false,
+     "float": false,
+     "notes": [
+      {
+       "t": "Apple crumble",
+       "col": 0
+      },
+      {
+       "t": "Pumpkin spice",
+       "col": 1
+      },
+      {
+       "t": "Elderberry",
+       "col": 2
+      },
+      {
+       "t": "Lemon tart",
+       "col": 0
+      },
+      {
+       "t": "Peach cobbler",
+       "col": 1
+      },
+      {
+       "t": "Chocolate silk",
+       "col": 2
+      }
      ],
-     "ringAt": [
+     "ats": [
+      "word:everyone",
+      "word:throws",
+      "word:in",
+      "word:ideas",
+      "word:ideas+0.15",
+      "word:and"
+     ],
+     "sortAt": "word:sorts",
+     "hi": [
+      0,
+      2
+     ],
+     "hiAt": [
       "word:easiest",
       "word:hardest"
-     ]
-    },
-    {
-     "type": "stamp",
-     "text": "SORTED",
-     "at": "word:hardest",
-     "x": 790,
-     "y": 1060,
-     "rot": -10,
-     "size": 90
+     ],
+     "scale": 1.05
     }
    ]
   },
   {
-   "pose": "think",
-   "react": "word:links",
+   "presenter": false,
    "lines": [
     "Ask it something, and it checks your docs and _links_ the source."
    ],
    "hero": [
     {
-     "type": "shot",
-     "src": "chat2.jpg",
-     "label": "meeting chat",
-     "w": 720,
-     "y": 800,
-     "rings": [
-      [
-       18,
-       12,
-       58,
-       20
-      ],
-      [
-       18,
-       32,
-       58,
-       32
-      ],
-      [
-       30,
-       47,
-       42,
-       14
-      ]
+     "type": "answer",
+     "icon": "logos:claude-icon",
+     "who": "Teammate",
+     "q": "Can we get elderberries in time?",
+     "docs": [
+      "Sourcing doc",
+      "Supplier sheet",
+      "Budget"
      ],
-     "ringAt": [
-      "word:ask",
-      "word:checks",
-      "word:links"
-     ]
+     "a": "The sourcing doc says they ship in 10–14 days.",
+     "link": "sourcing-doc-2026",
+     "checkAt": "word:checks",
+     "answerAt": "word:links",
+     "linkAt": "word:source",
+     "y": 830,
+     "scale": 1.1
     }
    ]
   },
   {
-   "pose": "thumbs_up",
+   "presenter": false,
    "lines": [
     "When the call ends, your notes, action items and transcript are already in _Claude_."
    ],
    "hero": [
     {
-     "type": "list",
-     "title": "// after the call",
+     "type": "meet",
+     "icon": "logos:claude-icon",
+     "title": "Pie brainstorm",
+     "w": 860,
+     "y": 620,
+     "endAt": "word:ends",
+     "until": "word:notes",
+     "scale": 1.1
+    },
+    {
+     "type": "mpage",
+     "icon": "logos:claude-icon",
+     "title": "Pie brainstorm",
+     "sub": "Meeting page · Claude",
+     "at": "word:notes-0.25",
+     "y": 860,
      "items": [
-      "Notes",
-      "Action items",
-      "Full transcript"
+      {
+       "icon": "lucide:notebook-pen",
+       "title": "Notes",
+       "sub": "the whole discussion"
+      },
+      {
+       "icon": "lucide:list-checks",
+       "title": "Action items",
+       "sub": "who does what"
+      },
+      {
+       "icon": "lucide:file-text",
+       "title": "Transcript",
+       "sub": "every word, searchable"
+      }
      ],
-     "ticks": [
+     "ats": [
       "word:notes",
       "word:action",
       "word:transcript"
      ],
-     "y": 660,
-     "w": 820
-    },
-    {
-     "type": "logo",
-     "icon": "logos:claude-icon",
-     "name": "Claude",
-     "at": "word:Claude",
-     "x": 560,
-     "y": 1110,
-     "rot": -3
+     "scale": 1.1
     }
    ]
   },
@@ -228,52 +241,31 @@
    ],
    "hero": [
     {
-     "type": "row",
-     "tiles": [
-      {
-       "icon": "lucide:mic-off",
-       "color": "#e5372d",
-       "label": "Audio"
-      },
-      {
-       "icon": "lucide:user-x",
-       "color": "#e5372d",
-       "label": "Outsiders"
-      }
-     ],
-     "ats": [
-      0,
-      "word:outsider"
-     ],
-     "y": 720,
-     "until": "word:audio",
-     "scale": 1.7
+     "type": "wave",
+     "label": "Call audio",
+     "strikeAt": "word:audio",
+     "y": 500,
+     "until": "word:default"
     },
     {
-     "type": "sticker",
-     "lines": [
-      "NO AUDIO",
-      "SAVED"
-     ],
-     "red": true,
-     "redLine": 1,
-     "at": "word:audio",
-     "x": 330,
-     "y": 700,
-     "rot": -5
+     "type": "stamp",
+     "text": "NOT SAVED",
+     "at": "word:audio+0.25",
+     "y": 560,
+     "rot": -8,
+     "size": 100,
+     "until": "word:default"
     },
     {
-     "type": "sticker",
-     "lines": [
-      "OUTSIDER IN",
-      "CLAUDE OUT"
-     ],
-     "red": true,
-     "redLine": 1,
-     "at": "word:outsider",
-     "x": 720,
-     "y": 1000,
-     "rot": 4
+     "type": "meet",
+     "icon": "logos:claude-icon",
+     "title": "Pie brainstorm",
+     "w": 860,
+     "at": "word:default",
+     "y": 560,
+     "outsiderAt": "word:outsider",
+     "outsider": "Vendor",
+     "leaveAt": "word:joins"
     }
    ]
   },
@@ -286,27 +278,54 @@
    ],
    "hero": [
     {
-     "type": "sticker",
-     "lines": [
-      "TEAM +",
-      "ENTERPRISE"
+     "type": "plans",
+     "items": [
+      {
+       "t": "Free"
+      },
+      {
+       "t": "Pro"
+      },
+      {
+       "t": "Max"
+      },
+      {
+       "t": "Team",
+       "ok": true
+      },
+      {
+       "t": "Enterprise",
+       "ok": true
+      }
      ],
-     "at": "word:Team",
-     "y": 680,
-     "rot": -3
+     "at": "word:only",
+     "markAt": "word:Team",
+     "y": 470
     },
     {
-     "type": "logo",
-     "icon": "logos:google-meet-2020",
-     "name": "Meet only",
-     "at": "word:Google",
-     "y": 1040,
-     "rot": 3
+     "type": "row",
+     "tiles": [
+      {
+       "icon": "logos:google-meet-2020",
+       "label": "Google Meet"
+      },
+      {
+       "icon": "lucide:clock-3",
+       "color": "#e5372d",
+       "label": "Others: soon"
+      }
+     ],
+     "ats": [
+      "word:Google",
+      "word:now"
+     ],
+     "y": 900,
+     "scale": 1.25
     }
    ]
   },
   {
-   "pose": "point_side",
+   "presenter": false,
    "lines": [
     "Docs and whiteboards are free till _February tenth_."
    ],
@@ -329,36 +348,45 @@
       0,
       "word:whiteboards"
      ],
-     "y": 860,
-     "until": "word:February",
-     "scale": 1.7
-    },
-    {
-     "type": "date",
-     "month": "FEB",
-     "day": "10",
-     "x": 400,
-     "y": 780,
-     "rot": -4,
-     "at": "word:February"
+     "y": 420,
+     "scale": 1.5
     },
     {
      "type": "stamp",
      "text": "FREE",
      "at": "word:free",
-     "x": 760,
-     "y": 560,
-     "rot": 10,
-     "size": 120
+     "x": 540,
+     "y": 640,
+     "rot": -10,
+     "size": 130
     },
     {
-     "type": "sticker",
-     "text": "2027",
-     "at": "word:tenth",
-     "x": 720,
-     "y": 1030,
-     "rot": 4,
-     "size": 80
+     "type": "flip",
+     "pages": [
+      {
+       "m": "NOV",
+       "d": "13"
+      },
+      {
+       "m": "DEC",
+       "d": "1"
+      },
+      {
+       "m": "JAN",
+       "d": "1"
+      },
+      {
+       "m": "FEB",
+       "d": "10",
+       "y": "2027"
+      }
+     ],
+     "at": 0.3,
+     "flipAt": "word:till",
+     "dur": 0.5,
+     "y": 1110,
+     "rot": -3,
+     "scale": 1.2
     }
    ]
   },
@@ -369,10 +397,13 @@
    ],
    "hero": [
     {
-     "type": "comment",
-     "who": "Send this to",
-     "keyword": "THE NOTE TAKER",
-     "y": 760
+     "type": "send",
+     "from": "This reel",
+     "fromIcon": "lucide:clapperboard",
+     "to": "The note taker",
+     "toIcon": "lucide:notebook-pen",
+     "sendAt": "word:teammate",
+     "y": 640
     }
    ]
   },
@@ -388,7 +419,8 @@
      "handle": "@krishexplainz",
      "text": "AI and tech, explained in a minute",
      "tapAt": "word:follow+0.4",
-     "y": 1000
+     "y": 860,
+     "scale": 1.3
     }
    ]
   }

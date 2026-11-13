@@ -45,7 +45,11 @@ beat is always the CTA (comment a keyword / send to a friend / follow).
 Themes: `paper` (off-white #efece6, ink, red #e8452c — most references), `ink` (dark navy, agents/dashboards),
 `neon` (near-black, lime #c8f53c + pink glow, launches/AI video tools). `kit` mixes in reel-kit's look: its black grid background, Archivo
 type, red #e5372d, red halftone shadows, and the presenter (use `"character": "otaku"` for Krish) rising out of a
-rounded box with a red glow, like reel-kit's character box. Example: `examples/claude-meetings-kit/`. The illustrated desk-room look seen in
+rounded box with a red glow, like reel-kit's character box. Example: `examples/claude-meetings-kit/`. In `kit` the caption sits **under** the visuals, centred
+(`caption_y` [with presenter, without], default [1150, 1580]); show the presenter only on beats where a gesture
+fits (`"presenter": false` on the rest gives the visuals the whole frame), and explain every line with a scene that
+acts it out (the explainer scenes below), not a static card. `"pop": false` on a hero makes it appear without the
+pop, to continue the same object from the previous beat. The illustrated desk-room look seen in
 two references is not built yet.
 
 ## Workflow (the user's standing rules apply)
@@ -136,6 +140,16 @@ beat start), `until` (a word: leave early), `keep` (stay N more beats), `x`, `y`
 | `image` | src, w, radius, shadow |
 | `html` | html (escape hatch) |
 | `video` | src (mp4), media (start second in the clip), url, tab, w, aspect, fit, words [[time, text, red]] — a clip playing in a browser window, with pop-on labels |
+| `meet` | people [{n, c}], title, url, icon (Claude logo), claudeAt, speak [[time, tile]], typing [[from, to]], outsiderAt, outsider, leaveAt, endAt — a video call acted out |
+| `doc` | title, by, icon, lines ["# heading", "line", ...], ats or step — a doc writing itself |
+| `speak` | who, c, text, dur — someone speaking: live waveform + words typing |
+| `sort` | title, sub, icon, empty, notes [{t, col, c}], ats, sortAt, cols, hi, hiAt, w, h — sticky notes fly in, then sort into columns |
+| `answer` | who, q, docs [..], hit, a, link, icon, checkAt, answerAt, linkAt — question, docs scanned, answer with its source |
+| `mpage` | title, sub, icon, items [{icon, title, sub}], ats — a page whose rows land one per word |
+| `wave` | label, strikeAt — an audio waveform that gets struck out |
+| `plans` | items [{t, ok}], markAt — plan cards; the ones left out grey and cross, the rest light up |
+| `flip` | pages [{m, d, y}], flipAt, dur — calendar pages flipping to a date |
+| `send` | from, fromIcon, to, toIcon, c, sendAt — a paper plane flies to a person |
 | `follow` | img, handle, text, tapAt — the follow card; the button turns to "Following" on tapAt |
 
 ## Files

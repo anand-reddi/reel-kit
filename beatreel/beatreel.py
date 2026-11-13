@@ -73,7 +73,8 @@ def icon(name, size=120, color="#111"):
 
 
 TIME_LISTS = ("ticks", "hiAt", "ringAt", "ats")
-TIME_ONE = ("rightAt", "dropAt", "tapAt")
+TIME_ONE = ("rightAt", "dropAt", "tapAt", "claudeAt", "outsiderAt", "leaveAt", "endAt", "strikeAt", "checkAt", "answerAt",
+            "linkAt", "sortAt", "markAt", "sendAt", "flipAt")
 
 
 def blocks(tm, max_words=7):
@@ -105,7 +106,13 @@ def build(sc, tm, work):
             if o.get(k) and not o[k].startswith(("http", "data:")):
                 src = o[k] if os.path.isabs(o[k]) else os.path.join(sc["_dir"], o[k])
                 dst = "assets/" + os.path.basename(src); shutil.copy(src, os.path.join(work, "page", dst)); o[k] = dst
+        for k in ("words", "speak"):   # [[time, ...], ...]
+            if k in o: o[k] = [[r3(at_time(x[0], tm, i, t0))] + list(x[1:]) for x in o[k]]
         if o.get("icon"): o["svg"] = icon(o["icon"], 160, o.get("color", "#111"))
+        for k in ("fromIcon", "toIcon"):
+            if o.get(k): o[k[:-4] + "Svg"] = icon(o[k], 160, o.get(k[:-4] + "Color", "#fff"))
+        if isinstance(o.get("items"), list) and o["items"] and isinstance(o["items"][0], dict):
+            o["items"] = [dict(x, svg=icon(x["icon"], 160, x.get("color", "#e5372d")) if x.get("icon") else "") for x in o["items"]]
         if o.get("tiles"): o["tiles"] = [dict(x, svg=icon(x["icon"], 160, x.get("color", "#111")) if x.get("icon") else "") for x in o["tiles"]]
         sid, g = POP.get(o["type"], ("pro_pop/thup", -19))
         if h.get("sfx", True): cues.append([o["at"], h.get("sfx_id", sid), g])
@@ -135,6 +142,7 @@ def build(sc, tm, work):
     lines = blocks(tm, sc.get("caption_words", 7))
     reel = {"dur": dur, "theme": sc.get("theme", "paper"), "counter": sc.get("counter"), "meta": sc.get("meta", True), "beats": beats, "items": items, "lines": lines,
             "cams": cams, "reacts": reacts}
+    if sc.get("theme") == "kit" or sc.get("caption_y"): reel["capY"] = sc.get("caption_y", [1150, 1580])
     if sc.get("character", "kai") == "kai":
         ws = [w for l in tm["lines"] for w in l["words"]]
         words = [{"t": w["t"], "d": r3((ws[k + 1]["t"] if k + 1 < len(ws) else w["t"] + .3) - w["t"]), "n": len(re.sub(r"[^A-Za-z0-9]", "", w["w"]))} for k, w in enumerate(ws)]

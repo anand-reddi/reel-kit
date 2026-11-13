@@ -46,17 +46,23 @@
   R.lines.forEach((ln, k) => {
     const el = $('div', 'cl', cap); el.innerHTML = ln.words.map(w => `<span class="w${w.it ? ' it' : ''}">${esc(w.w)}</span>`).join('');
     const end = k + 1 < R.lines.length ? R.lines[k + 1].start - .07 : R.dur; vis(el, ln.start - .06, end);
+    if (R.capY) { const bt = R.beats.find(b => ln.start >= b.t0 - .01 && ln.start < b.t1) || R.beats[0]; el.style.top = ((bt.pres === false ? R.capY[1] : R.capY[0]) - 170) + 'px'; }
     el.querySelectorAll('.w').forEach((s, j) => { const t = ln.words[j].t;
       tl.fromTo(s, { opacity: 0, y: 12, filter: 'blur(5px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: .16, ease: 'power2.out', immediateRender: true }, t - .06);
       on(s, t + .08); });
     if (k + 1 < R.lines.length) tl.to(el, { y: -26, opacity: 0, duration: .12, ease: 'power2.in' }, end - .12);
-    requestAnimationFrame(() => { const f = Math.min(1, 904 / Math.max(1, el.scrollWidth)); if (f < 1) el.style.transform = `scale(${f})`; });
+    requestAnimationFrame(() => { const f = Math.min(1, 904 / Math.max(1, el.scrollWidth)); if (f < 1) { el.style.transformOrigin = R.capY ? '50% 0' : '0 0'; el.style.transform = `scale(${f})`; } });
   });
 
   // ---- heroes
   const heroes = document.getElementById('heroes'); const fmt = (v, d) => Number(v).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
   const CK = '<svg viewBox="0 0 24 24" width="62%" height="62%" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5L19.5 7"/></svg>';
   const XX = '<svg viewBox="0 0 24 24" width="58%" height="58%" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+  const PC = ['#4f7cff', '#2fbf74', '#f5a524', '#b56cff', '#ff6b8b', '#20c3d0'], NOTE = ['#ffe27a', '#ffb3c7', '#a8e6ff', '#c3f5a0', '#ffd1a1', '#d9c2ff'];
+  const sv = (d, f) => `<svg viewBox="0 0 24 24" fill="${f ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+  const IC = { mic: sv('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>'), cam: sv('<rect x="3" y="7" width="12" height="10" rx="2"/><path d="M15 11l6-3v8l-6-3"/>'),
+    chat: sv('<path d="M4 5h16v11H9l-5 4z"/>'), end: sv('<path d="M3 14c5-5 13-5 18 0l-2 3-4-1v-3c-2-1-4-1-6 0v3l-4 1z"/>', 1), link: sv('<path d="M10 14a4 4 0 0 0 6 0l3-3a4 4 0 0 0-6-6l-1 1M14 10a4 4 0 0 0-6 0l-3 3a4 4 0 0 0 6 6l1-1"/>'),
+    pen: sv('<path d="M4 20l4-1 11-11-3-3L5 16z"/>'), plane: sv('<path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/>') };
   const B = {
     card: (o, e) => { e.className += ' card hs'; e.style.width = (o.w || 820) + 'px'; e.innerHTML = (o.label ? `<div class="lbl">${esc(o.label)}</div>` : '') + (o.icon ? `<div class="cic">${o.svg}</div>` : '') + (o.title ? `<h3>${o.title}</h3>` : '') + (o.text ? `<p>${o.text}</p>` : '') + (o.img ? `<img src="${o.img}" style="width:100%;border-radius:14px;margin-top:18px">` : ''); },
     // an odometer: digits roll (random, blurred) and settle left to right
@@ -111,6 +117,101 @@
       (o.words || []).forEach(([at, txt, red]) => { const w = $('div', 'vword' + (red ? ' red' : ''), e, esc(txt)); vis(w, at, o.until);
         tl.fromTo(w, { scale: 1.8, opacity: 0, rotation: -6 }, { scale: 1, opacity: 1, rotation: -3, duration: .22, ease: 'back.out(2.4)', immediateRender: false }, at);
         e.querySelectorAll('.vword').forEach(x => { if (x !== w) tl.set(x, { autoAlpha: 0 }, at); }); }); },
+
+    // ---------- explainer scenes: whole ideas acted out, built on the words
+    // a video call: people tiles, Claude joining, speakers lighting up, an outsider joining and Claude leaving, the call ending
+    meet: (o, e, t) => { e.className += ' meet hs'; e.style.width = (o.w || 920) + 'px';
+      const ppl = o.people || [{ n: 'Ana' }, { n: 'Ravi' }, { n: 'Sam' }, { n: 'Mia' }];
+      let tiles = ppl.map((p, k) => `<div class="mt"><i style="background:${p.c || PC[k % PC.length]}">${esc((p.n || '?')[0])}</i><span>${esc(p.n || '')}</span><s></s></div>`).join('');
+      tiles += `<div class="mt cl"><i class="clg">${o.svg || ''}</i><span>Claude</span><s></s><q></q></div>`;
+      if (o.outsiderAt != null) tiles += `<div class="mt ext"><i style="background:#6b6b70">${esc((o.outsider || 'Guest')[0])}</i><span>${esc(o.outsider || 'Guest')}</span><em>EXTERNAL</em></div>`;
+      e.innerHTML = `<div class="mbar2"><i></i><b>${esc(o.title || 'Team sync')}</b><span>${esc(o.url || 'meet.google.com')}</span></div><div class="mgrid">${tiles}</div>
+        <div class="mctl"><u>${IC.mic}</u><u>${IC.cam}</u><u>${IC.chat}</u><u class="end">${IC.end}</u></div>`;
+      const ts = [...e.querySelectorAll('.mt')], cl = e.querySelector('.mt.cl'), ex = e.querySelector('.mt.ext');
+      tl.fromTo(ts.slice(0, ppl.length), { scale: .7, opacity: 0 }, { scale: 1, opacity: 1, duration: .3, stagger: .05, ease: 'back.out(2)', immediateRender: false }, t + .05);
+      const toast = (txt, a, b) => { const x = $('div', 'mtoast', e, `${o.svg ? `<i>${o.svg}</i>` : ''}<span>${txt}</span>`); vis(x, a, b);
+        tl.fromTo(x, { y: -30, opacity: 0 }, { y: 0, opacity: 1, duration: .25, ease: 'back.out(2)', immediateRender: false }, a); };
+      if (o.claudeAt != null) { const a = o.claudeAt; tl.set(cl, { opacity: 0 }, 0); tl.fromTo(cl, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: .4, ease: 'back.out(2.4)', immediateRender: false }, a);
+        const q = cl.querySelector('q'); tl.fromTo(q, { scale: .7, opacity: 1 }, { scale: 1.6, opacity: 0, duration: .7, ease: 'power2.out', immediateRender: false }, a + .1);
+        toast('Claude joined the call', a + .15, o.leaveAt ?? a + 1.6); }
+      else tl.fromTo(cl, { scale: .7, opacity: 0 }, { scale: 1, opacity: 1, duration: .3, ease: 'back.out(2)', immediateRender: false }, t + .05 + ppl.length * .05);
+      (o.speak || []).forEach(([a, k]) => { const s_ = ts[k]?.querySelector('s'); if (!s_) return; tl.set(s_, { opacity: 1 }, a); tl.set(s_, { opacity: 0 }, a + .45);
+        tl.fromTo(s_, { scale: 1.06 }, { scale: 1, duration: .3, immediateRender: false }, a); });
+      (o.typing || []).forEach(([a, b]) => { const x = $('div', 'mtype', cl, `${IC.pen}<span>writing</span>`); vis(x, a, b); });
+      if (ex) { const a = o.outsiderAt; tl.set(ex, { opacity: 0 }, 0); tl.fromTo(ex, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: .35, ease: 'back.out(2.4)', immediateRender: false }, a); }
+      if (o.leaveAt != null) { const a = o.leaveAt; tl.to(cl, { scale: .2, opacity: 0, duration: .35, ease: 'power3.in' }, a); toast('Claude left: someone outside your company joined', a + .2, o.until); }
+      if (o.endAt != null) { const a = o.endAt, en = e.querySelector('.end'); tl.fromTo(en, { scale: 1.3 }, { scale: 1, duration: .25, ease: 'back.out(3)', immediateRender: false }, a);
+        tl.to(e.querySelector('.mgrid'), { opacity: .15, duration: .2 }, a + .15); toast('Call ended', a + .15, o.until); } },
+    // a doc that writes itself, line by line
+    doc: (o, e, t) => { e.className += ' doc hs'; e.style.width = (o.w || 700) + 'px';
+      e.innerHTML = `<div class="dh">${o.svg ? `<i>${o.svg}</i>` : ''}<div><b>${esc(o.title || 'Meeting notes')}</b><span>${esc(o.by || 'Claude is writing…')}</span></div></div><div class="db"></div>`;
+      const db = e.querySelector('.db'); (o.lines || []).forEach((s_, k) => { const h = s_.startsWith('#'); const ln = $('div', h ? 'dl hh' : 'dl', db, esc(s_.replace(/^#\s*/, '')));
+        const a = o.ats?.[k] ?? t + .25 + k * (o.step ?? .26); vis(ln, a);
+        tl.fromTo(ln, { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: h ? .18 : .26, ease: 'none', immediateRender: false }, a); }); },
+    // someone speaking: a live waveform and the words typing out
+    speak: (o, e, t) => { e.className += ' spk hs';
+      e.innerHTML = `<i class="sav" style="background:${o.c || '#4f7cff'}">${esc((o.who || 'You')[0])}</i><div class="sbody"><span>${esc(o.who || 'You')} · speaking</span><div class="stx"></div><div class="swave">${'<b></b>'.repeat(22)}</div></div>`;
+      const bars = [...e.querySelectorAll('.swave b')], d = o.dur ?? 1.3, tx = e.querySelector('.stx'), full = String(o.text || ''), v = { n: 0 };
+      const up = () => { tx.textContent = full.slice(0, Math.round(v.n)); }; up(); tl.to(v, { n: full.length, duration: d, ease: 'none', onUpdate: up }, t + .1);
+      bars.forEach(b => { for (let j = 0; j * .11 < d; j++) tl.to(b, { scaleY: .15 + rnd() * .85, duration: .11, ease: 'sine.inOut' }, t + .1 + j * .11); tl.to(b, { scaleY: .12, duration: .2 }, t + .1 + d); }); },
+    // a whiteboard: sticky notes fly in, then sort into columns; columns can light up
+    sort: (o, e, t) => { e.className += ' wb hs'; const W = o.w || 960, H = o.h || 660; e.style.width = W + 'px'; e.style.height = H + 'px';
+      e.innerHTML = `<div class="wbh">${o.svg ? `<i>${o.svg}</i>` : ''}<b>${esc(o.title || 'Whiteboard')}</b><span>${esc(o.sub || '')}</span></div>`;
+      const cols = o.cols || ['Easiest', 'Medium', 'Hardest'], cw = (W - 60) / cols.length, heads = [];
+      if (o.sortAt != null) cols.forEach((c, k) => { const h = $('div', 'wbc', e, `<span>${k + 1}</span>${esc(c)}`); h.style.left = (30 + k * cw) + 'px'; h.style.width = (cw - 14) + 'px';
+        heads.push(h); vis(h, o.sortAt + k * .08); tl.fromTo(h, { y: -24, opacity: 0 }, { y: 0, opacity: 1, duration: .25, ease: 'back.out(2)', immediateRender: false }, o.sortAt + k * .08); });
+      if (!(o.notes || []).length && o.empty) { const z = $('div', 'wbe', e, esc(o.empty)); }
+      const cnt = cols.map(() => 0), NW = cw - 30;
+      (o.notes || []).forEach((n, k) => { const el = $('div', 'wn', e, esc(n.t)); el.style.background = n.c || NOTE[k % NOTE.length]; el.style.width = NW + 'px';
+        const sx = 40 + (k % 3) * (W - 80 - NW) / 2 + (rnd() - .5) * 40, sy = 150 + Math.floor(k / 3) * 190 + rnd() * 50; el.style.left = sx + 'px'; el.style.top = sy + 'px';
+        const a = o.ats?.[k] ?? t + .15 + k * .12, r0 = (rnd() - .5) * 12; vis(el, a);
+        tl.fromTo(el, { x: (rnd() - .5) * 1000, y: (k % 2 ? 1 : -1) * (600 + rnd() * 300), rotation: (rnd() - .5) * 120, scale: .5 }, { x: 0, y: 0, rotation: r0, scale: 1, duration: .5, ease: 'power3.out', immediateRender: false }, a);
+        if (o.sortAt != null) { const c = n.col ?? k % cols.length, tx = 30 + c * cw + 8, ty = 150 + cnt[c]++ * 118; tl.to(el, { x: tx - sx, y: ty - sy, rotation: 0, duration: .55, ease: 'power3.inOut' }, o.sortAt + .15 + k * .05); } });
+      (o.hiAt || []).forEach((a, j) => { const h = heads[o.hi?.[j] ?? j]; if (!h) return; on(h, a); tl.fromTo(h, { scale: 1.12 }, { scale: 1, duration: .3, ease: 'back.out(3)', immediateRender: false }, a); }); },
+    // a question, Claude checking the docs, the answer with its source
+    answer: (o, e, t) => { e.className += ' ans'; e.style.width = (o.w || 920) + 'px';
+      e.innerHTML = `<div class="aq card hs"><i style="background:${o.c || '#2fbf74'}">${esc((o.who || 'T')[0])}</i><div><b>${esc(o.who || 'Teammate')}</b><p>${esc(o.q || '')}</p></div></div>
+        <div class="adocs">${(o.docs || ['Sourcing doc', 'Supplier sheet', 'Budget']).map(d => `<div class="ad hs"><u></u><u></u><u></u><u></u><span>${esc(d)}</span></div>`).join('')}<div class="ascan"></div></div>
+        <div class="aa card hs"><i class="clg">${o.svg || ''}</i><div><b>Claude</b><p>${esc(o.a || '')}</p><div class="alink">${IC.link}<span>${esc(o.link || 'source')}</span></div></div></div>`;
+      const q = e.querySelector('.aq'), dk = e.querySelector('.adocs'), ds = [...e.querySelectorAll('.ad')], sc = e.querySelector('.ascan'), aa = e.querySelector('.aa'), lk = e.querySelector('.alink');
+      tl.fromTo(q, { x: -80, opacity: 0 }, { x: 0, opacity: 1, duration: .32, ease: 'back.out(1.6)', immediateRender: false }, t + .05);
+      const ca = o.checkAt ?? t + .7; vis(dk, ca);
+      tl.fromTo(ds, { y: 60, opacity: 0, rotation: 0 }, { y: 0, opacity: 1, rotation: i => [-7, 0, 7][i % 3], stagger: .07, duration: .3, ease: 'back.out(2)', immediateRender: false }, ca);
+      vis(sc, ca + .25, ca + 1.25); tl.fromTo(sc, { x: 0 }, { x: 640, duration: .5, ease: 'sine.inOut', repeat: 1, yoyo: true, immediateRender: false }, ca + .25);
+      on(ds[o.hit ?? 0], ca + 1.05); tl.fromTo(ds[o.hit ?? 0], { scale: 1.15 }, { scale: 1, duration: .3, ease: 'back.out(3)', immediateRender: false }, ca + 1.05);
+      const aat = o.answerAt ?? ca + 1.1; vis(aa, aat); tl.fromTo(aa, { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: .32, ease: 'back.out(1.8)', immediateRender: false }, aat);
+      const la = o.linkAt ?? aat + .4; on(lk, la); tl.fromTo(lk, { scale: 1.3 }, { scale: 1, duration: .3, ease: 'back.out(3)', immediateRender: false }, la); },
+    // the meeting page: rows land one per word
+    mpage: (o, e, t) => { e.className += ' mpg card hs'; e.style.width = (o.w || 880) + 'px';
+      e.innerHTML = `<div class="mph">${o.svg ? `<i>${o.svg}</i>` : ''}<div><b>${esc(o.title || 'Meeting')}</b><span>${esc(o.sub || '')}</span></div></div>` +
+        (o.items || []).map(x => `<div class="mpr"><i>${x.svg || ''}</i><div><b>${esc(x.title)}</b><span>${esc(x.sub || '')}</span></div><em>${CK}</em></div>`).join('');
+      e.querySelectorAll('.mpr').forEach((r, k) => { const a = o.ats?.[k] ?? t + .3 + k * .25; vis(r, a);
+        tl.fromTo(r, { x: 160, opacity: 0 }, { x: 0, opacity: 1, duration: .32, ease: 'back.out(1.6)', immediateRender: false }, a);
+        tl.fromTo(r.querySelector('em'), { scale: 0 }, { scale: 1, duration: .25, ease: 'back.out(3)', immediateRender: false }, a + .2); }); },
+    // audio waveform that gets struck out
+    wave: (o, e, t) => { e.className += ' wav card hs';
+      e.innerHTML = `<div class="wl">${IC.mic}<span>${esc(o.label || 'Call audio')}</span></div><div class="wbars">${'<b></b>'.repeat(30)}</div><svg class="wx" viewBox="0 0 100 40" preserveAspectRatio="none"><line x1="3" y1="37" x2="97" y2="3" pathLength="1"/></svg>`;
+      const bars = [...e.querySelectorAll('.wbars b')], sa = o.strikeAt ?? t + 1;
+      bars.forEach(b => { for (let j = 0; j * .12 < sa - t + .3; j++) tl.to(b, { scaleY: .12 + rnd() * .88, duration: .12, ease: 'sine.inOut' }, t + j * .12); tl.to(b, { scaleY: .1, duration: .25 }, sa + .3); });
+      const ln = e.querySelector('.wx line'); tl.set(ln, { attr: { 'stroke-dashoffset': 1 } }, 0); tl.to(ln, { attr: { 'stroke-dashoffset': 0 }, duration: .25, ease: 'power2.in' }, sa); on(e, sa + .25); },
+    // plan cards: the ones that don't get it grey out with a cross, the ones that do light up with a tick
+    plans: (o, e, t) => { e.className += ' pln';
+      e.innerHTML = (o.items || []).map(x => `<div class="pc card hs" data-ok="${x.ok ? 1 : 0}"><b>${esc(x.t)}</b><em>${x.ok ? CK : XX}</em></div>`).join('');
+      const cs = [...e.querySelectorAll('.pc')]; tl.fromTo(cs, { y: 60, opacity: 0 }, { y: 0, opacity: 1, stagger: .06, duration: .3, ease: 'back.out(2)', immediateRender: false }, t + .05);
+      const m = o.markAt ?? t + .6; cs.forEach((c, k) => { const a = m + k * .07; on(c, a); tl.fromTo(c.querySelector('em'), { scale: 0 }, { scale: 1, duration: .25, ease: 'back.out(3)', immediateRender: false }, a); }); },
+    // calendar pages flipping to a date
+    flip: (o, e, t) => { e.className += ' flp'; const P_ = o.pages || [], a0 = o.flipAt ?? t + .3, d = o.dur ?? .8;
+      P_.forEach((p, k) => { const c = $('div', 'date hs fp', e, `<div class="m">${esc(p.m)}</div><div class="d">${esc(p.d)}</div><div class="y">${p.y ? esc(p.y) : '&nbsp;'}</div>`); c.style.zIndex = P_.length - k;
+        if (k < P_.length - 1) tl.to(c, { rotationX: -95, opacity: 0, duration: .16, ease: 'power2.in', transformOrigin: '50% 0%', transformPerspective: 900 }, a0 + k * d / (P_.length - 1)); }); },
+    // sending: a paper plane flies from one card to a person, who bounces
+    send: (o, e, t) => { e.className += ' snd';
+      e.innerHTML = `<div class="sf card hs">${o.fromSvg ? `<i>${o.fromSvg}</i>` : ''}<b>${esc(o.from || 'This reel')}</b></div><svg class="sarc" viewBox="0 0 520 220"><path d="M20 190 Q260 -40 500 150" pathLength="1"/></svg>
+        <div class="st"><i style="background:${o.c || '#f5a524'}">${o.toSvg || ''}</i><b>${esc(o.to || '')}</b></div><div class="spl">${IC.plane}</div>`;
+      const a = o.sendAt ?? t + .5, pl = e.querySelector('.spl'), arc = e.querySelector('.sarc path'), to = e.querySelector('.st');
+      tl.fromTo(to, { scale: 0 }, { scale: 1, duration: .35, ease: 'back.out(2)', immediateRender: false }, t + .2);
+      tl.set(arc, { attr: { 'stroke-dashoffset': 1 } }, 0); tl.to(arc, { attr: { 'stroke-dashoffset': 0 }, duration: .6, ease: 'power1.inOut' }, a);
+      vis(pl, a, a + .62); tl.set(pl, { x: 0, y: 0, rotation: -30 }, a); tl.to(pl, { x: 250, y: -170, rotation: 0, duration: .3, ease: 'power1.out' }, a); tl.to(pl, { x: 500, y: -30, rotation: 35, duration: .3, ease: 'power1.in' }, a + .3);
+      tl.fromTo(to, { scale: 1.25 }, { scale: 1, duration: .4, ease: 'elastic.out(1.2,.4)', immediateRender: false }, a + .6); on(to, a + .6); },
     // the follow card: avatar, handle, a button that gets tapped and turns into "Following"
     follow: (o, e, t) => { e.className += ' fol card hs';
       e.innerHTML = `<img src="${o.img || ''}"><b>${esc(o.handle || '')}</b><span>${esc(o.text || '')}</span><div class="fbtn"><span class="a">Follow</span><span class="b">Following ✓</span></div>`;
@@ -118,15 +219,16 @@
       tl.fromTo(btn, { scale: .86 }, { scale: 1, duration: .3, ease: 'back.out(3)', immediateRender: false }, at); },
   };
   function place(o, parent, owner) {
-    const e = $('div', 'h', parent); const t = o.at, u = o.until ?? owner?.until ?? R.dur;
-    (B[o.type] || B.card)(o, e, t);
+    // the moving wrapper (.h) holds the built object, so the object's halftone shadow can sit behind its own background
+    const e = $('div', 'h', parent), inner = $('div', '', e); const t = o.at, u = o.until ?? owner?.until ?? R.dur;
+    (B[o.type] || B.card)(o, inner, t);
     e.style.left = (o.x ?? (owner ? (owner.w || 920) / 2 : 540)) + 'px'; e.style.top = (o.y ?? (owner ? (owner.h || 760) / 2 : 820)) + 'px'; e.style.zIndex = o.z ?? 1;
     const S1 = o.scale || 1;
     gsap.set(e, { xPercent: -50, yPercent: -50, rotation: o.rot || 0, scale: S1 });
     vis(e, t, u);
     const stamp = o.type === 'stamp', stk = o.type === 'sticker';
     const pop = stamp ? { scale: 2.6, opacity: 0, rotation: (o.rot || 0) - 14 } : { scale: .55, opacity: 0, y: 46, rotation: (o.rot || 0) + (stk ? -12 : -4) };
-    pop.scale *= S1; tl.fromTo(e, pop, { scale: S1, opacity: 1, y: 0, rotation: o.rot || 0, duration: stamp ? .2 : .42, ease: stamp ? 'power4.out' : 'back.out(1.8)', immediateRender: false }, t);
+    pop.scale *= S1; if (o.pop !== false) tl.fromTo(e, pop, { scale: S1, opacity: 1, y: 0, rotation: o.rot || 0, duration: stamp ? .2 : .42, ease: stamp ? 'power4.out' : 'back.out(1.8)', immediateRender: false }, t);
     if (!owner && o.float !== false && u - t > 1.4) tl.to(e, { y: -10, duration: (u - t - .5) / 2, ease: 'sine.inOut', yoyo: true, repeat: 1 }, t + .45);
     if (o.exit !== 'cut' && u < R.dur && (!owner || o.until != null)) tl.to(e, { y: owner ? -20 : -70, opacity: 0, duration: .16, ease: 'power2.in' }, u - .16);
     return e;
@@ -138,9 +240,13 @@
   tl.fromTo(pres, { y: 700 }, { y: 0, duration: .5, ease: 'back.out(1.3)', immediateRender: true }, 0);
   const pbox = document.getElementById('pbox');
   if (pbox) { tl.fromTo(pbox, { y: 700 }, { y: 0, duration: .5, ease: 'back.out(1.1)', immediateRender: true }, 0);
-    R.beats.forEach(b => { if (b.pres === false) tl.to(pbox, { y: 900, duration: .4, ease: 'power3.in' }, b.t0 - .05); }); }
+  }
   (R.cams || []).forEach(c => { tl.set(pin, { scale: c.scale, y: c.y }, c.t0); if (c.t1 != null) tl.to(pin, { scale: 1, y: 0, duration: .38, ease: 'power3.inOut' }, c.t1); });
-  R.beats.forEach(b => { if (b.pres === false) tl.to(pres, { y: 900, duration: .4, ease: 'power3.in' }, b.t0 - .05); });
+  { const ps = [pres, pbox].filter(Boolean); let shown = R.beats[0]?.pres !== false;
+    if (!shown) tl.set(ps, { y: 900 }, .01);
+    R.beats.forEach((b, k) => { if (!k) return; const want = b.pres !== false; if (want === shown) return; shown = want;
+      if (want) tl.fromTo(ps, { y: 900 }, { y: 0, duration: .45, ease: 'back.out(1.2)', immediateRender: false }, b.t0 - .05);
+      else tl.to(ps, { y: 900, duration: .35, ease: 'power3.in' }, b.t0 - .1); }); }
   R.beats.forEach((b, k) => { if (k) tl.fromTo(pres, { scale: .975 }, { scale: 1, duration: .28, ease: 'back.out(3)', transformOrigin: '50% 100%', immediateRender: false }, b.t0); });
   const hx = (P.headX ?? .517) * 100, hy = (P.headY ?? .31) * 100;
   (R.reacts || []).forEach(t => {
