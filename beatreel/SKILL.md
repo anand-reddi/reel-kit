@@ -76,7 +76,7 @@ two references is not built yet.
 }
 ```
 
-Top-level keys: `name`, `theme`, `counter` {label, start}, `voice` (reel-kit voice block), `presenter` {scale, y}
+Top-level keys: `name`, `theme`, `counter` {label, start}, `meta` (false = no slug/counter row at the top), `voice` (reel-kit voice block), `presenter` {scale, y}
 (default 1 / 1060: head centre ≈ y 1340), `caption_words` (block size, default 7), `intro`, `sfx_level`,
 `character` ("kai" default; or a reel-kit video character folder such as "otaku"), `avatar_colors` (override
 Kai's palette: skin, skinSh, hair, shirt, shirtSh, cuff, tee, iris, …).
@@ -101,7 +101,7 @@ seek with events on (`tl.seek(t, false)`) when screenshotting pages by hand. Eve
 shown in `engine/kai-poses.jpg`. Default placement: `presenter`
 {scale 1, y 1060} (head centre about y 1340).
 
-Beat keys: `slug`, `lines` (usually one; `_x_` = red italic serif), `cam` ("big" = presenter starts large until
+Beat keys: `presenter` (false = the presenter drops out, e.g. the Follow beat), `slug`, `lines` (usually one; `_x_` = red italic serif), `cam` ("big" = presenter starts large until
 the beat's first hero lands), `react` (word or list of words: burst lines + impact), `pose` (presenter clip: talk, explain, calm,
 laugh, hi, shrug, smile, think, clasp, wait, ok, shh, arms_crossed, facepalm, excited, stressed, shocked, angry,
 sad, cry, panic, nervous, thumbs_up, point_up, point_side, count, wave, bored), `count` (new counter value),

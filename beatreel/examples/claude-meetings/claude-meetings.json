@@ -1,0 +1,304 @@
+{
+ "name": "claude-meetings",
+ "theme": "paper",
+ "character": "otaku",
+ "counter": {
+  "label": "IN THE CALL",
+  "start": "6"
+ },
+ "voice": {
+  "name": "am_puck",
+  "speed": 1.12
+ },
+ "presenter": {
+  "width": 1500,
+  "y": 1150
+ },
+ "beats": [
+  {
+   "slug": "01 — new",
+   "pose": "hi",
+   "cam": "big",
+   "count": "7",
+   "lines": [
+    "Claude can now join your _Google Meet_ and build the doc while you talk."
+   ],
+   "hero": [
+    {
+     "type": "row",
+     "tiles": [
+      {
+       "icon": "simple-icons:claude",
+       "color": "#d97757",
+       "label": "Claude"
+      },
+      {
+       "icon": "simple-icons:googlemeet",
+       "color": "#00897b",
+       "label": "Google Meet"
+      }
+     ],
+     "ats": [
+      "word:Claude",
+      "word:Google"
+     ],
+     "y": 560
+    },
+    {
+     "type": "stamp",
+     "text": "LIVE",
+     "at": "word:talk",
+     "x": 760,
+     "y": 820,
+     "rot": -8
+    }
+   ]
+  },
+  {
+   "slug": "02 — it joins",
+   "pose": "point_up",
+   "lines": [
+    "It shows up as a guest, right in the call."
+   ],
+   "hero": [
+    {
+     "type": "shot",
+     "src": "grid.png",
+     "label": "google meet",
+     "w": 960,
+     "y": 700,
+     "rings": [
+      [
+       62,
+       54,
+       24,
+       34
+      ]
+     ],
+     "ringAt": [
+      "word:guest"
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "03 — just ask",
+   "pose": "explain",
+   "lines": [
+    "Say, Claude, start a _whiteboard_, and it does."
+   ],
+   "hero": [
+    {
+     "type": "card",
+     "label": "// said out loud",
+     "title": "“Claude, start a whiteboard.”",
+     "w": 820,
+     "y": 560
+    },
+    {
+     "type": "shot",
+     "src": "stickies.png",
+     "label": "whiteboard",
+     "w": 900,
+     "at": "word:does",
+     "y": 820,
+     "rot": 2
+    }
+   ]
+  },
+  {
+   "slug": "04 — sorts it",
+   "pose": "count",
+   "lines": [
+    "Everyone's ideas, sorted from _easiest_ to hardest."
+   ],
+   "hero": [
+    {
+     "type": "shot",
+     "src": "sorted.png",
+     "label": "sorted by claude",
+     "w": 960,
+     "y": 720,
+     "rings": [
+      [
+       0,
+       24,
+       25,
+       9
+      ],
+      [
+       27,
+       24,
+       25,
+       9
+      ],
+      [
+       56,
+       24,
+       24,
+       9
+      ]
+     ],
+     "ringAt": [
+      "word:easiest",
+      "word:to",
+      "word:hardest"
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "05 — answers",
+   "pose": "think",
+   "lines": [
+    "Ask a question, and it checks your docs and _links_ the source."
+   ],
+   "hero": [
+    {
+     "type": "shot",
+     "src": "chat2.jpg",
+     "label": "meeting chat",
+     "w": 760,
+     "y": 700,
+     "rings": [
+      [
+       30,
+       47,
+       42,
+       14
+      ]
+     ],
+     "ringAt": [
+      "word:links"
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "06 — after",
+   "pose": "thumbs_up",
+   "lines": [
+    "When the call ends, everything's waiting for you in Claude."
+   ],
+   "hero": [
+    {
+     "type": "list",
+     "title": "// on the meeting page",
+     "items": [
+      "Notes and action items",
+      "Full transcript",
+      "The doc and whiteboard"
+     ],
+     "ticks": [
+      "word:ends",
+      "word:everything's",
+      "word:waiting"
+     ],
+     "y": 560,
+     "w": 820
+    },
+    {
+     "type": "shot",
+     "src": "notes.png",
+     "label": "claude.ai",
+     "w": 760,
+     "at": "word:Claude",
+     "y": 860,
+     "rot": -2
+    }
+   ]
+  },
+  {
+   "slug": "07 — the catch",
+   "pose": "wait",
+   "bg": "black",
+   "lines": [
+    "The catch? Team and Enterprise only, and just Google Meet for now."
+   ],
+   "hero": [
+    {
+     "type": "sticker",
+     "lines": [
+      "TEAM +",
+      "ENTERPRISE"
+     ],
+     "red": true,
+     "redLine": 1,
+     "at": "word:Team",
+     "y": 620,
+     "rot": -3
+    },
+    {
+     "type": "logo",
+     "icon": "simple-icons:googlemeet",
+     "color": "#00897b",
+     "name": "Meet only",
+     "at": "word:Meet",
+     "x": 760,
+     "y": 900,
+     "rot": 5
+    }
+   ]
+  },
+  {
+   "slug": "08 — free",
+   "pose": "point_side",
+   "lines": [
+    "Docs and whiteboards are free till _February tenth_."
+   ],
+   "hero": [
+    {
+     "type": "date",
+     "month": "FEB",
+     "day": "10",
+     "y": 640,
+     "rot": 4
+    },
+    {
+     "type": "stamp",
+     "text": "FREE",
+     "at": "word:free",
+     "x": 740,
+     "y": 880,
+     "rot": -10
+    }
+   ]
+  },
+  {
+   "slug": "09 — share",
+   "pose": "smile",
+   "lines": [
+    "Send this to the teammate who _always_ takes the notes."
+   ],
+   "hero": [
+    {
+     "type": "comment",
+     "who": "Send this to",
+     "keyword": "THE NOTE TAKER",
+     "y": 700
+    }
+   ]
+  },
+  {
+   "slug": "10 — follow",
+   "presenter": false,
+   "lines": [
+    "Follow for more like this."
+   ],
+   "hero": [
+    {
+     "type": "sticker",
+     "lines": [
+      "FOLLOW",
+      "@KRISHEXPLAINZ"
+     ],
+     "red": true,
+     "redLine": 0,
+     "y": 820,
+     "rot": -3
+    }
+   ]
+  }
+ ],
+ "meta": false
+}

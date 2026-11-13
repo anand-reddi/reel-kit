@@ -116,7 +116,7 @@ def build(sc, tm, work):
         return o
 
     for i, (b, (t0, t1)) in enumerate(zip(sc["beats"], bounds)):
-        beats.append({"t0": t0, "t1": t1, "slug": b.get("slug", f"{i + 1:02d}"), "count": b.get("count"), "bg": b.get("bg"), "wipe": b.get("wipe", False)})
+        beats.append({"t0": t0, "t1": t1, "slug": b.get("slug", f"{i + 1:02d}"), "count": b.get("count"), "bg": b.get("bg"), "wipe": b.get("wipe", False), "pres": b.get("presenter", True)})
         hs = b.get("hero", []); hs = hs if isinstance(hs, list) else [hs]
         for h in hs:
             keep = h.get("keep", 0); until = r3(bounds[min(i + keep, len(bounds) - 1)][1])
@@ -133,7 +133,7 @@ def build(sc, tm, work):
         for s_ in b.get("sfx", []):   # extra sounds: [time|word:xyz, id, gain]
             cues.append([r3(at_time(s_[0], tm, i, t0)), s_[1], s_[2] if len(s_) > 2 else -16])
     lines = blocks(tm, sc.get("caption_words", 7))
-    reel = {"dur": dur, "theme": sc.get("theme", "paper"), "counter": sc.get("counter"), "beats": beats, "items": items, "lines": lines,
+    reel = {"dur": dur, "theme": sc.get("theme", "paper"), "counter": sc.get("counter"), "meta": sc.get("meta", True), "beats": beats, "items": items, "lines": lines,
             "cams": cams, "reacts": reacts}
     if sc.get("character", "kai") == "kai":
         ws = [w for l in tm["lines"] for w in l["words"]]

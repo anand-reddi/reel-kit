@@ -20,7 +20,7 @@
   st.className = 't-' + (R.theme || 'paper');
 
   // ---- meta row: slug on the left, a running counter on the right
-  const meta = document.getElementById('meta'); const slug = $('span', '', meta), cnt = $('span', '', meta); cnt.id = 'cnt'; slug.style.position = 'relative'; cnt.style.position = 'relative';
+  const meta = document.getElementById('meta'); if (R.meta === false) meta.style.display = 'none'; const slug = $('span', '', meta), cnt = $('span', '', meta); cnt.id = 'cnt'; slug.style.position = 'relative'; cnt.style.position = 'relative';
   const counter = R.counter || null; let lastVal = null;
   R.beats.forEach(b => {
     const sp = $('span', '', slug, '// ' + esc(b.slug || '')); sp.style.cssText = 'position:absolute;left:0;top:0;white-space:nowrap'; vis(sp, b.t0, b.t1);
@@ -125,6 +125,7 @@
   const pres = document.getElementById('pres'), pin = document.getElementById('presin'); const P = R.presenter || {};
   tl.fromTo(pres, { y: 700 }, { y: 0, duration: .5, ease: 'back.out(1.3)', immediateRender: true }, 0);
   (R.cams || []).forEach(c => { tl.set(pin, { scale: c.scale, y: c.y }, c.t0); if (c.t1 != null) tl.to(pin, { scale: 1, y: 0, duration: .38, ease: 'power3.inOut' }, c.t1); });
+  R.beats.forEach(b => { if (b.pres === false) tl.to(pres, { y: 900, duration: .4, ease: 'power3.in' }, b.t0 - .05); });
   R.beats.forEach((b, k) => { if (k) tl.fromTo(pres, { scale: .975 }, { scale: 1, duration: .28, ease: 'back.out(3)', transformOrigin: '50% 100%', immediateRender: false }, b.t0); });
   const hx = (P.headX ?? .517) * 100, hy = (P.headY ?? .31) * 100;
   (R.reacts || []).forEach(t => {
