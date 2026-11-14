@@ -1,0 +1,35 @@
+<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;background:transparent}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"./three.module.min.js"}}</script></head><body><canvas id="gl" width="800" height="800"></canvas>
+<script type="module">
+// one rack from the outage server hall, failed (red LEDs), for the cover's app tile
+import * as THREE from "three"; import { RoundedBoxGeometry } from "./RoundedBoxGeometry.js"; import { RoomEnvironment } from "./RoomEnvironment.js";
+const r = new THREE.WebGLRenderer({ canvas: document.getElementById("gl"), antialias: true, alpha: true, preserveDrawingBuffer: true });
+r.setPixelRatio(1); r.setSize(800, 800, false); r.setClearColor(0, 0); r.toneMapping = THREE.ACESFilmicToneMapping; r.outputColorSpace = THREE.SRGBColorSpace;
+r.shadowMap.enabled = true; r.shadowMap.type = THREE.PCFSoftShadowMap;
+const sc = new THREE.Scene(); sc.environment = new THREE.PMREMGenerator(r).fromScene(new RoomEnvironment(), .04).texture;
+sc.add(new THREE.HemisphereLight("#ffffff", "#30323a", .9));
+const key = new THREE.DirectionalLight("#fff4ea", 2.4); key.position.set(-3, 6, 5); key.castShadow = true; key.shadow.mapSize.set(2048, 2048); sc.add(key);
+const rim = new THREE.DirectionalLight("#ffd0c8", 1.2); rim.position.set(4, 3, -4); sc.add(rim);
+const RED = new THREE.Color("#ff3b30"), OFF = new THREE.Color("#2a2c31");
+const std = (c, o = {}) => new THREE.MeshStandardMaterial({ color: c, roughness: o.r ?? .45, metalness: o.m ?? 0, envMapIntensity: .7 });
+const basic = (c) => new THREE.MeshBasicMaterial({ color: c, toneMapped: false });
+const g = new THREE.Group(); sc.add(g);
+const add = (geo, mat, x, y, z, sh = true) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = m.receiveShadow = sh; g.add(m); return m; };
+const RW = .6, RH = 1.45, RD = .9;
+add(new RoundedBoxGeometry(RW, RH, RD, 4, .035), std("#ebe9e4"), 0, RH / 2, 0);
+add(new THREE.BoxGeometry(.5, 1.34, .02), std("#101114", { r: .35, m: .2 }), 0, RH / 2 + .01, RD / 2 + .002, false);
+for (let j = 0; j < 6; j++) { const y = .16 + j * .215;
+  add(new THREE.BoxGeometry(.46, .16, .026), std("#1e2026", { r: .4, m: .3 }), 0, y, RD / 2 + .014, false);
+  add(new THREE.BoxGeometry(.22, .028, .012), basic(j === 4 ? OFF : RED), -.08, y, RD / 2 + .03, false);
+  add(new THREE.BoxGeometry(.034, .034, .012), basic((j % 2) ? RED : OFF), .12, y, RD / 2 + .03, false);
+  add(new THREE.BoxGeometry(.034, .034, .012), basic(RED), .18, y, RD / 2 + .03, false); }
+add(new THREE.BoxGeometry(.5, .018, .05), basic(RED), 0, RH + .002, RD / 2 - .06, false);
+// soft red glow on the floor + a contact shadow
+const c = document.createElement("canvas"); c.width = c.height = 256; const x = c.getContext("2d"); const gr = x.createRadialGradient(128, 128, 0, 128, 128, 128);
+gr.addColorStop(0, "rgba(255,255,255,1)"); gr.addColorStop(.4, "rgba(255,255,255,.35)"); gr.addColorStop(1, "rgba(255,255,255,0)"); x.fillStyle = gr; x.fillRect(0, 0, 256, 256);
+const gl = new THREE.Mesh(new THREE.PlaneGeometry(1.7, 1.7), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), color: "#ff3b30", transparent: true, opacity: .8, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }));
+gl.rotation.x = -Math.PI / 2; gl.position.set(0, .002, .3); g.add(gl);
+const fl = new THREE.Mesh(new THREE.PlaneGeometry(6, 6), new THREE.ShadowMaterial({ opacity: .45 })); fl.rotation.x = -Math.PI / 2; fl.receiveShadow = true; g.add(fl);
+const cam = new THREE.PerspectiveCamera(24, 1, .1, 50); cam.position.set(2.75, 2.6, 4.3); cam.lookAt(0, .68, 0);
+r.render(sc, cam); window.__ready = true;
+</script></body></html>
