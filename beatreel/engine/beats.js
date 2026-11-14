@@ -63,7 +63,9 @@
   const sv = (d, f) => `<svg viewBox="0 0 24 24" fill="${f ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
   const IC = { mic: sv('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>'), cam: sv('<rect x="3" y="7" width="12" height="10" rx="2"/><path d="M15 11l6-3v8l-6-3"/>'),
     chat: sv('<path d="M4 5h16v11H9l-5 4z"/>'), end: sv('<path d="M3 14c5-5 13-5 18 0l-2 3-4-1v-3c-2-1-4-1-6 0v3l-4 1z"/>', 1), link: sv('<path d="M10 14a4 4 0 0 0 6 0l3-3a4 4 0 0 0-6-6l-1 1M14 10a4 4 0 0 0-6 0l-3 3a4 4 0 0 0 6 6l1-1"/>'),
-    pen: sv('<path d="M4 20l4-1 11-11-3-3L5 16z"/>'), plane: sv('<path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/>') };
+    pen: sv('<path d="M4 20l4-1 11-11-3-3L5 16z"/>'), plane: sv('<path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/>'),
+    clock: sv('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'),
+    env: '<svg viewBox="0 0 120 80"><rect x="2" y="2" width="116" height="76" rx="10" fill="#f8f6f1"/><path d="M8 9 L60 46 L112 9" fill="none" stroke="#c9c4ba" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/></svg>' };
   const B = {
     card: (o, e) => { e.className += ' card hs'; e.style.width = (o.w || 820) + 'px'; e.innerHTML = (o.label ? `<div class="lbl">${esc(o.label)}</div>` : '') + (o.icon ? `<div class="cic">${o.svg}</div>` : '') + (o.title ? `<h3>${o.title}</h3>` : '') + (o.text ? `<p>${o.text}</p>` : '') + (o.img ? `<img src="${o.img}" style="width:100%;border-radius:14px;margin-top:18px">` : ''); },
     // an odometer: digits roll (random, blurred) and settle left to right
@@ -86,7 +88,7 @@
     phone: (o, e) => { e.className += ' phone hs'; e.innerHTML = `<div class="scr">${o.src ? `<img src="${o.src}">` : `<div class="pt">${o.title || ''}</div>`}</div>`; if (o.scale) e.style.scale = o.scale; },
     term: (o, e, t) => { e.className += ' term hs'; if (o.w) e.style.width = o.w + 'px'; e.innerHTML = `<div class="tb"><i></i><i></i><i></i><span>${esc(o.title || 'terminal')}</span></div><div class="tx"></div>`;
       const tx = e.querySelector('.tx'), full = (o.lines || []).join('\n'), v = { n: 0 };
-      const up = () => { const s = full.slice(0, Math.round(v.n)); tx.innerHTML = esc(s).replace(/\$ /g, '<em>$ </em>').replace(/(DO NOT INSTALL|CRITICAL|100\/100)/g, '<b class="bad">$1</b>').replace(/\b(SAFE|LOW|17\/100)\b/g, '<b class="ok">$1</b>').replace(/\b(HIGH|MEDIUM)\b/g, '<b class="mid">$1</b>') + '<span class="cur"></span>'; }; up();
+      const up = () => { const s = full.slice(0, Math.round(v.n)); tx.innerHTML = esc(s).replace(/\$ /g, '<em>$ </em>').replace(/(DO NOT INSTALL|CRITICAL|100\/100|FAILED|TIMEOUT|UNHEALTHY)/g, '<b class="bad">$1</b>').replace(/\b(SAFE|LOW|17\/100)\b/g, '<b class="ok">$1</b>').replace(/\b(HIGH|MEDIUM)\b/g, '<b class="mid">$1</b>') + '<span class="cur"></span>'; }; up();
       tl.to(v, { n: full.length, duration: o.typeDur ?? Math.min(2.2, full.length * .03), ease: 'none', onUpdate: up }, t + .25); },
     logo: (o, e) => { e.className += ' logo'; e.innerHTML = `<div class="mk hs">${o.svg || ''}</div>${o.name ? `<b>${esc(o.name)}</b>` : ''}`; },
     list: (o, e) => { e.className += ' list card hs'; if (o.w) e.style.width = o.w + 'px'; e.innerHTML = (o.title ? `<div class="lbl">${esc(o.title)}</div>` : '') + (o.items || []).map(s => `<div class="li"><div class="bx"><span>${o.mark === 'x' ? XX : CK}</span></div><span>${esc(s)}</span></div>`).join('');
@@ -94,7 +96,8 @@
         tl.fromTo(li.querySelector('.bx'), { scale: 1.6 }, { scale: 1, duration: .25, ease: 'back.out(3)', immediateRender: false }, at); }); },
     // icon tiles in a row, each landing on its own word
     row: (o, e, t) => { e.className += ' row'; (o.tiles || []).forEach((x, k) => { const c = $('div', 'tile card hs', e, `<div class="ti">${x.svg || ''}</div><b>${esc(x.label || '')}</b>`); const a = o.ats?.[k] ?? t + k * .25;
-      vis(c, a); tl.fromTo(c, { y: 60, scale: .5, rotation: k % 2 ? 8 : -8, opacity: 0 }, { y: 0, scale: 1, rotation: 0, opacity: 1, duration: .38, ease: 'back.out(2)', immediateRender: false }, a); }); },
+      vis(c, a); tl.fromTo(c, { y: 60, scale: .5, rotation: k % 2 ? 8 : -8, opacity: 0 }, { y: 0, scale: 1, rotation: 0, opacity: 1, duration: .38, ease: 'back.out(2)', immediateRender: false }, a);
+      const xa = o.crossAt?.[k]; if (xa != null) { const xx = $('div', 'tx', c, XX); vis(xx, xa); on(c, xa); tl.fromTo(xx, { scale: 2.2, opacity: 0, rotation: -20 }, { scale: 1, opacity: 1, rotation: 0, duration: .25, ease: 'power4.out', immediateRender: false }, xa); } }); },
     grid: (o, e, t) => { e.className += ' grid' + (o.shape === 'doc' ? ' docs' : ''); e.style.gridTemplateColumns = `repeat(${o.cols || 6}, ${o.shape === 'doc' ? 74 : 92}px)`; for (let k = 0; k < (o.n || 24); k++) $('div', 'p', e);
       const ps = [...e.querySelectorAll('.p')]; tl.fromTo(ps, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: .25, stagger: { each: .012, from: 'random' }, ease: 'back.out(2)', immediateRender: false }, t);
       (o.hi || []).forEach((k, j) => on(ps[k], o.hiAt?.[j] ?? t + .6));
@@ -285,6 +288,104 @@
       e.innerHTML = `<img src="${o.img || ''}"><b>${esc(o.handle || '')}</b><span>${esc(o.text || '')}</span><div class="fbtn"><span class="a">Follow</span><span class="b">Following ✓</span></div>`;
       const btn = e.querySelector('.fbtn'), at = o.tapAt ?? t + .6; on(btn, at);
       tl.fromTo(btn, { scale: .86 }, { scale: 1, duration: .3, ease: 'back.out(3)', immediateRender: false }, at); },
+    // ---------- scenes v4 (outage explainer): world map, status board, report spike, social post, dominoes, restart, freeze, mail, clock, 3D clip
+    // a dotted world map: dots sweep in, city pins blink in a wave (red or green), a logo above it can crack, traffic arcs fly between cities
+    world: (o, e, t) => { e.className += ' wmap'; const M = window.WORLD, Wd = o.w || 900, k = Wd / M.W, Hd = M.H * k; e.style.width = Wd + 'px'; e.style.height = Hd + 'px';
+      const NS = 'http://www.w3.org/2000/svg', svg = document.createElementNS(NS, 'svg'); svg.setAttribute('viewBox', `0 0 ${Wd} ${Hd}`); svg.setAttribute('class', 'wsvg'); e.appendChild(svg);
+      const g = document.createElementNS(NS, 'g'); svg.appendChild(g);
+      g.innerHTML = M.pts.map(([x, y]) => `<circle cx="${(x * k).toFixed(1)}" cy="${(y * k).toFixed(1)}" r="${((o.dot || .3) * k).toFixed(2)}"/>`).join('');
+      if (o.pop !== false) tl.fromTo(svg, { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: .5, ease: 'power2.out', immediateRender: false }, t);
+      const cities = o.cities === false ? [] : M.cities.filter(c => !o.only || o.only.includes(c.n)), ra = o.redAt;
+      cities.forEach((c, j) => { const p = $('div', 'wpin ' + (o.pin || 'red'), e); p.style.left = c.x * k + 'px'; p.style.top = c.y * k + 'px';
+        const a = ra != null ? ra + (c.x / M.W) * (o.spread ?? .6) + rnd() * .08 : t + .25 + rnd() * .4; vis(p, a);
+        tl.fromTo(p, { scale: 0 }, { scale: 1, duration: .25, ease: 'back.out(3)', immediateRender: false }, a);
+        const rg = $('i', '', p); tl.fromTo(rg, { scale: .5, opacity: .9 }, { scale: 2.8, opacity: 0, duration: .75, repeat: 3, ease: 'power1.out', immediateRender: false }, a); });
+      (o.arcs || []).forEach(([fa, fb], j) => { const A = M.cities.find(c => c.n === fa), Bc = M.cities.find(c => c.n === fb); if (!A || !Bc) return;
+        const x1 = A.x * k, y1 = A.y * k, x2 = Bc.x * k, y2 = Bc.y * k, mx = (x1 + x2) / 2, my = Math.min(y1, y2) - Math.abs(x2 - x1) * .35;
+        const pth = document.createElementNS(NS, 'path'); pth.setAttribute('d', `M${x1} ${y1} Q${mx} ${my} ${x2} ${y2}`); pth.setAttribute('pathLength', 1); pth.setAttribute('class', 'warc'); svg.appendChild(pth);
+        const a = (o.arcsAt ?? t + .3) + j * (o.arcEach ?? .12); tl.set(pth, { attr: { 'stroke-dashoffset': 1 } }, 0); tl.to(pth, { attr: { 'stroke-dashoffset': 0 }, duration: .45, ease: 'power2.out' }, a);
+        for (let q = 0; q < 3; q++) { const d_ = $('div', 'wdot', e), b = a + .2 + q * .32; vis(d_, b, b + .55); const pv = { u: 0 };
+          const up = () => { const u = pv.u, x = (1 - u) * (1 - u) * x1 + 2 * (1 - u) * u * mx + u * u * x2, y = (1 - u) * (1 - u) * y1 + 2 * (1 - u) * u * my + u * u * y2; d_.style.transform = `translate(${x}px, ${y}px)`; }; up();
+          tl.fromTo(pv, { u: 0 }, { u: 1, duration: .55, ease: 'none', onUpdate: up, immediateRender: false }, b); } });
+      if (o.svg) { const lg = $('div', 'wlogo', e, o.svg); lg.style.top = (o.logoY ?? -150) + 'px';
+        tl.fromTo(lg, { scale: 0, rotation: -12 }, { scale: 1, rotation: 0, duration: .4, ease: 'back.out(2)', immediateRender: false }, o.logoAt ?? t + .1);
+        if (o.crackAt != null) { const cr = $('div', 'wcrack', lg, `<svg viewBox="0 0 100 100"><path d="M54 0 L45 28 L60 44 L41 66 L52 100" pathLength="1"/><path d="M60 44 L90 36" pathLength="1"/><path d="M45 28 L14 18" pathLength="1"/><path d="M41 66 L12 74" pathLength="1"/></svg>`);
+          cr.querySelectorAll('path').forEach(p_ => { tl.set(p_, { attr: { 'stroke-dashoffset': 1 } }, 0); tl.to(p_, { attr: { 'stroke-dashoffset': 0 }, duration: .22, ease: 'power3.out' }, o.crackAt); });
+          tl.to(lg.firstChild, { filter: 'grayscale(1) brightness(.6)', duration: .3 }, o.crackAt + .1); on(lg, o.crackAt + .1);
+          tl.fromTo(lg, { x: -16 }, { x: 0, duration: .45, ease: 'elastic.out(1.3,.25)', immediateRender: false }, o.crackAt); } }
+      if (o.label) { const lb = $('div', 'wlbl', e, esc(o.label)); vis(lb, o.labelAt ?? t + .3); tl.fromTo(lb, { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: .25, immediateRender: false }, o.labelAt ?? t + .3); } },
+    // an update rolling out: the bar fills, "installed", then a bug pops out of it
+    upgrade: (o, e, t) => { e.className += ' upg card hs'; e.style.width = (o.w || 820) + 'px';
+      e.innerHTML = `<div class="uh"><i>${o.svg || ''}</i><div><b>${esc(o.title || 'Update')}</b><span>${esc(o.sub || '')}</span></div></div><div class="ubar"><u></u></div><div class="ust"><span class="a">${esc(o.doing || 'Rolling out…')}</span><span class="b">${esc(o.done || 'Installed')}</span><em>0%</em></div>${o.bugSvg ? `<div class="ubug">${o.bugSvg}</div>` : ''}`;
+      const bar = e.querySelector('.ubar u'), pct = e.querySelector('.ust em'), st_ = e.querySelector('.ust'), v = { p: 0 }, da = o.doneAt ?? t + 1;
+      const up = () => { pct.textContent = Math.round(v.p) + '%'; bar.style.width = v.p + '%'; }; up();
+      tl.to(v, { p: 100, duration: Math.max(.2, da - t - .15), ease: 'power1.inOut', onUpdate: up }, t + .15); on(st_, da);
+      const bug = e.querySelector('.ubug'); if (bug) { const a = o.bugAt ?? da + .2; vis(bug, a); on(e, a);
+        tl.fromTo(bug, { scale: 0, rotation: -40 }, { scale: 1, rotation: 0, duration: .35, ease: 'back.out(3)', immediateRender: false }, a);
+        tl.to(bug, { rotation: 12, duration: .08, yoyo: true, repeat: 7, ease: 'sine.inOut' }, a + .35); } },
+    // a status board: services listed as operational, flipping to DOWN one by one
+    status: (o, e, t) => { e.className += ' sts card hs'; e.style.width = (o.w || 840) + 'px';
+      e.innerHTML = (o.title ? `<div class="lbl">${esc(o.title)}</div>` : '') + (o.items || []).map(x => `<div class="sr"><i>${x.svg || ''}</i><b>${esc(x.title)}</b><em><s></s><span class="a">Operational</span><span class="b">${esc(o.downText || 'Down')}</span></em></div>`).join('');
+      const rows = [...e.querySelectorAll('.sr')]; if (o.pop !== false) rows.forEach((r_, k) => { const a = o.ats?.[k] ?? t + .05 + k * .08; vis(r_, a); tl.fromTo(r_, { x: 120, opacity: 0 }, { x: 0, opacity: 1, duration: .3, ease: 'back.out(1.6)', immediateRender: false }, a); });
+      rows.forEach((r_, k) => { const a = o.downAt?.[k]; if (a == null) return; on(r_, a); tl.fromTo(r_, { x: -16 }, { x: 0, duration: .45, ease: 'elastic.out(1.4,.3)', immediateRender: false }, a);
+        tl.fromTo(r_.querySelector('s'), { boxShadow: '0 0 0 0px rgba(255,255,255,.7)' }, { boxShadow: '0 0 0 16px rgba(255,255,255,0)', duration: .6, repeat: 3, ease: 'power1.out', immediateRender: false }, a); }); },
+    // a report spike: baseline, then the line shoots up; the peak label counts up
+    spike: (o, e, t) => { e.className += ' spk2 card hs'; const Wd = o.w || 860, cw = Wd - 80, ch = o.ch || 330; e.style.width = Wd + 'px';
+      const pts = o.points || [3, 2, 3, 2, 4, 3, 26, 74, 100, 90, 72, 58, 46, 38, 30], n = pts.length;
+      const P_ = pts.map((v, k) => [k / (n - 1) * cw, ch - v / 100 * ch]), d = 'M' + P_.map(p => p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' L');
+      e.innerHTML = `<div class="lbl">${esc(o.title || '')}</div><div class="sw" style="width:${cw}px;height:${ch}px"><svg viewBox="0 0 ${cw} ${ch}" style="width:${cw}px;height:${ch}px">${[.25, .5, .75].map(q => `<line x1="0" x2="${cw}" y1="${ch * q}" y2="${ch * q}"/>`).join('')}<path class="sa" d="${d} L${cw} ${ch} L0 ${ch} Z"/><path class="sl" d="${d}" pathLength="1"/></svg><div class="speak"><b>0</b><small>${esc(o.peakLabel || 'reports')}</small></div></div><div class="sx"><span>${esc(o.from || '')}</span><span>${esc(o.to || '')}</span></div>`;
+      const ln = e.querySelector('.sl'), ar = e.querySelector('.sa'), pk = e.querySelector('.speak'), b_ = pk.querySelector('b'), dd = o.dur ?? 1.1, a = o.drawAt ?? t + .2;
+      tl.set(ln, { attr: { 'stroke-dashoffset': 1 } }, 0); tl.to(ln, { attr: { 'stroke-dashoffset': 0 }, duration: dd, ease: 'power1.in' }, a);
+      tl.fromTo(ar, { opacity: 0 }, { opacity: 1, duration: .4, immediateRender: false }, a + dd * .6);
+      const pi = pts.indexOf(Math.max(...pts)), [px, py] = P_[pi]; pk.style.left = px + 'px'; pk.style.top = py + 'px'; gsap.set(pk, { xPercent: -50, yPercent: -118 });
+      const pa = a + dd * .62, v = { x: 0 }; vis(pk, pa); const up = () => { b_.textContent = fmt(v.x, 0) + (o.suffix || ''); }; up();
+      tl.fromTo(pk, { scale: 0 }, { scale: 1, duration: .3, ease: 'back.out(2.4)', immediateRender: false }, pa); tl.to(v, { x: o.peak || 130000, duration: .7, ease: 'power3.out', onUpdate: up }, pa); },
+    // a social post screenshot: its header and one passage, with a highlighter sweeping the key words (white text on red)
+    xpost: (o, e, t) => { e.className += ' xp hs'; const Wd = o.w || 880, k = Wd / (o.iw || 1080), hd = o.head || [0, 0], cr = o.crop || [0, 400];
+      const win = (y0, y1, cls) => `<div class="${cls}" style="height:${((y1 - y0) * k).toFixed(1)}px"><img src="${o.src}" style="width:${Wd}px;top:${(-y0 * k).toFixed(1)}px">${cls === 'xb' ? '<div class="xmk"></div>' : ''}</div>`;
+      e.style.width = Wd + 'px'; e.innerHTML = (hd[1] > hd[0] ? win(hd[0], hd[1], 'xh') : '') + win(cr[0], cr[1], 'xb') + (o.label ? `<div class="xl">${esc(o.label)}</div>` : '');
+      const mk = e.querySelector('.xmk');
+      (o.marks || []).forEach(m => { const [x0, y0, x1, y1] = m.r, b_ = $('div', 'xm', mk); Object.assign(b_.style, { left: (x0 - 8) * k + 'px', top: (y0 - 6 - cr[0]) * k + 'px', width: (x1 - x0 + 16) * k + 'px', height: (y1 - y0 + 12) * k + 'px' });
+        const a = m.at ?? t + .5; tl.set(b_, { scaleX: 0 }, 0); tl.to(b_, { scaleX: 1, duration: m.dur ?? .3, ease: 'power2.inOut' }, a); }); },
+    // dominoes: labelled tiles that topple one after another, turning red
+    domino: (o, e, t) => { e.className += ' dom'; const it = o.items || [], a0 = o.fallAt ?? t + .4, ea = o.each ?? .16;
+      e.innerHTML = it.map(s_ => `<div class="dm"><div class="dt"><u></u><u></u></div><b>${esc(s_)}</b></div>`).join('');
+      tl.fromTo([...e.querySelectorAll('.dm')], { y: 80, opacity: 0 }, { y: 0, opacity: 1, duration: .3, stagger: .04, ease: 'back.out(2)', immediateRender: false }, t);
+      [...e.querySelectorAll('.dt')].forEach((d_, k) => { const a = a0 + k * ea, last = k === it.length - 1;
+        tl.fromTo(d_, { rotation: 0 }, { rotation: last ? 84 : 27, duration: last ? .4 : .2, ease: last ? 'bounce.out' : 'power2.in', transformOrigin: '100% 100%', immediateRender: false }, a); on(d_, a + .1); }); },
+    // a power button: pressed, then the ring fills while it restarts
+    restart: (o, e, t) => { e.className += ' rst'; e.innerHTML = `<svg class="rsv" viewBox="0 0 200 200"><circle class="rb" cx="100" cy="100" r="88"/><circle class="rr" cx="100" cy="100" r="88" pathLength="1"/></svg><div class="rp">${o.svg || ''}</div><b>${esc(o.text || 'Restarting')}</b>`;
+      const rr = e.querySelector('.rr'), rp = e.querySelector('.rp'), a = o.pressAt ?? t + .2, d = o.dur ?? 1;
+      tl.fromTo(rp, { scale: 1 }, { scale: .84, duration: .1, yoyo: true, repeat: 1, ease: 'power2.inOut', immediateRender: false }, a); on(e, a + .12);
+      tl.set(rr, { attr: { 'stroke-dashoffset': 1 } }, 0); tl.to(rr, { attr: { 'stroke-dashoffset': 0 }, duration: d, ease: 'power1.inOut' }, a + .1); },
+    // deployments on a conveyor that freeze: the chips stop, frost spreads, a lock drops
+    freeze: (o, e, t) => { e.className += ' frz card hs'; e.style.width = (o.w || 860) + 'px'; const it = o.items || ['update', 'config change', 'patch', 'update'], fa = o.freezeAt ?? t + .8;
+      e.innerHTML = `<div class="lbl">${esc(o.title || 'Deployments')}</div><div class="fz"><div class="ftrack"></div>${it.map(s_ => `<div class="fc">${esc(s_)}</div>`).join('')}<div class="frost">${o.snowSvg || ''}</div></div><div class="flock">${o.svg || ''}</div><div class="fst">${esc(o.text || 'All updates paused')}</div>`;
+      e.querySelectorAll('.fc').forEach((c, k) => { const x0 = -300 + k * 250, run = Math.max(.2, fa - t); tl.fromTo(c, { x: x0 }, { x: x0 + run * 280, duration: run, ease: 'none', immediateRender: true }, t);
+        tl.fromTo(c, { y: 0 }, { y: 5, duration: .05, yoyo: true, repeat: 3, immediateRender: false }, fa); });
+      const fr = e.querySelector('.frost'), lk = e.querySelector('.flock'), tx = e.querySelector('.fst');
+      tl.set(fr, { opacity: 0 }, 0); tl.to(fr, { opacity: 1, duration: .3 }, fa); on(e, fa);
+      vis(lk, fa); tl.fromTo(lk, { y: -300, rotation: -25 }, { y: 0, rotation: 0, duration: .5, ease: 'bounce.out', immediateRender: false }, fa);
+      vis(tx, fa + .3); tl.fromTo(tx, { scale: 1.7, opacity: 0 }, { scale: 1, opacity: 1, duration: .25, ease: 'back.out(2)', immediateRender: false }, fa + .3); },
+    // mail held in a tray: envelopes drop in and stack, a timer counts the hours, then they fly out delivered
+    mail: (o, e, t) => { e.className += ' mail'; const n = o.n || 6, ha = o.countAt, hd = o.hours ?? 48;
+      e.innerHTML = `<div class="mtray card hs">${o.svg ? `<i class="mlg">${o.svg}</i>` : ''}<b>${esc(o.title || 'Held mail')}</b>${ha != null ? `<div class="mtime">${IC.clock}<span>0 h</span></div>` : ''}</div>` + Array.from({ length: n }, () => `<div class="env">${IC.env}</div>`).join('') + (o.okAt != null ? `<div class="mok">${CK}<span>${esc(o.okText || 'Delivered')}</span></div>` : '');
+      [...e.querySelectorAll('.env')].forEach((v, k) => { const a = (o.dropAt ?? t + .1) + k * (o.each ?? .12), y = 40 - k * 24, x = (k % 2 ? 1 : -1) * 16, r0 = (rnd() - .5) * 10;
+        vis(v, o.instant ? t : a, o.releaseAt != null ? o.releaseAt + k * .07 + .5 : null);
+        if (!o.instant) tl.fromTo(v, { x: x + (rnd() - .5) * 500, y: -700, rotation: (rnd() - .5) * 90 }, { x, y, rotation: r0, duration: .5, ease: 'power3.out', immediateRender: false }, a);
+        else tl.set(v, { x, y, rotation: r0 }, 0);
+        if (o.releaseAt != null) tl.to(v, { x: 760, y: y - 420, rotation: 35, duration: .5, ease: 'power2.in' }, o.releaseAt + k * .07); });
+      if (ha != null) { const sp = e.querySelector('.mtime span'), v = { h: 0 }; const up = () => { sp.textContent = Math.round(v.h) + ' h'; }; up(); tl.to(v, { h: hd, duration: o.countDur ?? 1, ease: 'power2.inOut', onUpdate: up }, ha); }
+      const ok = e.querySelector('.mok'); if (ok) { vis(ok, o.okAt); tl.fromTo(ok, { scale: 1.8, opacity: 0 }, { scale: 1, opacity: 1, duration: .25, ease: 'back.out(2)', immediateRender: false }, o.okAt); } },
+    // a 24-hour dial: the hand sweeps round, the swept part fills
+    clock: (o, e, t) => { e.className += ' clk card hs';
+      e.innerHTML = `<svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="86" class="cf"/>${Array.from({ length: 24 }, (_, k) => { const a = k / 24 * Math.PI * 2, r1 = k % 6 ? 76 : 66; return `<line x1="${(100 + Math.sin(a) * 82).toFixed(1)}" y1="${(100 - Math.cos(a) * 82).toFixed(1)}" x2="${(100 + Math.sin(a) * r1).toFixed(1)}" y2="${(100 - Math.cos(a) * r1).toFixed(1)}"/>`; }).join('')}<path class="csw" d=""/><line class="ch" x1="100" y1="100" x2="100" y2="30"/><circle cx="100" cy="100" r="8" class="cc"/></svg><div class="ct"><b>${esc(o.text || '')}</b><span>${esc(o.sub || '')}</span></div>`;
+      const h = e.querySelector('.ch'), sw = e.querySelector('.csw'), v = { a: 0 }, d = o.dur ?? 1, a0 = o.spinAt ?? t + .15, fr = o.turn ?? 1;
+      const up = () => { const ang = v.a * Math.PI * 2, x = 100 + Math.sin(ang) * 62, y = 100 - Math.cos(ang) * 62; sw.setAttribute('d', v.a <= .001 ? '' : `M100 100 L100 38 A62 62 0 ${v.a > .5 ? 1 : 0} 1 ${x.toFixed(2)} ${y.toFixed(2)} Z`); }; up();
+      tl.set(h, { rotation: 0, svgOrigin: '100 100' }, 0); tl.to(h, { rotation: 360 * fr, svgOrigin: '100 100', duration: d, ease: 'power2.inOut' }, a0); tl.to(v, { a: fr * .9999, duration: d, ease: 'power2.inOut', onUpdate: up }, a0); },
+    // a pre-rendered clip (e.g. a 3D shot with a transparent background), no frame around it
+    clip: (o, e) => { e.className += ' clip3'; e.style.width = (o.w || 1080) + 'px'; e.style.height = (o.h || 1280) + 'px';
+      const v = document.getElementById(o.vid); if (v) { v.style.cssText = 'width:100%;height:100%;display:block'; e.appendChild(v); } },
   };
   function place(o, parent, owner) {
     // the moving wrapper (.h) holds the built object, so the object's halftone shadow can sit behind its own background

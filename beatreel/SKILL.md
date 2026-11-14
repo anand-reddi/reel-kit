@@ -157,6 +157,28 @@ beat start), `until` (a word: leave early), `keep` (stay N more beats), `x`, `y`
 | `dots` | n, cols, cell, hi, hi2, redAt, darkAt, legend [[time, text, "r1"/"r2"]] — a 10 x 10 share grid |
 | `profile` | img, handle, cat, bio, covers [paths], tapAt, gridAt — the follow end card: avatar ring, Follow button tapped (hearts), grid of earlier reel covers |
 | `follow` | img, handle, text, tapAt — the follow card; the button turns to "Following" on tapAt |
+| `world` | w, redAt + spread (pins light up west to east), pin ("red"/"green"), arcs [[city, city]] + arcsAt, icon + logoY + crackAt (a logo above the map that cracks), label, labelAt — a dotted world map (engine/worldmap.js) |
+| `upgrade` | icon, title, sub, doneAt, done, bugIcon, bugAt — an update rolling out; a bug pops out of it |
+| `status` | title, items [{icon, title}], ats, downAt [times], downText — a service status board flipping to DOWN |
+| `spike` | title, points [0-100], from, to, peak, suffix, peakLabel, drawAt, dur — a reports chart that spikes, peak label counts up |
+| `xpost` | src (a post screenshot), iw, head [y0, y1], crop [y0, y1], w, label, marks [{r: [x0, y0, x1, y1] in image px, at}] — the real post, key words highlighted (white on red) |
+| `domino` | items [labels], fallAt, each — labelled dominoes toppling one after another |
+| `restart` | icon, text, pressAt, dur — a power button pressed, ring fills |
+| `freeze` | title, items, freezeAt, icon (lock), snowIcon, text — deployments on a conveyor that freeze |
+| `mail` | n, title, icon, dropAt, each, instant, countAt + hours + countDur, releaseAt, okAt — envelopes held in a tray with an hours timer |
+| `clock` | text, sub, spinAt, dur, turn — a 24-hour dial sweeping round |
+| `clip` | src (mp4/webm, alpha ok), w, h, media — a pre-rendered shot with no frame (e.g. a 3D shot on a transparent background); use `"pop": false, "exit": "cut"` |
+
+`row` also takes `crossAt` [times] (a red ✕ lands on that tile and it greys out).
+
+### 3D shots inside a beatreel reel
+
+Example: `examples/outlook-outage/3d/` (an original server hall: white racks with LED rows on a dark platform).
+`times.py` reads the voice timing and writes the named moments and the shot ranges (absolute reel seconds);
+`scene.js` is three.js, every frame a pure function of t; `node render.js stills t1 t2` for checks, `node render.js clips`
+renders each range to `assets/clips/<name>.webm` (VP9 with alpha, about 2 s per frame in software GL). Each range is
+then a `clip` shot starting on the same word, with stickers above it at y ≈ 250 and a small "simplified · not to
+scale" tag. Copy three.module.min.js, RoundedBoxGeometry.js and RoomEnvironment.js from reel-kit's assets/vendor.
 
 ### Fast-cut, visual-first reels (the user's current standard)
 

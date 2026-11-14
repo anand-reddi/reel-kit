@@ -1,0 +1,1071 @@
+{
+ "name": "outlook-outage",
+ "theme": "kit",
+ "character": "otaku",
+ "meta": false,
+ "max_hold": 2.6,
+ "sfx": false,
+ "caption_y": [
+  1420,
+  1420
+ ],
+ "caption_words": 6,
+ "voice": {
+  "name": "am_puck",
+  "speed": 1.15,
+  "say": {
+   "365": "three sixty-five",
+   "AI": "A I",
+   "Microsoft": "/mˈIkɹəsˌɔft/"
+  }
+ },
+ "presenter": {
+  "width": 1500,
+  "y": 300
+ },
+ "music": {
+  "style": "curious",
+  "bpm": 120,
+  "level": -33,
+  "duck_db": 3
+ },
+ "outro": "outro.json",
+ "beats": [
+  {
+   "lines": [
+    "One bad _upgrade_ knocked Outlook offline for the whole _world_."
+   ],
+   "shots": [
+    [
+     {
+      "type": "upgrade",
+      "icon": "lucide:server-cog",
+      "title": "Network capacity upgrade",
+      "sub": "MICROSOFT · ROLLING OUT",
+      "doneAt": 0.5,
+      "bugIcon": "lucide:bug",
+      "bugAt": "word:bad",
+      "y": 740,
+      "in": "zoom"
+     },
+     {
+      "type": "sticker",
+      "lines": [
+       "ONE BAD UPGRADE"
+      ],
+      "red": true,
+      "at": "word:upgrade",
+      "y": 1120,
+      "size": 96,
+      "rot": -3,
+      "z": 5
+     }
+    ],
+    [
+     {
+      "type": "world",
+      "w": 880,
+      "y": 900,
+      "at": "word:knocked",
+      "logoAt": "word:knocked",
+      "logoY": -250,
+      "crackAt": "word:offline",
+      "redAt": "word:offline+0.1",
+      "spread": 0.9,
+      "label": "Outlook down worldwide",
+      "labelAt": "word:world",
+      "icon": "simple-icons:microsoftoutlook",
+      "color": "#0078D4"
+     }
+    ]
+   ],
+   "presenter": false
+  },
+  {
+   "lines": [
+    "On November twelfth, Outlook, Teams, and Microsoft 365 started _failing_ everywhere."
+   ],
+   "shots": [
+    [
+     {
+      "type": "flip",
+      "pages": [
+       {
+        "m": "NOV",
+        "d": "10",
+        "y": "2026"
+       },
+       {
+        "m": "NOV",
+        "d": "11",
+        "y": "2026"
+       },
+       {
+        "m": "NOV",
+        "d": "12",
+        "y": "2026"
+       }
+      ],
+      "flipAt": "word:november",
+      "dur": 0.45,
+      "y": 700,
+      "scale": 1.25,
+      "in": "drop"
+     },
+     {
+      "type": "sticker",
+      "lines": [
+       "THURSDAY · ~1 PM ET"
+      ],
+      "red": false,
+      "at": "word:twelfth",
+      "y": 1110,
+      "size": 70,
+      "rot": -3,
+      "z": 5
+     }
+    ],
+    {
+     "type": "status",
+     "title": "Microsoft service status",
+     "items": [
+      {
+       "title": "Outlook",
+       "icon": "simple-icons:microsoftoutlook",
+       "color": "#0078D4"
+      },
+      {
+       "title": "Teams",
+       "icon": "logos:microsoft-teams"
+      },
+      {
+       "title": "Microsoft 365",
+       "icon": "logos:microsoft-icon"
+      }
+     ],
+     "at": "word:outlook",
+     "ats": [
+      "word:outlook",
+      "word:teams",
+      "word:microsoft"
+     ],
+     "y": 760,
+     "exit": "cut",
+     "float": false,
+     "in": "right"
+    },
+    [
+     {
+      "type": "status",
+      "title": "Microsoft service status",
+      "items": [
+       {
+        "title": "Outlook",
+        "icon": "simple-icons:microsoftoutlook",
+        "color": "#0078D4"
+       },
+       {
+        "title": "Teams",
+        "icon": "logos:microsoft-teams"
+       },
+       {
+        "title": "Microsoft 365",
+        "icon": "logos:microsoft-icon"
+       }
+      ],
+      "at": "word:failing",
+      "pop": false,
+      "downAt": [
+       "word:failing",
+       "word:failing+0.15",
+       "word:failing+0.3"
+      ],
+      "downText": "Down",
+      "y": 760,
+      "scale": 1.08,
+      "float": false
+     },
+     {
+      "type": "stamp",
+      "text": "DOWN EVERYWHERE",
+      "at": "word:everywhere",
+      "y": 1130,
+      "rot": -6,
+      "size": 96,
+      "z": 5
+     }
+    ]
+   ],
+   "presenter": false
+  },
+  {
+   "lines": [
+    "Over a hundred and thirty thousand people _reported_ it in a few hours."
+   ],
+   "shots": [
+    {
+     "type": "num",
+     "value": 130000,
+     "suffix": "+",
+     "label": "OUTAGE REPORTS",
+     "count": 1.1,
+     "size": 200,
+     "y": 760,
+     "in": "zoom"
+    },
+    [
+     {
+      "type": "spike",
+      "title": "Outlook reports · Downdetector (approx.)",
+      "from": "12 PM ET",
+      "to": "6 PM ET",
+      "peak": 130000,
+      "suffix": "+",
+      "peakLabel": "peak reports",
+      "at": "word:people",
+      "dur": 0.9,
+      "y": 780,
+      "in": "up"
+     },
+     {
+      "type": "sticker",
+      "lines": [
+       "IN A FEW HOURS"
+      ],
+      "red": false,
+      "at": "word:few",
+      "y": 1170,
+      "size": 84,
+      "rot": -3,
+      "z": 5
+     }
+    ]
+   ],
+   "presenter": false
+  },
+  {
+   "lines": [
+    "So what actually happened? Microsoft runs this on huge _fleets_ of servers."
+   ],
+   "shots": [
+    {
+     "type": "scramble",
+     "text": "WHAT HAPPENED?",
+     "size": 118,
+     "decode": 0.6,
+     "label": "the real reason",
+     "y": 760,
+     "in": "zoom"
+    },
+    {
+     "type": "logo",
+     "icon": "logos:microsoft-icon",
+     "name": "Microsoft",
+     "at": "word:microsoft",
+     "y": 760,
+     "scale": 1.15,
+     "in": "flip"
+    },
+    [
+     {
+      "type": "clip",
+      "src": "assets/clips/rise.webm",
+      "w": 1080,
+      "h": 1280,
+      "y": 760,
+      "pop": false,
+      "exit": "cut",
+      "float": false,
+      "z": 1,
+      "at": "word:huge"
+     },
+     {
+      "type": "sticker",
+      "lines": [
+       "HUGE SERVER FLEETS"
+      ],
+      "red": false,
+      "at": "word:fleets",
+      "y": 250,
+      "size": 80,
+      "rot": -3,
+      "z": 5
+     },
+     {
+      "type": "html",
+      "html": "<div class=\"tag3d\">simplified · not to scale</div>",
+      "y": 1335,
+      "pop": false,
+      "z": 5,
+      "float": false,
+      "at": "word:huge"
+     }
+    ]
+   ],
+   "presenter": false
+  },
+  {
+   "lines": [
+    "Each server gets regular health _checks_. If one looks sick, it's pulled _out_."
+   ],
+   "shots": [
+    [
+     {
+      "type": "clip",
+      "src": "assets/clips/scan.webm",
+      "w": 1080,
+      "h": 1280,
+      "y": 760,
+      "pop": false,
+      "exit": "cut",
+      "float": false,
+      "z": 1,
+      "at": 0
+     },
+     {
+      "type": "sticker",
+      "lines": [
+       "HEALTH CHECKS"
+      ],
+      "red": false,
+      "at": "word:health",
+      "y": 250,
+      "size": 84,
+      "rot": -3,
+      "z": 5
+     },
+     {
+      "type": "html",
+      "html": "<div class=\"tag3d\">simplified · not to scale</div>",
+      "y": 1335,
+      "pop": false,
+      "z": 5,
+      "float": false
+     }
+    ],
+    [
+     {
+      "type": "clip",
+      "src": "assets/clips/sick.webm",
+      "w": 1080,
+      "h": 1280,
+      "y": 760,
+      "pop": false,
+      "exit": "cut",
+      "float": false,
+      "z": 1,
+      "at": "word:if"
+     },
+     {
+      "type": "sticker",
+      "lines": [
+       "LOOKS SICK"
+      ],
+      "red": true,
+      "at": "word:sick",
+      "y": 250,
+      "size": 84,
+      "rot": -3,
+      "z": 5,
+      "until": "word:pulled"
+     },
+     {
+      "type": "sticker",
+      "lines": [
+       "PULLED OUT"
+      ],
+      "red": false,
+      "at": "word:pulled",
+      "y": 250,
+      "size": 84,
+      "rot": -3,
+      "z": 5
+     }
+    ]
+   ],
+   "presenter": false
+  },
+  {
+   "lines": [
+    "But a problem left over from an earlier network _upgrade_ surfaced, and suddenly lots of servers _failed_ those checks at once."
+   ],
+   "shots": [
+    [
+     {
+      "type": "upgrade",
+      "icon": "lucide:server-cog",
+      "title": "Network capacity upgrade",
+      "sub": "EARLIER · INSTALLED",
+      "doneAt": 0.35,
+      "done": "Installed ✓",
+      "bugIcon": "lucide:bug",
+      "bugAt": "word:problem",
+      "y": 720,
+      "in": "left",
+      "tilt": [
+       14,
+       -12
+      ]
+     },
+     {
+      "type": "sticker",
+      "lines": [
+       "A LEFT-OVER PROBLEM"
+      ],
+      "red": true,
+      "at": "word:left",
+      "y": 1110,
+      "size": 84,
+      "rot": -3,
+      "z": 5
+     }
+    ],
+    {
+     "type": "xpost",
+     "src": "assets/ms-x-cause.jpg",
+     "head": [
+      14,
+      140
+     ],
+     "crop": [
+      466,
+      760
+     ],
+     "w": 880,
+     "label": "Microsoft on X",
+     "at": "word:earlier",
+     "y": 760,
+     "in": "zoom",
+     "tilt": [
+      10,
+      -10
+     ],
+     "marks": [
+      {
+       "r": [
+        472,
+        594,
+        973,
+        634
+       ],
+       "at": "word:earlier"
+      },
+      {
+       "r": [
+        184,
+        651,
+        985,
+        691
+       ],
+       "at": "word:network"
+      },
+      {
+       "r": [
+        182,
+        708,
+        884,
+        748
+       ],
+       "at": "word:surfaced"
+      }
+     ]
+    },
+    [
+     {
+      "type": "clip",
+      "src": "assets/clips/fail.webm",
+      "w": 1080,
+      "h": 1280,
+      "y": 760,
+      "pop": false,
+      "exit": "cut",
+      "float": false,
+      "z": 1,
+      "at": "word:suddenly"
+     },
+     {
+      "type": "sticker",
+      "lines": [
+       "MASS FAILURE"
+      ],
+      "red": true,
+      "at": "word:lots",
+      "y": 250,
+      "size": 90,
+      "rot": -3,
+      "z": 5
+     }
+    ],
+    {
+     "type": "dots",
+     "n": 100,
+     "cols": 10,
+     "cell": 62,
+     "hi": 84,
+     "redAt": "word:failed+0.05",
+     "at": "word:failed",
+     "y": 740,
+     "in": "up",
+     "float": false,
+     "legend": [
+      [
+       "word:checks",
+       "FAILED HEALTH CHECKS",
+       "r1"
+      ]
+     ]
+    }
+   ],
+   "presenter": false
+  },
+  {
+   "lines": [
+    "Their traffic got _dumped_ onto the servers still running."
+   ],
+   "shots": [
+    [
+     {
+      "type": "clip",
+      "src": "assets/clips/dump.webm",
+      "w": 1080,
+      "h": 1280,
+      "y": 760,
+      "pop": false,
+      "exit": "cut",
+      "float": false,
+      "z": 1,
+      "at": 0
+     },
+     {
+      "type": "sticker",
+      "lines": [
+       "TRAFFIC DUMPED"
+      ],
+      "red": false,
+      "at": "word:dumped",
+      "y": 250,
+      "size": 84,
+      "rot": -3,
+      "z": 5
+     }
+    ],
+    {
+     "type": "gauge",
+     "title": "LOAD · SERVERS STILL UP",
+     "value": 100,
+     "verdict": "OVERLOADED",
+     "at": "word:onto",
+     "at2": "word:onto+0.15",
+     "count": 0.8,
+     "y": 760,
+     "scale": 1.55,
+     "in": "up"
+    }
+   ],
+   "presenter": false
+  },
+  {
+   "lines": [
+    "Those overloaded, failed too, and it spread like _dominoes_ across regions."
+   ],
+   "shots": [
+    [
+     {
+      "type": "clip",
+      "src": "assets/clips/over.webm",
+      "w": 1080,
+      "h": 1280,
+      "y": 760,
+      "pop": false,
+      "exit": "cut",
+      "float": false,
+      "z": 1,
+      "at": 0
+     },
+     {
+      "type": "sticker",
+      "lines": [
+       "OVERLOADED"
+      ],
+      "red": false,
+      "at": "word:overloaded",
+      "y": 250,
+      "size": 84,
+      "rot": -3,
+      "z": 5,
+      "until": "word:failed"
+     },
+     {
+      "type": "sticker",
+      "lines": [
+       "FAILED TOO"
+      ],
+      "red": true,
+      "at": "word:failed",
+      "y": 250,
+      "size": 84,
+      "rot": -3,
+      "z": 5
+     }
+    ],
+    [
+     {
+      "type": "world",
+      "w": 860,
+      "y": 560,
+      "at": "word:spread",
+      "redAt": "word:spread+0.05",
+      "spread": 0.9,
+      "in": "zoom"
+     },
+     {
+      "type": "domino",
+      "items": [
+       "US",
+       "UK",
+       "Europe",
+       "India",
+       "Asia",
+       "Australia"
+      ],
+      "at": "word:spread",
+      "fallAt": "word:dominoes",
+      "each": 0.14,
+      "y": 1110
+     }
+    ]
+   ],
+   "presenter": false
+  },
+  {
+   "lines": [
+    "Even restarts didn't help. Servers came back, got _slammed_, and went down again."
+   ],
+   "shots": [
+    [
+     {
+      "type": "restart",
+      "icon": "lucide:power",
+      "text": "Restart",
+      "pressAt": "word:restarts",
+      "dur": 0.8,
+      "y": 700,
+      "in": "zoom"
+     },
+     {
+      "type": "sticker",
+      "lines": [
+       "DIDN'T HELP"
+      ],
+      "red": true,
+      "at": "word:help",
+      "y": 1160,
+      "size": 96,
+      "rot": -3,
+      "z": 5
+     }
+    ],
+    [
+     {
+      "type": "clip",
+      "src": "assets/clips/restart.webm",
+      "w": 1080,
+      "h": 1280,
+      "y": 760,
+      "pop": false,
+      "exit": "cut",
+      "float": false,
+      "z": 1,
+      "at": "word:servers"
+     },
+     {
+      "type": "sticker",
+      "lines": [
+       "BACK ONLINE"
+      ],
+      "red": false,
+      "at": "word:came",
+      "y": 250,
+      "size": 84,
+      "rot": -3,
+      "z": 5,
+      "until": "word:slammed"
+     },
+     {
+      "type": "sticker",
+      "lines": [
+       "SLAMMED"
+      ],
+      "red": true,
+      "at": "word:slammed",
+      "y": 250,
+      "size": 96,
+      "rot": -3,
+      "z": 5
+     }
+    ],
+    [
+     {
+      "type": "clip",
+      "src": "assets/clips/down.webm",
+      "w": 1080,
+      "h": 1280,
+      "y": 760,
+      "pop": false,
+      "exit": "cut",
+      "float": false,
+      "z": 1,
+      "at": "word:and"
+     },
+     {
+      "type": "stamp",
+      "text": "DOWN AGAIN",
+      "at": "word:down",
+      "y": 260,
+      "rot": -5,
+      "size": 104,
+      "z": 5
+     }
+    ]
+   ],
+   "presenter": false
+  },
+  {
+   "lines": [
+    "So Microsoft froze all updates, moved traffic around the world, and brought services back step by step, checking each _stage_."
+   ],
+   "shots": [
+    {
+     "type": "freeze",
+     "title": "Microsoft 365 deployments",
+     "items": [
+      "update",
+      "config change",
+      "patch",
+      "update"
+     ],
+     "freezeAt": "word:froze",
+     "icon": "lucide:lock",
+     "color": "#ffffff",
+     "snowIcon": "lucide:snowflake",
+     "text": "All updates paused",
+     "y": 740,
+     "in": "right"
+    },
+    {
+     "type": "world",
+     "w": 880,
+     "y": 740,
+     "at": "word:moved",
+     "pin": "red",
+     "arcs": [
+      [
+       "New York",
+       "London"
+      ],
+      [
+       "London",
+       "Mumbai"
+      ],
+      [
+       "Seattle",
+       "Tokyo"
+      ],
+      [
+       "Singapore",
+       "Sydney"
+      ],
+      [
+       "Dublin",
+       "Johannesburg"
+      ],
+      [
+       "Chicago",
+       "São Paulo"
+      ],
+      [
+       "Paris",
+       "Dubai"
+      ]
+     ],
+     "arcsAt": "word:traffic",
+     "arcEach": 0.1,
+     "label": "traffic moved between regions",
+     "labelAt": "word:around",
+     "in": "zoom"
+    },
+    [
+     {
+      "type": "clip",
+      "src": "assets/clips/rec.webm",
+      "w": 1080,
+      "h": 1280,
+      "y": 760,
+      "pop": false,
+      "exit": "cut",
+      "float": false,
+      "z": 1,
+      "at": "word:brought"
+     },
+     {
+      "type": "sticker",
+      "lines": [
+       "STEP BY STEP"
+      ],
+      "red": false,
+      "at": "word:step",
+      "y": 250,
+      "size": 84,
+      "rot": -3,
+      "z": 5
+     }
+    ],
+    {
+     "type": "xpost",
+     "src": "assets/ms-x-cause.jpg",
+     "head": [
+      14,
+      140
+     ],
+     "crop": [
+      985,
+      1212
+     ],
+     "w": 880,
+     "label": "Microsoft on X",
+     "at": "word:checking",
+     "y": 760,
+     "in": "left",
+     "tilt": [
+      8,
+      10
+     ],
+     "marks": [
+      {
+       "r": [
+        736,
+        993,
+        971,
+        1031
+       ],
+       "at": "word:checking"
+      },
+      {
+       "r": [
+        183,
+        1050,
+        987,
+        1090
+       ],
+       "at": "word:checking+0.2"
+      },
+      {
+       "r": [
+        183,
+        1107,
+        407,
+        1147
+       ],
+       "at": "word:stage"
+      }
+     ]
+    }
+   ],
+   "presenter": false
+  },
+  {
+   "lines": [
+    "About a day later, things were mostly back. And no, it wasn't _hackers_, or AI."
+   ],
+   "shots": [
+    [
+     {
+      "type": "clock",
+      "text": "~1 DAY LATER",
+      "sub": "about 25 hours",
+      "spinAt": "word:about+0.1",
+      "dur": 0.9,
+      "y": 470,
+      "scale": 0.9,
+      "in": "down"
+     },
+     {
+      "type": "xpost",
+      "src": "assets/ms-x-recovery.jpg",
+      "crop": [
+       14,
+       310
+      ],
+      "w": 880,
+      "label": "Microsoft on X",
+      "at": "word:things",
+      "y": 920,
+      "in": "up",
+      "marks": [
+       {
+        "r": [
+         448,
+         90,
+         882,
+         143
+        ],
+        "at": "word:mostly"
+       },
+       {
+        "r": [
+         184,
+         147,
+         370,
+         187
+        ],
+        "at": "word:mostly+0.18"
+       }
+      ]
+     }
+    ],
+    [
+     {
+      "type": "xpost",
+      "src": "assets/ms-x-cause.jpg",
+      "head": [
+       14,
+       140
+      ],
+      "crop": [
+       466,
+       590
+      ],
+      "w": 880,
+      "label": "Microsoft on X",
+      "at": "word:and",
+      "y": 600,
+      "in": "zoom",
+      "marks": [
+       {
+        "r": [
+         182,
+         480,
+         699,
+         520
+        ],
+        "at": "word:and+0.1"
+       },
+       {
+        "r": [
+         712,
+         480,
+         980,
+         520
+        ],
+        "at": "word:wasn't"
+       },
+       {
+        "r": [
+         183,
+         537,
+         585,
+         577
+        ],
+        "at": "word:hackers"
+       }
+      ]
+     },
+     {
+      "type": "row",
+      "tiles": [
+       {
+        "icon": "tabler:spy",
+        "label": "Hackers"
+       },
+       {
+        "icon": "lucide:bot",
+        "label": "AI"
+       }
+      ],
+      "at": "word:no",
+      "ats": [
+       "word:no",
+       "word:no+0.12"
+      ],
+      "crossAt": [
+       "word:hackers",
+       "word:ai"
+      ],
+      "y": 1110
+     }
+    ]
+   ],
+   "presenter": false
+  },
+  {
+   "lines": [
+    "Your emails weren't lost either. Microsoft held them for up to forty-eight _hours_."
+   ],
+   "shots": [
+    [
+     {
+      "type": "mail",
+      "n": 6,
+      "title": "Your emails",
+      "dropAt": 0.05,
+      "each": 0.1,
+      "y": 760,
+      "icon": "simple-icons:microsoftoutlook",
+      "color": "#0078D4",
+      "scale": 1.2
+     },
+     {
+      "type": "stamp",
+      "text": "NOT LOST",
+      "at": "word:lost",
+      "y": 640,
+      "rot": -8,
+      "size": 110,
+      "z": 5
+     }
+    ],
+    {
+     "type": "mail",
+     "n": 6,
+     "title": "Held by Microsoft",
+     "icon": "logos:microsoft-icon",
+     "instant": true,
+     "countAt": "word:held",
+     "hours": 48,
+     "countDur": 1.0,
+     "at": "word:microsoft",
+     "y": 760,
+     "in": "flip",
+     "scale": 1.2
+    },
+    [
+     {
+      "type": "num",
+      "value": 48,
+      "suffix": "h",
+      "label": "UP TO · THEN DELIVERED",
+      "count": 0.6,
+      "size": 300,
+      "at": "word:forty-eight",
+      "y": 700,
+      "in": "zoom"
+     },
+     {
+      "type": "mail",
+      "n": 6,
+      "title": "Delivered",
+      "icon": "lucide:mail-check",
+      "color": "#2fe37f",
+      "instant": true,
+      "releaseAt": "word:hours+0.1",
+      "at": "word:forty-eight",
+      "y": 1190,
+      "scale": 0.5,
+      "float": false
+     }
+    ]
+   ],
+   "presenter": false
+  }
+ ]
+}

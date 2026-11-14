@@ -1,0 +1,71 @@
+{
+ "style": "paper",
+ "theme": "dark",
+ "captions": "short",
+ "header": "none",
+ "title": "Outlook outage outro",
+ "brand": {
+  "handle": "@krishexplainz",
+  "avatar": "assets/pfp-krish.png"
+ },
+ "voice": {
+  "name": "am_puck",
+  "speed": 1.15
+ },
+ "music": {
+  "style": "none"
+ },
+ "intro": false,
+ "sfx_set": "arena",
+ "character": "otaku",
+ "camera": {
+  "box": [
+   80,
+   1400,
+   920,
+   640
+  ]
+ },
+ "scenes": [
+  {
+   "label": "share",
+   "layout": "box",
+   "cut": "zoom",
+   "face": [
+    {
+     "face": "smile",
+     "at": "start"
+    }
+   ],
+   "lines": [
+    "Send this to the friend who",
+    "blamed their Wi-Fi."
+   ],
+   "card": {
+    "type": "share",
+    "image": "assets/share.jpg",
+    "contacts": [
+     "F·best friend",
+     "D·dev friend",
+     "T·team",
+     "S·squad"
+    ],
+    "pick": 0,
+    "pick_at": "word:friend",
+    "send_at": "line:1",
+    "message": "it wasn't your Wi-Fi, it was Microsoft"
+   }
+  },
+  {
+   "label": "follow",
+   "layout": "none",
+   "lines": [
+    "Follow for more like this."
+   ],
+   "card": {
+    "type": "follow",
+    "tap_at": "word:follow+0.3"
+   }
+  }
+ ]
+}

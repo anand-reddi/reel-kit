@@ -6,3 +6,10 @@ examples/*/launch.mp4
 examples/*/pfp.png
 examples/*/assets/pfp-krish.png
 examples/*/_outro.json
+examples/*/assets/clips/
+examples/*/3d/frames/
+examples/*/3d/st_*.png
+examples/*/3d/render.log
+examples/*/3d/three.module.min.js
+examples/*/3d/RoundedBoxGeometry.js
+examples/*/3d/RoomEnvironment.js
