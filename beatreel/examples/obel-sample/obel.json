@@ -1,0 +1,113 @@
+{
+ "name": "obel-sample",
+ "theme": "kit",
+ "character": "otaku",
+ "meta": false,
+ "max_hold": 2.6,
+ "sfx": false,
+ "mono": "obel",
+ "caption_y": [
+  1420,
+  1420
+ ],
+ "caption_words": 6,
+ "voice": {
+  "name": "am_puck",
+  "speed": 1.15,
+  "say": {
+   "API": "A P I",
+   "Obel": "Oh-bell"
+  }
+ },
+ "presenter": {
+  "width": 1500,
+  "y": 300
+ },
+ "music": {
+  "style": "curious",
+  "bpm": 120,
+  "level": -33,
+  "duck_db": 3
+ },
+ "beats": [
+  {
+   "lines": [
+    "This is Obel Mono, a free font made for _code_."
+   ],
+   "presenter": false,
+   "shots": [
+    {
+     "type": "html",
+     "html": "<div class=\"obel\" style=\"text-align:center;color:#f2f1ee\"><div style=\"font-weight:800;font-size:140px;letter-spacing:-2px;line-height:1;white-space:nowrap\">Obel Mono</div><div style=\"margin-top:26px;font-weight:400;font-size:34px;color:#e5372d;letter-spacing:4px;white-space:nowrap\">FREE \u00b7 OPEN SOURCE \u00b7 SIL OFL</div></div>",
+     "y": 760,
+     "in": "zoom"
+    }
+   ]
+  },
+  {
+   "lines": [
+    "Every letter is the same _width_, from thin to black."
+   ],
+   "presenter": false,
+   "shots": [
+    {
+     "type": "html",
+     "html": "<div class=\"obel\" style=\"color:#f2f1ee;font-size:110px;line-height:1.1;font-weight:600;letter-spacing:0;background:repeating-linear-gradient(90deg,#e5372d22 0 66px,transparent 66px 132px);padding:10px 0\">iiiiiiiiii<br>MMMMMMMMMM<br>wwwwwwwwww</div>",
+     "y": 740,
+     "in": "up"
+    },
+    {
+     "type": "html",
+     "html": "<div class=\"obel\" style=\"color:#f2f1ee;font-size:76px;line-height:1.18;white-space:nowrap\"><div style=\"font-weight:100\">Thin 100</div><div style=\"font-weight:300\">Light 300</div><div style=\"font-weight:400\">Regular 400</div><div style=\"font-weight:500\">Medium 500</div><div style=\"font-weight:700\">Bold 700</div><div style=\"font-weight:900\">Black 900</div></div>",
+     "at": "word:thin",
+     "y": 760,
+     "in": "right"
+    }
+   ]
+  },
+  {
+   "lines": [
+    "And its masked version hides your API _keys_."
+   ],
+   "presenter": false,
+   "shots": [
+    {
+     "type": "html",
+     "html": "<div class=\"card\" style=\"width:860px;box-sizing:border-box;padding:28px 34px\"><div class=\"lbl\" style=\"color:#8a8a90\">.env \u00b7 Obel Mono</div><div style=\"color:#f2f1ee\"><div class=\"obel\" style=\"font-size:36px;font-weight:500;line-height:1.9;white-space:nowrap\">OPENAI_API_KEY=sk-proj-Xk29fQpLm81zTq</div><div class=\"obel\" style=\"font-size:36px;font-weight:500;line-height:1.9;white-space:nowrap\">GITHUB_TOKEN=ghp_7Hd02kLqPz9vXs4Wn</div><div class=\"obel\" style=\"font-size:36px;font-weight:500;line-height:1.9;white-space:nowrap\">AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE</div></div></div>",
+     "y": 760,
+     "in": "left"
+    },
+    {
+     "type": "html",
+     "html": "<div class=\"card\" style=\"width:860px;box-sizing:border-box;padding:28px 34px\"><div class=\"lbl\" style=\"color:#e5372d\">.env \u00b7 Obel Mono Masked</div><div style=\"color:#f2f1ee\"><div class=\"obelm\" style=\"font-size:36px;font-weight:500;line-height:1.9;white-space:nowrap\">OPENAI_API_KEY=sk-proj-Xk29fQpLm81zTq</div><div class=\"obelm\" style=\"font-size:36px;font-weight:500;line-height:1.9;white-space:nowrap\">GITHUB_TOKEN=ghp_7Hd02kLqPz9vXs4Wn</div><div class=\"obelm\" style=\"font-size:36px;font-weight:500;line-height:1.9;white-space:nowrap\">AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE</div></div></div>",
+     "at": "word:hides",
+     "y": 760,
+     "in": "zoom"
+    }
+   ]
+  },
+  {
+   "lines": [
+    "Perfect for the code and _terminals_ in our reels."
+   ],
+   "presenter": false,
+   "shots": [
+    {
+     "type": "term",
+     "title": "zsh \u2014 skillspector",
+     "lines": [
+      "$ skillspector scan ./agent-speed-boost",
+      "  scanning 71 attack patterns...",
+      "  E1  data exfiltration     CRITICAL",
+      "  E2  reads secrets          HIGH",
+      "  score 100/100  DO NOT INSTALL"
+     ],
+     "typeDur": 1.4,
+     "w": 900,
+     "y": 760,
+     "in": "up"
+    }
+   ]
+  }
+ ]
+}

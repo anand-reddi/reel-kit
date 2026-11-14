@@ -449,3 +449,8 @@ html, body { margin: 0; background: #000; }
 .tag3d { font: 700 22px MONO, monospace; color: #8a8a90; letter-spacing: 2px; text-transform: uppercase; padding: 8px 16px; border: 2px solid #2a2a2e; border-radius: 10px; background: rgba(11,11,11,.75); white-space: nowrap; }
 .mail .mtray { position: absolute; }
 .spk2 .sw { margin-top: 128px; }
+
+/* ---- Obel Mono (SIL OFL 1.1, typographic.systems): OBEL, and OBELM, which draws API keys as dots */
+@font-face { font-family: OBEL; src: url(fonts/ObelMono-VF.woff2) format("woff2"); font-weight: 100 900; }
+@font-face { font-family: OBELM; src: url(fonts/ObelMonoMasked-VF.woff2) format("woff2"); font-weight: 100 900; }
+.obel { font-family: OBEL, monospace; } .obelm { font-family: OBELM, monospace; }

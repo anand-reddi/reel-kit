@@ -224,8 +224,9 @@ def page(sc, tm, work):
     box = '<div id="pbox"></div>' if sc.get("theme") == "kit" else ""
     if src: shutil.copy(src, os.path.join(pg, "assets", os.path.basename(src)))
     dur = tm["duration"]
+    mono_css = '<style>@font-face{font-family:MONO;src:url(fonts/ObelMono-VF.woff2) format("woff2");font-weight:100 900}</style>' if sc.get("mono") == "obel" else ""
     html = f'''<!doctype html><html lang="en"><head><meta charset="utf-8"/><title>{sc["_name"]}</title>
-<link rel="stylesheet" href="style.css"/><script src="gsap.min.js"></script></head><body>
+<link rel="stylesheet" href="style.css"/>{mono_css}<script src="gsap.min.js"></script></head><body>
 <div id="root" data-composition-id="reel" data-start="0" data-duration="{dur}" data-width="1080" data-height="1920" data-fps="30">
  <div id="stage"><div id="dots"></div><div id="glow"></div><div id="flood"></div>
   <div id="meta"></div><div id="cap"></div><div id="heroes"></div>{box}{pres}<div id="wipe"></div></div>
