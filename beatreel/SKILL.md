@@ -188,6 +188,7 @@ scale" tag. Copy three.module.min.js, RoundedBoxGeometry.js and RoomEnvironment.
   (zoom, left, right, up, down, flip, drop, swing) and exits with `"out"` (left, right, zoom, down, shrink).
 - **Show the source** whenever there is one (screenshots, the real file, the real command output); explain the rest
   with animated scenes (code, hub, pile, gauge, dots, send, meet, sort, answer...).
+- **No presenter flash:** with `"presenter": false` on the first beat the presenter is hidden from frame 0 (checked: the first 3 frames show no Krish). Check the first frames of every render.
 - **Presenter:** only on the "send this to a friend" frame. Put `"presenter": false` on every beatreel beat and end
   with `"outro": "outro.json"`, a reel-kit script holding the share scene (Krish in his box + the share sheet) and the
   follow card; beatreel renders it with reel-kit and appends it, then one music bed and one mix run over the whole.
